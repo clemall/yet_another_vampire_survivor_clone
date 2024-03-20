@@ -8,11 +8,10 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (setup_player_plugin,setup_player_ui));
+        app.add_systems(Startup, (setup_player_plugin));
         app.add_systems(Update, (
             player_movement,
             player_game_over,
-            player_health_ui_sync
             )
         );
     }
@@ -45,63 +44,16 @@ fn setup_player_plugin(mut commands: Commands,
         .insert(animation_indices)
         .insert(AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
         .insert(Collider::ball(4.0),)
+        .insert(Health(100.0))
+        .insert(MaxHealth(100.0))
         .insert(Player{
-            health: 100.0,
-            max_health: 100.0,
             facing: Facing::Right,
         });
         // .add_child(claw);
 
-    // default weapon
-    setup_claw_spawner(&mut commands);
-}
-
-fn setup_player_ui(mut commands: Commands,
-         asset_server: Res<AssetServer>,
-) {
-
-    let parent_node = (
-        NodeBundle {
-            style: Style {
-                width: Val::Px(80.),
-                height: Val::Px(5.),
-                // WTF, should be SCREEN_WIDTH / 2... but the screen UI seems to be 1200px,
-                left: Val::Px(SCREEN_WIDTH as f32 - 40.0),
-                right: Val::Auto,
-                top: Val::Px(SCREEN_HEIGHT as f32 + 20.0),
-                bottom: Val::Auto,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::FlexStart,
-                flex_direction: FlexDirection::Row,
-                position_type: PositionType::Absolute,
-                ..default()
-            },
-            background_color: BackgroundColor(Color::BLACK),
-            ..default()
-        },
-        PlayerUI,
-        Name::new("Player UI"),
-    );
-
-    let health_node = (
-        NodeBundle {
-            style: Style {
-                width: Val::Px(80.),
-                height: Val::Px(5.),
-                ..default()
-            },
-            background_color: BackgroundColor(Color::RED),
-            ..default()
-        },
-        HealthUI,
-        Name::new("Health UI"),
-    );
-
-    commands.spawn(parent_node).with_children(|commands| {
-        commands.spawn(health_node);
-    });
 
 }
+
 
 
 
@@ -149,14 +101,14 @@ pub fn player_movement(
 
 
 fn player_game_over(
-    player: Query<&Player>,
+    health: Query<&Health, With<Player>>,
     // mut game_state: ResMut<NextState<GameState>>,
     // audio: Res<Audio>,
     assets: Res<AssetServer>,
 ) {
-    let player = player.single();
+    let health = health.single();
 
-    if player.health <= 0.0 {
+    if health.0 <= 0.0 {
         // audio.play_with_settings(
         //     assets.load("death.wav"),
         //     PlaybackSettings {
@@ -171,11 +123,5 @@ fn player_game_over(
 
 
 //
-fn player_health_ui_sync(mut ui: Query<&mut Style, With<HealthUI>>, player: Query<&Player>) {
-    let mut style = ui.single_mut();
-    let player = player.single();
 
-    let percent = player.health / player.max_health;
-    style.width = Val::Percent(percent * 100.0);
-}
 

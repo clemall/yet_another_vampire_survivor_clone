@@ -6,12 +6,16 @@ use bevy_rapier2d::prelude::{Collider, ColliderMassProperties, ExternalForce, Ex
 use rand::Rng;
 use crate::components::*;
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::enemies::bats::BatPlugin;
+use crate::ui::ui_enemy::spawn_world_text;
 
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        // app.add_systems(Update, (compute_enemy_velocity, check_enemy_neighbour, apply_enemy_velocity).chain())
+        // bats enemy
+        app.add_plugins(BatPlugin);
+        // basic enemy logic
         app.add_systems(Update, (
             enemy_death_check,
             compute_enemy_velocity,
@@ -19,7 +23,7 @@ impl Plugin for EnemyPlugin {
             enemy_damage_player
             ).chain()
         );
-        app.add_systems(Update, update_world_text);
+
         app.add_systems(Update, debug_spawn_enemies);
     }
 }
@@ -53,7 +57,7 @@ fn apply_enemy_velocity(
     }
 }
 
-
+// TODO: move code elsewhere
 fn debug_spawn_enemies(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -78,9 +82,9 @@ fn debug_spawn_enemies(
             },
             Collider::ball(8.0),
             ColliderMassProperties::Density(1.0),
-            Enemy{
-                health: 30.0
-            },
+            Enemy,
+            Health(50.0),
+            MaxHealth(50.0),
             EnemyVelocity(Vec2::new(0.0, 0.0)),
             EnemySpeed(30.0),
             EnemyDamageOverTime(10.0),
@@ -92,7 +96,7 @@ fn debug_spawn_enemies(
 
 fn enemy_damage_player(
     enemies: Query<(&Collider, &GlobalTransform, &EnemyDamageOverTime),(With<Enemy>,)>,
-    mut player: Query<&mut Player>,
+    mut health: Query<(&mut Health), With<Player>>,
     rapier_context: Res<RapierContext>,
     time: Res<Time>,
 ) {
@@ -103,8 +107,8 @@ fn enemy_damage_player(
             collider,
             QueryFilter::new(),
             |entity| {
-                if let Ok(mut player) = player.get_mut(entity) {
-                    player.health -= damage.0 * time.delta_seconds();
+                if let Ok(mut health) = health.get_mut(entity) {
+                    **health -= damage.0 * time.delta_seconds();
                 }
                 true
             },
@@ -115,93 +119,27 @@ fn enemy_damage_player(
 
 pub fn damage_enemy(
     commands: &mut Commands,
-    enemy: &mut Enemy,
+    mut health: Mut<Health>,
     position: &Transform,
     damage: f32,
 ) {
+    // TODO: Use event ?
     spawn_world_text(
         commands,
         position.translation.truncate(),
         &format!("{:?}", damage as i32),
     );
-    println!("{}", damage);
 
-    enemy.health -= damage;
+    **health -= damage;
 }
 
 fn enemy_death_check(
     mut commands: Commands,
-    mut enemies: Query<(Entity, &Transform, &Enemy)>,
+    mut enemies: Query<(Entity, &Transform, &Health), With<Enemy>>,
 ) {
-    for (entity, transform, enemy) in &mut enemies {
-        if enemy.health <= 0.0 {
+    for (entity, transform, health) in &mut enemies {
+        if health.0 <= 0.0 {
             commands.entity(entity).despawn_recursive();
-        }
-    }
-}
-
-pub fn spawn_world_text(commands: &mut Commands,  position: Vec2, text: &str) {
-    let position = position + Vec2::new(-0.2, 1.4);
-
-    let parent = (
-        NodeBundle {
-            style: Style {
-                width: Val::Px(50.),
-                height: Val::Px(50.),
-                position_type: PositionType::Absolute,
-                align_items: AlignItems::FlexStart,
-                justify_content: JustifyContent::FlexStart,
-                ..default()
-            },
-            z_index: ZIndex::Global(-100),
-            ..default()
-        },
-        WorldTextUI {
-            lifetime: Timer::from_seconds(0.5, TimerMode::Once),
-            velocity: Vec2::new(0.15, 1.5),
-            position,
-        },
-    );
-
-    let text = TextBundle::from_section(
-        text,
-        TextStyle {
-            font: Default::default(),
-            font_size: 32.0,
-            color: Color::rgb(0.95, 0.2, 0.2),
-        },
-    );
-
-    commands.spawn(parent).with_children(|commands| {
-        commands.spawn(text);
-    });
-}
-
-fn update_world_text(
-    mut commands: Commands,
-    mut text: Query<(Entity, &mut Style, &mut WorldTextUI)>,
-    main_camera: Query<(&Camera, &GlobalTransform)>,
-    // render_camera: Query<&Camera>,
-    time: Res<Time>,
-) {
-    let (camera, transform) = main_camera.single();
-    // let final_camera = render_camera.single();
-
-    for (entity, mut style, mut world_ui) in &mut text {
-        world_ui.lifetime.tick(time.delta());
-        if world_ui.lifetime.just_finished() {
-            commands.entity(entity).despawn_recursive();
-        }
-
-        world_ui.position = world_ui.position + world_ui.velocity * time.delta_seconds();
-
-        if let Some(mut coords) = camera.world_to_viewport(transform, world_ui.position.extend(0.0)) {
-            // let mut coords = coords / Vec2::new(SCREEN_WIDTH as f32, SCREEN_HEIGHT as f32)
-            //     * camera.logical_viewport_size().unwrap();
-            coords.y = camera.logical_viewport_size().unwrap().y - coords.y;
-            style.left = Val::Px(coords.x);
-            style.top = Val::Px(coords.y);
-
         }
     }
 }

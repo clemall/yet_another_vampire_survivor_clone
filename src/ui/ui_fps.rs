@@ -1,15 +1,10 @@
-
-
-
-
-
 use bevy::diagnostic::DiagnosticsStore;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 
-pub struct FPSPlugin;
+pub struct UiFPSPlugin;
 
-impl Plugin for FPSPlugin {
+impl Plugin for UiFPSPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_fps_counter);
         app.add_systems(Update, (

@@ -1,5 +1,5 @@
 [package]
-name = "Farming"
+name = "yet_another_vampire_survivor_clone"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,7 +15,7 @@ bevy_rapier2d = { version = "0.25.0", features = [ "simd-stable" ] }
 
 
 [profile.dev.package.bevy_rapier2d]
-opt-level = 3
+opt-level = 2
 debug = false
 codegen-units = 16
 

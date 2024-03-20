@@ -1,22 +1,23 @@
-
+use std::fmt;
 use bevy::math::Vec2;
 use bevy::prelude::{Component, Deref, DerefMut, Entity, Resource, Timer};
 
 #[derive(Component)]
 pub struct Player{
-    pub health: f32,
-    pub max_health: f32,
     pub facing: Facing,
 }
 
 #[derive(Component)]
 pub struct PlayerUI;
 
+#[derive(Component, Deref, DerefMut)]
+pub struct Health(pub f32);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct MaxHealth(pub f32);
 
 #[derive(Component)]
-pub struct Enemy{
-    pub health: f32,
-}
+pub struct Enemy;
 
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemyVelocity(pub Vec2);
@@ -61,6 +62,7 @@ pub struct AttackDuration {
 
 #[derive(Component)]
 pub struct AlreadyHitEnemies {
+    // entity ID
     pub seen:Vec<u32>,
 }
 
@@ -76,4 +78,15 @@ pub struct WorldTextUI {
     pub lifetime: Timer,
     pub velocity: Vec2,
     pub position: Vec2,
+}
+
+#[derive(Debug)]
+pub enum WeaponsTypes {
+    CLAW,
+    TOTO
+}
+#[derive(Resource, Debug)]
+pub struct PlayerWeapons {
+    // entity ID
+    pub weapons:Vec<WeaponsTypes>,
 }

@@ -2,11 +2,11 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_pixel_camera::{PixelViewport, PixelZoom};
 use bevy_rapier2d::prelude::*;
-use crate::components::{AlreadyHitEnemies, AnimationIndices, AnimationTimer, AttackDuration, AttackTimer, Claw, ClawSpawner, Enemy, Facing, Player};
+use crate::components::{AlreadyHitEnemies, AnimationIndices, AnimationTimer, AttackDuration, AttackTimer, Claw, ClawSpawner, Enemy, Facing, Health, Player};
 
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::enemy::damage_enemy;
-use crate::player::player_movement;
+use crate::enemies::enemy::damage_enemy;
+
 
 const CLAWS_POSITION_X:f32 = 28.0;
 pub struct WeaponClawPlugin;
@@ -81,8 +81,6 @@ fn factory_claw(
         }
     }
 
-    let mut timer_attack_duration = Timer::from_seconds(0.3, TimerMode::Once);
-
     commands.spawn((
         SpriteBundle {
             texture,
@@ -103,11 +101,11 @@ fn factory_claw(
             index: 0,
         },
         AnimationIndices { first: 0, last: 1, is_repeating: false },
-        AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         Sensor,
         Collider::cuboid(48.0/2.0, 48.0/2.0),
         AttackDuration{
-            timer:timer_attack_duration,
+            timer:Timer::from_seconds(0.3, TimerMode::Once),
         },
         Claw{
             damage: 10.0,
@@ -132,8 +130,8 @@ fn claw_attack_animation_and_collider(
 ) {
     for (mut tranform, mut sprite,mut collider, mut attack_duration)  in &mut claws {
         // transform claw attack
-        // tranform.scale.x = (attack_duration.timer.fraction() * 1.0) + 0.7;
-        // tranform.scale.y = (attack_duration.timer.fraction() * 1.0) + 0.7;
+        tranform.scale.x = (attack_duration.timer.fraction() * 0.2) + 0.8;
+        tranform.scale.y = (attack_duration.timer.fraction() * 0.2) + 0.8;
         // collider claw attack
         // let new_scale = Vec2::new(
         //     (attack_duration.timer.fraction() * 1.1),
@@ -154,100 +152,6 @@ fn claw_attack_despawn(
         }
     }
 }
-//
-// pub fn spawn_claw(
-//     commands: &mut Commands,
-//     asset_server: &Res<AssetServer>,
-// )  -> Entity{
-//     let mut timer = Timer::from_seconds(2.0, TimerMode::Repeating);
-//     timer.set_elapsed(Duration::from_secs(1));
-//
-//     commands.spawn((
-//         SpriteBundle {
-//             texture: asset_server.load("claw.png"),
-//             transform: Transform::from_xyz(CLAWS_POSITION_X, 0.0, 1.0),
-//             ..default()
-//         },
-//         Sensor,
-//         Collider::cuboid(16.0/2.0, 48.0/2.0),
-//         AttackTimer{
-//             timer:timer,
-//         },
-//         Claw{
-//             damage: 100.0,
-//         },
-//         Name::new("Claw Attack"),
-//     )).id()
-//
-// }
-
-// pub fn claw_attack_facing(
-//     mut claws: Query<(&mut Transform, &mut Sprite, &Visibility), With<Claw>>,
-//     player: Query<&Player>,
-// ) {
-//     let player = player.single();
-//
-//     if let Ok((mut whip, mut sprite, visibility)) = claws.get_single_mut() {
-//         // Change the orientation of the claw only when we are not attacking.
-//         if visibility == Visibility::Hidden {
-//             whip.translation = match player.facing {
-//                 Facing::Left => {
-//                     sprite.flip_x = true;
-//                     Vec3::new(-CLAWS_POSITION_X, 0.0, 0.0)
-//                 }
-//                 Facing::Right => {
-//                     sprite.flip_x = false;
-//                     Vec3::new(CLAWS_POSITION_X, 0.0, 0.0)
-//                 }
-//             };
-//         }
-//     }
-// }
-
-//
-// fn claw_attack(
-//     mut commands: Commands,
-//     mut claws: Query<(
-//         Entity,
-//         &Collider,
-//         &GlobalTransform,
-//         &mut Claw,
-//         &mut AttackTimer,
-//         &mut Visibility,
-//     )>,
-//     mut enemy: Query<(&mut Enemy, &Transform)>,
-//     rapier_context: Res<RapierContext>,
-//     time: Res<Time>,
-// ) {
-//     for (entity,collider, transform, mut claw,mut attack_timer, mut visibility) in &mut claws {
-//         attack_timer.timer.tick(time.delta());
-//
-//         if attack_timer.timer.fraction() < 0.2 || attack_timer.timer.fraction() > 0.9 {
-//             *visibility = Visibility::Visible;
-//             commands.entity(entity).remove::<ColliderDisabled>();
-//         } else {
-//             *visibility = Visibility::Hidden;
-//             commands.entity(entity).insert(ColliderDisabled);
-//         };
-//
-//
-//         // if attack_timer.timer.just_finished() {
-//         //     rapier_context.intersections_with_shape(
-//         //         transform.translation().truncate(),
-//         //         0.0,
-//         //         collider,
-//         //         QueryFilter::new(),
-//         //         |entity| {
-//         //             if let Ok((mut enemy, transform)) = enemy.get_mut(entity) {
-//         //                 damage_enemy(&mut commands,  &mut enemy, transform, claw.damage);
-//         //             }
-//         //             true
-//         //         },
-//         //     );
-//         // }
-//     }
-// }
-
 
 fn claw_damage(
     mut commands: Commands,
@@ -257,7 +161,7 @@ fn claw_damage(
         &mut Claw,
         &mut AlreadyHitEnemies,
     ), Without<ColliderDisabled>>,
-    mut enemy: Query<(&mut Enemy, &Transform)>,
+    mut enemy: Query<(&mut Health, &Transform), With<Enemy>>,
     mut player: Query<(&Transform, &mut Player)>,
     rapier_context: Res<RapierContext>,
     time: Res<Time>,
@@ -272,9 +176,9 @@ fn claw_damage(
             collider,
             QueryFilter::new(),
             |entity| {
-                if let Ok((mut enemy, transform)) = enemy.get_mut(entity) {
+                if let Ok((mut health, transform)) = enemy.get_mut(entity) {
                     if !seen_enemies.seen.contains(&entity.index()){
-                        damage_enemy(&mut commands,  &mut enemy, transform, claw.damage);
+                        damage_enemy(&mut commands,  health, transform, claw.damage);
 
                         seen_enemies.seen.push(entity.index());
 

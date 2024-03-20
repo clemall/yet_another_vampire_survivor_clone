@@ -3,7 +3,8 @@ use bevy_pixel_camera::{PixelViewport, PixelZoom};
 use crate::components::{ Player};
 
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::player::player_movement;
+use crate::players::player::player_movement;
+
 
 pub struct PlayerCameraPlugin;
 

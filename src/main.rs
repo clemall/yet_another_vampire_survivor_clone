@@ -3,18 +3,19 @@ use bevy::{prelude::*, utils::Duration};
 use bevy::input::common_conditions::input_toggle_active;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_pixel_camera::{
-    PixelCameraPlugin, PixelZoom, PixelViewport
+    PixelCameraPlugin
 };
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
-use bevy::render::camera::CameraPlugin;
 use bevy_rapier2d::prelude::*;
-use Farming::camera::PlayerCameraPlugin;
-use Farming::components::{AnimationIndices, AnimationTimer, EnemyDamageOverTime, EnemySpeed, EnemyVelocity, Player};
-use Farming::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use Farming::fps::FPSPlugin;
-use Farming::player::PlayerPlugin;
-use Farming::enemy::EnemyPlugin;
-use Farming::weapons::claw::WeaponClawPlugin;
+use yet_another_vampire_survivor_clone::components::*;
+use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
+use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
+use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
+use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
+use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
+use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
+use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
+use yet_another_vampire_survivor_clone::weapons::claw::{setup_claw_spawner, WeaponClawPlugin};
 
 #[allow(unused)]
 fn main() {
@@ -23,7 +24,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
-        .add_plugins(FPSPlugin)
+        .add_plugins(UiFPSPlugin)
         // Rapier2D plugin
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.0))
         .add_plugins(RapierDebugRenderPlugin::default())
@@ -40,18 +41,32 @@ fn main() {
         .add_plugins(PlayerCameraPlugin)
         // Player plugin
         .add_plugins(PlayerPlugin)
-        // Player plugin
+        // Enemies plugin
         .add_plugins(EnemyPlugin)
+        // UI
+        .add_plugins(UiEnemyPlugin)
+        .add_plugins(UiPlayerPlugin)
         // animation
-        .add_systems(Update, animate_sprite)
-        // claw
+        .add_plugins(AnimationSimplePlugin)
+        // Weapons
+        .insert_resource(PlayerWeapons{ weapons:Vec::new() })
         .add_plugins(WeaponClawPlugin)
+        // Setup
+        .add_systems(Startup, setup)
         // test
         .add_systems(Startup, background)
         .run();
 }
 
-
+fn setup(
+    mut commands: Commands,
+    mut player_weapons: ResMut<PlayerWeapons>,
+){
+    // default weapon
+    setup_claw_spawner(&mut commands);
+    // TODO: change that to use a list of enum representing each weapons
+    player_weapons.weapons.push(WeaponsTypes::CLAW);
+}
 
 fn background(
     mut commands: Commands,
@@ -70,26 +85,3 @@ fn background(
 
 
 
-fn animate_sprite(
-    time: Res<Time>,
-    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut TextureAtlas)>,
-) {
-    for (indices, mut timer, mut atlas) in &mut query {
-        timer.tick(time.delta());
-        if timer.just_finished() {
-            if indices.is_repeating {
-                atlas.index = if atlas.index == indices.last {
-                    indices.first
-                } else {
-                    atlas.index + 1
-                };
-            }
-            else {
-                if  atlas.index < indices.last{
-                    atlas.index = atlas.index + 1;
-                }
-            }
-
-        }
-    }
-}

@@ -1,9 +1,10 @@
-pub mod fps;
 pub mod components;
-pub mod player;
-pub mod enemy;
+pub mod players;
 pub mod constants;
-pub mod camera;
+pub mod cameras;
 pub mod weapons;
+pub mod ui;
+pub mod enemies;
+pub mod animations;
 
 
