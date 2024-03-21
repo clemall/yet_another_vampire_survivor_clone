@@ -53,6 +53,11 @@ pub struct Claw {
 }
 
 #[derive(Component)]
+pub struct FireArea {
+    pub damage: f32,
+}
+
+#[derive(Component)]
 pub struct ClawSpawner;
 
 #[derive(Component)]
@@ -80,10 +85,10 @@ pub struct WorldTextUI {
     pub position: Vec2,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum WeaponsTypes {
     CLAW,
-    TOTO
+    FIRE_AREA
 }
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {

@@ -1,11 +1,11 @@
 use std::time::Duration;
+use bevy::ecs::query::QuerySingleError;
 use bevy::prelude::*;
 use bevy_pixel_camera::{PixelViewport, PixelZoom};
 use bevy_rapier2d::prelude::*;
-use crate::components::{AlreadyHitEnemies, AnimationIndices, AnimationTimer, AttackDuration, AttackTimer, Claw, ClawSpawner, Enemy, Facing, Health, Player};
-
+use crate::components::*;
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::enemies::enemy::damage_enemy;
+use crate::enemies::enemy::{damage_enemy, enemy_death_check};
 
 
 const CLAWS_POSITION_X:f32 = 28.0;
@@ -13,19 +13,29 @@ pub struct WeaponClawPlugin;
 
 impl Plugin for WeaponClawPlugin {
     fn build(&self, app: &mut App) {
-        // app.add_systems(Startup, spawn_claw);
-        // app.add_systems(Update,(claw_attack_facing, claw_attack, claw_damage));
+        app.add_systems(
+            Update,
+            setup_claw_spawner.run_if(
+                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_claw_present)
+            )
+        );
         app.add_systems(Update,(
             spawn_claw_attack,
             claw_attack_duration_tick,
             claw_attack_animation_and_collider,
-            claw_damage,
+            claw_damage.before(enemy_death_check),
             claw_attack_despawn
         ));
     }
 }
 
-pub fn setup_claw_spawner(commands: &mut Commands)-> Entity{
+fn run_if_claw_present(
+     mut player_weapons: Res<PlayerWeapons>,
+) -> bool {
+    player_weapons.weapons.contains(&WeaponsTypes::CLAW)
+}
+
+fn setup_claw_spawner(mut commands: Commands){
     let mut timer = Timer::from_seconds(2.0, TimerMode::Repeating);
     timer.set_elapsed(Duration::from_secs(1));
 
@@ -35,7 +45,7 @@ pub fn setup_claw_spawner(commands: &mut Commands)-> Entity{
             timer:timer,
         },
         Name::new("Claw Spawner"),
-    )).id()
+    ));
 }
 
 fn spawn_claw_attack(
@@ -46,14 +56,17 @@ fn spawn_claw_attack(
     time: Res<Time>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>
 ){
-    let (mut spawner, mut attack_timer) = claw_spawner.single_mut();
     let (player_transform, player) = player.single_mut();
-    attack_timer.timer.tick(time.delta());
+    // let (mut spawner, mut attack_timer) = claw_spawner.get_single_mut();
+
+    if let Ok((mut spawner, mut attack_timer)) = claw_spawner.get_single_mut(){
+        attack_timer.timer.tick(time.delta());
 
 
-    if attack_timer.timer.just_finished() {
-        factory_claw(&mut commands, &asset_server, &mut texture_atlas_layouts, &player_transform, Facing::Left);
-        factory_claw(&mut commands, &asset_server, &mut texture_atlas_layouts, &player_transform, Facing::Right);
+        if attack_timer.timer.just_finished() {
+            factory_claw(&mut commands, &asset_server, &mut texture_atlas_layouts, &player_transform, Facing::Left);
+            factory_claw(&mut commands, &asset_server, &mut texture_atlas_layouts, &player_transform, Facing::Right);
+        }
     }
 }
 
@@ -178,13 +191,13 @@ fn claw_damage(
             |entity| {
                 if let Ok((mut health, transform)) = enemy.get_mut(entity) {
                     if !seen_enemies.seen.contains(&entity.index()){
-                        damage_enemy(&mut commands,  health, transform, claw.damage);
+                        damage_enemy(&mut commands,  entity,health, transform, claw.damage);
 
                         seen_enemies.seen.push(entity.index());
 
                         let (player_transform, player) = player.single_mut();
                         let mut direction:Vec2 = (transform.translation.truncate() -player_transform.translation.truncate());
-                        commands.entity(entity).insert(ExternalImpulse   {
+                        commands.entity(entity).try_insert(ExternalImpulse   {
                             impulse: direction.normalize() * 2000.0,
                             torque_impulse: 0.0,
                         },);

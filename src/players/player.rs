@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::Collider;
 use crate::components::*;
-use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::weapons::claw::{setup_claw_spawner};
+
 
 pub struct PlayerPlugin;
 
@@ -31,7 +30,6 @@ fn setup_player_plugin(mut commands: Commands,
     let animation_indices = AnimationIndices { first: 0, last: 3, is_repeating: true };
 
 
-    // let claw = spawn_claw(&mut commands, &asset_server);
     commands.spawn(SpriteBundle {
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             texture,
@@ -49,7 +47,7 @@ fn setup_player_plugin(mut commands: Commands,
         .insert(Player{
             facing: Facing::Right,
         });
-        // .add_child(claw);
+
 
 
 }
