@@ -17,6 +17,7 @@ use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
+use yet_another_vampire_survivor_clone::weapons::arcane_missile::ArcaneMissilePlugin;
 use yet_another_vampire_survivor_clone::weapons::claw::{WeaponClawPlugin};
 use yet_another_vampire_survivor_clone::weapons::fire_area::{setup_fire_area, WeaponFireAreaPlugin};
 
@@ -55,6 +56,7 @@ fn main() {
         .insert_resource(PlayerWeapons{ weapons:Vec::new() })
         .add_plugins(WeaponClawPlugin)
         .add_plugins(WeaponFireAreaPlugin)
+        .add_plugins(ArcaneMissilePlugin)
         // Setup
         .add_systems(Startup, setup)
         // test
@@ -73,7 +75,7 @@ fn setup(
     // setup_fire_area(&mut commands);
     // TODO: change that to use a list of enum representing each weapons
     // player_weapons.weapons.push(WeaponsTypes::CLAW);
-    // player_weapons.weapons.push(WeaponsTypes::FIRE_AREA);
+    // player_weapons.weapons.push(WeaponsTypes::FireArea);
 }
 
 fn background(
@@ -99,13 +101,15 @@ fn debug_add_claw_attack(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
 ){
-    if keyboard_input.just_pressed(KeyCode::KeyC) {
-        player_weapons.weapons.push(WeaponsTypes::CLAW);
+    if keyboard_input.just_pressed(KeyCode::Digit1) {
+        player_weapons.weapons.push(WeaponsTypes::Claw);
     }
-    if keyboard_input.just_pressed(KeyCode::KeyF) {
-        player_weapons.weapons.push(WeaponsTypes::FIRE_AREA);
+    if keyboard_input.just_pressed(KeyCode::Digit2) {
+        player_weapons.weapons.push(WeaponsTypes::FireArea);
     }
-    println!("{:?}", player_weapons.weapons);
+    if keyboard_input.just_pressed(KeyCode::Digit3) {
+        player_weapons.weapons.push(WeaponsTypes::ArcaneMissile);
+    }
 }
 
 // TODO: move code elsewhere

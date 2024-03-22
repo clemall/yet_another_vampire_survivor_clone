@@ -53,12 +53,23 @@ pub struct Claw {
 }
 
 #[derive(Component)]
+pub struct ArcaneMissile {
+    pub damage: f32,
+}
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileTarget(pub Entity);
+
+#[derive(Component)]
 pub struct FireArea {
     pub damage: f32,
 }
 
 #[derive(Component)]
 pub struct ClawSpawner;
+
+#[derive(Component)]
+pub struct ArcaneMissileSpawner;
 
 #[derive(Component)]
 pub struct AttackDuration {
@@ -87,11 +98,19 @@ pub struct WorldTextUI {
 
 #[derive(Debug, PartialEq)]
 pub enum WeaponsTypes {
-    CLAW,
-    FIRE_AREA
+    Claw,
+    FireArea,
+    ArcaneMissile,
 }
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
     // entity ID
     pub weapons:Vec<WeaponsTypes>,
 }
+
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileVelocity(pub Vec2);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileSpeed(pub f32);

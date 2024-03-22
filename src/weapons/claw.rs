@@ -32,7 +32,7 @@ impl Plugin for WeaponClawPlugin {
 fn run_if_claw_present(
      mut player_weapons: Res<PlayerWeapons>,
 ) -> bool {
-    player_weapons.weapons.contains(&WeaponsTypes::CLAW)
+    player_weapons.weapons.contains(&WeaponsTypes::Claw)
 }
 
 fn setup_claw_spawner(mut commands: Commands){

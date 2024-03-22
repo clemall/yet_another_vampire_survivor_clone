@@ -16,14 +16,14 @@ impl Plugin for WeaponFireAreaPlugin {
                 resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_fire_area_present)
             )
         );
-        app.add_systems(Update, (fire_area_follow_follow, fire_area_damage.before(enemy_death_check)));
+        app.add_systems(Update, (fire_area_follow_player, fire_area_damage.before(enemy_death_check)));
     }
 }
 
 fn run_if_fire_area_present(
      mut player_weapons: Res<PlayerWeapons>,
 ) -> bool {
-    player_weapons.weapons.contains(&WeaponsTypes::FIRE_AREA)
+    player_weapons.weapons.contains(&WeaponsTypes::FireArea)
 }
 
 pub fn setup_fire_area(
@@ -37,6 +37,8 @@ pub fn setup_fire_area(
     let texture = asset_server.load("fire-area.png");
     let layout = TextureAtlasLayout::from_grid(Vec2::new(48.0, 48.0), 3, 1, Option::from(Vec2::new(1.0, 0.0)), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
+    let mut timer = Timer::from_seconds(0.33, TimerMode::Repeating);
 
     commands.spawn((
         SpriteBundle {
@@ -56,13 +58,16 @@ pub fn setup_fire_area(
         Sensor,
         Collider::ball(48.0/2.0),
         FireArea{
-            damage: 1.0,
+            damage: 5.0,
+        },
+        AttackTimer{
+            timer,
         },
         Name::new("Fire area Attack"),
     ));
 }
 
-fn fire_area_follow_follow(
+fn fire_area_follow_player(
     player: Query<&Transform, (With<Player>, Without<FireArea>)>,
     mut fire_area: Query<&mut Transform, (With<FireArea>, Without<Player>)>,
 ) {
@@ -75,39 +80,45 @@ fn fire_area_follow_follow(
 }
 
 
-// TODO: ADD tick damage instead of every frame, something like every 0.2s
 fn fire_area_damage(
     mut commands: Commands,
     mut fire_areas: Query<(
         &Collider,
         &GlobalTransform,
         &mut FireArea,
+        &mut AttackTimer,
     ), Without<ColliderDisabled>>,
     mut enemy: Query<(&mut Health, &Transform), With<Enemy>>,
     mut player: Query<(&Transform, &mut Player)>,
     rapier_context: Res<RapierContext>,
     time: Res<Time>,
 ) {
-    for (collider, transform, mut fire_area) in &mut fire_areas {
-        rapier_context.intersections_with_shape(
-            transform.translation().truncate(),
-            0.0,
-            collider,
-            QueryFilter::new(),
-            |entity| {
-                if let Ok((mut health, transform)) = enemy.get_mut(entity) {
-                    damage_enemy(&mut commands,entity,  health, transform, fire_area.damage);
+    for (collider, transform, mut fire_area, mut attack_timer) in &mut fire_areas {
+        attack_timer.timer.tick(time.delta());
 
-                    let (player_transform, player) = player.single_mut();
-                    let mut direction:Vec2 = (transform.translation.truncate() -player_transform.translation.truncate());
-                    commands.entity(entity).try_insert(ExternalImpulse   {
-                        impulse: direction.normalize() * 12.0,
-                        torque_impulse: 0.0,
-                    },);
-                }
-                true
-            },
-        );
+        if attack_timer.timer.just_finished() {
+            rapier_context.intersections_with_shape(
+                transform.translation().truncate(),
+                0.0,
+                collider,
+                QueryFilter::new(),
+                |entity| {
+                    if let Ok((mut health, transform)) = enemy.get_mut(entity) {
+                        damage_enemy(&mut commands,entity,  health, transform, fire_area.damage);
+
+                        let (player_transform, player) = player.single_mut();
+                        let mut direction:Vec2 = (transform.translation.truncate() -player_transform.translation.truncate());
+                        commands.entity(entity).try_insert(ExternalImpulse   {
+                            impulse: direction.normalize() * 200.0,
+                            torque_impulse: 0.0,
+                        },);
+
+                    }
+                    true
+                },
+            );
+        }
+
     }
 }
 

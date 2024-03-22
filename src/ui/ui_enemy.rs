@@ -18,6 +18,7 @@ pub fn spawn_world_text(commands: &mut Commands,  position: Vec2, text: &str) {
     let parent = (
         NodeBundle {
             style: Style {
+                left: Val::Px(-990.),
                 width: Val::Px(50.),
                 height: Val::Px(50.),
                 position_type: PositionType::Absolute,
@@ -29,8 +30,8 @@ pub fn spawn_world_text(commands: &mut Commands,  position: Vec2, text: &str) {
             ..default()
         },
         WorldTextUI {
-            lifetime: Timer::from_seconds(0.5, TimerMode::Once),
-            velocity: Vec2::new(0.15, 1.5),
+            lifetime: Timer::from_seconds(2.0, TimerMode::Once),
+            velocity: Vec2::new(0.0, 10.0),
             position,
         },
     );
@@ -70,7 +71,7 @@ fn update_world_text(
         if let Some(mut coords) = camera.world_to_viewport(transform, world_ui.position.extend(0.0)) {
             // let mut coords = coords / Vec2::new(SCREEN_WIDTH as f32, SCREEN_HEIGHT as f32)
             //     * camera.logical_viewport_size().unwrap();
-            coords.y = camera.logical_viewport_size().unwrap().y - coords.y;
+            // coords.y = camera.logical_viewport_size().unwrap().y - coords.y;
             style.left = Val::Px(coords.x);
             style.top = Val::Px(coords.y);
 
