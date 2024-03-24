@@ -11,11 +11,13 @@ use rand::Rng;
 use yet_another_vampire_survivor_clone::components::*;
 use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
 use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
-use yet_another_vampire_survivor_clone::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
+use yet_another_vampire_survivor_clone::constants::{MAP_LEVEL_EXPERIENCE, SCREEN_HEIGHT, SCREEN_WIDTH};
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
+use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
+use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::weapons::arcane_missile::ArcaneMissilePlugin;
 use yet_another_vampire_survivor_clone::weapons::claw::{WeaponClawPlugin};
@@ -26,6 +28,12 @@ fn main() {
     App::new()
         // bevy plugin
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        // States
+        .init_state::<GameState>()
+        // Events
+        .add_event::<EnemyDied>()
+        .add_event::<CollectExperience>()
+
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(UiFPSPlugin)
@@ -44,19 +52,28 @@ fn main() {
         .add_plugins(PixelCameraPlugin)
         .add_plugins(PlayerCameraPlugin)
         // Player plugin
+        .insert_resource(PlayerExperience{
+            level: 1,
+            amount_experience: 0,
+        })
         .add_plugins(PlayerPlugin)
         // Enemies plugin
         .add_plugins(EnemyPlugin)
         // UI
         .add_plugins(UiEnemyPlugin)
         .add_plugins(UiPlayerPlugin)
+        .add_plugins(UiLevelUpPlugin)
         // animation
         .add_plugins(AnimationSimplePlugin)
+        // gems
+        .add_plugins(GemsPlugin)
         // Weapons
         .insert_resource(PlayerWeapons{ weapons:Vec::new() })
+        .insert_resource(ProjectileOffsetGoesLeft(true))
         .add_plugins(WeaponClawPlugin)
         .add_plugins(WeaponFireAreaPlugin)
         .add_plugins(ArcaneMissilePlugin)
+
         // Setup
         .add_systems(Startup, setup)
         // test
@@ -138,7 +155,7 @@ fn debug_spawn_enemies(
             Collider::ball(8.0),
             ColliderMassProperties::Density(2.0),
             Enemy,
-            Health(500.0),
+            Health(50.0),
             MaxHealth(500.0),
             EnemyVelocity(Vec2::new(0.0, 0.0)),
             EnemySpeed(30.0),

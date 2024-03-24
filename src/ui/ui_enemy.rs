@@ -34,6 +34,7 @@ pub fn spawn_world_text(commands: &mut Commands,  position: Vec2, text: &str) {
             velocity: Vec2::new(0.0, 10.0),
             position,
         },
+        Name::new("Enemy UI"),
     );
 
     let text = TextBundle::from_section(

@@ -20,9 +20,12 @@ impl Plugin for EnemyPlugin {
             compute_enemy_velocity,
             apply_enemy_velocity,
             enemy_damage_player
-            ).chain()
+            ).chain().run_if(in_state(GameState::Gameplay))
         );
-        app.add_systems(Update, enemy_death_check);
+
+        app.add_systems(Update,
+                        (enemy_death_check).run_if(in_state(GameState::Gameplay))
+        );
 
     }
 }
@@ -105,10 +108,17 @@ pub fn damage_enemy(
 pub fn enemy_death_check(
     mut commands: Commands,
     mut enemies: Query<(Entity, &Transform, &Health), With<Enemy>>,
+    mut enemy_died: EventWriter<EnemyDied>,
 ) {
     for (entity, transform, health) in &mut enemies {
         if health.0 <= 0.0 {
             commands.entity(entity).despawn_recursive();
+
+            enemy_died.send(
+                EnemyDied{
+                    position: transform.translation.clone(),
+                    experience: 100 }
+            );
         }
     }
 }

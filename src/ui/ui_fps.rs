@@ -28,6 +28,7 @@ fn setup_fps_counter(
     // create our UI root node
     // this is the wrapper/container for the text
     let root = commands.spawn((
+        Name::new("FPS UI"),
         FpsRoot,
         NodeBundle {
             // give it a dark background for readability

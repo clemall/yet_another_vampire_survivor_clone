@@ -1,6 +1,9 @@
 use bevy::prelude::*;
+use bevy_rapier2d::dynamics::{LockedAxes, RigidBody};
+use bevy_rapier2d::geometry::Sensor;
 use bevy_rapier2d::prelude::Collider;
 use crate::components::*;
+use crate::constants::MAP_LEVEL_EXPERIENCE;
 
 
 pub struct PlayerPlugin;
@@ -11,8 +14,11 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Update, (
             player_movement,
             player_game_over,
-            )
+            // compute_experience_from_collect,
+            ).run_if(in_state(GameState::Gameplay))
         );
+        app.add_systems(Update,compute_experience.run_if(in_state(GameState::Gameplay)));
+
     }
 }
 
@@ -46,7 +52,8 @@ fn setup_player_plugin(mut commands: Commands,
         .insert(MaxHealth(100.0))
         .insert(Player{
             facing: Facing::Right,
-        });
+        })
+        .insert(Name::new("Health UI"));
 
 
 
@@ -120,6 +127,29 @@ fn player_game_over(
 }
 
 
-//
 
+fn compute_experience(
+    mut commands: Commands,
+    mut collect_experience: EventReader<CollectExperience>,
+    mut player_experience: ResMut<PlayerExperience>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    for event in collect_experience.read() {
+        player_experience.amount_experience += event.experience;
+    }
+
+    let amount_of_experience_before_leveling = MAP_LEVEL_EXPERIENCE[player_experience.level as usize];
+
+    if player_experience.amount_experience >= amount_of_experience_before_leveling{
+        // 0 or the remaining experience
+        player_experience.amount_experience -= amount_of_experience_before_leveling;
+
+        player_experience.level += 1;
+
+        // GG player leveled up
+        next_state.set(GameState::PlayerLevelUp);
+        println!("Should be in player level up STATE");
+    }
+
+}
 

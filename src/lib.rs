@@ -6,5 +6,6 @@ pub mod weapons;
 pub mod ui;
 pub mod enemies;
 pub mod animations;
+pub mod gems;
 
 

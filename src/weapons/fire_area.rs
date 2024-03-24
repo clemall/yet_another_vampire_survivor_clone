@@ -16,14 +16,19 @@ impl Plugin for WeaponFireAreaPlugin {
                 resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_fire_area_present)
             )
         );
-        app.add_systems(Update, (fire_area_follow_player, fire_area_damage.before(enemy_death_check)));
+        app.add_systems(
+            Update,
+            (fire_area_follow_player, fire_area_damage.before(enemy_death_check))
+                .run_if(in_state(GameState::Gameplay))
+        );
     }
 }
 
 fn run_if_fire_area_present(
      mut player_weapons: Res<PlayerWeapons>,
+    weapon: Query<(), With<FireArea>>,
 ) -> bool {
-    player_weapons.weapons.contains(&WeaponsTypes::FireArea)
+    player_weapons.weapons.contains(&WeaponsTypes::FireArea) && weapon.is_empty()
 }
 
 pub fn setup_fire_area(

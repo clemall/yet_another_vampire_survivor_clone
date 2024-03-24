@@ -24,15 +24,16 @@ impl Plugin for WeaponClawPlugin {
             claw_attack_duration_tick,
             claw_attack_animation_and_collider,
             claw_damage.before(enemy_death_check),
-            claw_attack_despawn
-        ));
+            claw_attack_despawn).run_if(in_state(GameState::Gameplay))
+        );
     }
 }
 
 fn run_if_claw_present(
      mut player_weapons: Res<PlayerWeapons>,
+     weapon: Query<(), With<ClawSpawner>>,
 ) -> bool {
-    player_weapons.weapons.contains(&WeaponsTypes::Claw)
+    player_weapons.weapons.contains(&WeaponsTypes::Claw) && weapon.is_empty()
 }
 
 fn setup_claw_spawner(mut commands: Commands){

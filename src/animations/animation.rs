@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::components::{AnimationIndices, AnimationTimer};
+use crate::components::{AnimationIndices, AnimationTimer, GameState};
 
 
 pub struct AnimationSimplePlugin;
@@ -7,7 +7,7 @@ pub struct AnimationSimplePlugin;
 impl Plugin for AnimationSimplePlugin {
     fn build(&self, app: &mut App) {
         // basic animation
-        app.add_systems(Update, animate_sprite);
+        app.add_systems(Update, animate_sprite.run_if(in_state(GameState::Gameplay)));
     }
 }
 
