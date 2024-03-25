@@ -181,20 +181,6 @@ fn spawn_arcane_missile_attack(
                 attack_ammo.current -= 1;
 
             }
-
-            // match closed_enemy {
-            //     Some(closed_enemy) => {
-            //         factory_arcane_missile(&mut commands,
-            //                                &asset_server,
-            //                                &mut texture_atlas_layouts,
-            //                                &player_transform,
-            //                                &closed_enemy,
-            //                                &enemies,
-            //                                &mut projectile_offset_bool);
-            //     }
-            //     None => {}
-            // }
-
         }
     }
 }

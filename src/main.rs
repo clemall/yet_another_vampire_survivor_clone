@@ -7,11 +7,9 @@ use bevy_pixel_camera::{
 };
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy_rapier2d::prelude::*;
-use rand::Rng;
 use yet_another_vampire_survivor_clone::components::*;
 use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
 use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
-use yet_another_vampire_survivor_clone::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
@@ -78,7 +76,6 @@ fn main() {
         // .add_systems(Startup, setup)
         // test
         .add_systems(Startup, background)
-        .add_systems(Update, debug_spawn_enemies)
         .add_systems(Update, debug_add_claw_attack)
         .run();
 }
@@ -127,38 +124,3 @@ fn debug_add_claw_attack(
     }
 }
 
-// TODO: move code elsewhere
-fn debug_spawn_enemies(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-){
-    if keyboard_input.just_pressed(KeyCode::KeyO) || keyboard_input.pressed(KeyCode::KeyP) {
-        let mut rng = rand::thread_rng();
-        let x: i32 = rng.gen_range(-SCREEN_WIDTH/2..SCREEN_WIDTH/2);
-        let y: i32 = rng.gen_range(-SCREEN_HEIGHT/2..SCREEN_HEIGHT/2);
-
-        commands.spawn((
-            SpriteBundle {
-                texture: asset_server.load("enemies.png"),
-                transform: Transform::from_xyz(x as f32, y as f32, 0.0),
-                ..default()
-            },
-            RigidBody::Dynamic,
-            LockedAxes::ROTATION_LOCKED_Z,
-            Damping {
-                linear_damping: 100.0,
-                angular_damping: 1.0,
-            },
-            Collider::ball(8.0),
-            ColliderMassProperties::Density(2.0),
-            Enemy,
-            Health(50.0),
-            MaxHealth(500.0),
-            EnemyVelocity(Vec2::new(0.0, 0.0)),
-            EnemySpeed(30.0),
-            EnemyDamageOverTime(10.0),
-        ));
-    }
-
-}
