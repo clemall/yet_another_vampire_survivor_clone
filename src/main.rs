@@ -67,10 +67,9 @@ fn main() {
         .add_plugins(GemsPlugin)
         // Weapons
         .insert_resource(PlayerWeapons{ weapons:Vec::new() })
-        .insert_resource(ProjectileOffsetGoesLeft(true))
         .add_plugins(WeaponClawPlugin)
-        .add_plugins(WeaponFireAreaPlugin)
-        .add_plugins(ArcaneMissilePlugin)
+        // .add_plugins(WeaponFireAreaPlugin)
+        // .add_plugins(ArcaneMissilePlugin)
 
         // Setup
         // .add_systems(Startup, setup)

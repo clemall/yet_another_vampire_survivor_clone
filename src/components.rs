@@ -53,80 +53,27 @@ pub struct AnimationIndices {
 pub struct AnimationTimer(pub Timer);
 
 
-#[derive(Component)]
-pub struct HealthUI;
 
 pub enum Facing {
     Left,
     Right,
 }
 
-#[derive(Component)]
-pub struct Claw {
-    pub damage: f32,
-}
-
-#[derive(Component)]
-pub struct ArcaneMissile {
-    pub damage: f32,
-}
-
-#[derive(Component, Deref, DerefMut)]
-pub struct ProjectileTarget(pub Entity);
-
-#[derive(Component)]
-pub struct FireArea {
-    pub damage: f32,
-}
 
 #[derive(Component)]
 pub struct ClawSpawner;
-
 #[derive(Component)]
 pub struct ArcaneMissileSpawner;
 
 #[derive(Component)]
-pub struct AttackDuration {
-    pub timer: Timer,
-}
-
+pub struct FireAreaSpawner;
 #[derive(Component)]
-pub struct AlreadyHitEnemies {
-    // entity ID
-    pub seen:Vec<u32>,
-}
-
-
-// Delay between 2 attacks
-// could be use as reload when the weapon has no real reload time
-// like claw
-// rename cast delay
+pub struct Claw;
 #[derive(Component)]
-pub struct AttackTimer {
-    pub timer: Timer,
-}
-
-// Delay before weapon can attack again
-// arcane missile fire every X for 3 attacks with a delay of Y between each attacks
-// X is AttackReload, Y would be AttackTimer
-// rename recharge time
+pub struct ArcaneMissile;
 #[derive(Component)]
-pub struct AttackReload {
-    pub timer: Timer,
-}
+pub struct FireArea;
 
-#[derive(Component)]
-pub struct AttackAmmo{
-    pub size: u32,
-    pub current :u32,
-}
-
-#[derive(Component)]
-pub struct WorldTextUI {
-    pub lifetime: Timer,
-    pub velocity: Vec2,
-    pub position: Vec2,
-}
 
 #[derive(Debug, PartialEq)]
 pub enum WeaponsTypes {
@@ -139,22 +86,6 @@ pub struct PlayerWeapons {
     // entity ID
     pub weapons:Vec<WeaponsTypes>,
 }
-
-
-#[derive(Component, Deref, DerefMut)]
-pub struct ProjectileVelocity(pub Vec2);
-
-#[derive(Component, Deref, DerefMut)]
-pub struct ProjectileOrigin(pub Vec3);
-
-#[derive(Component, Deref, DerefMut)]
-pub struct ProjectileControlPoint(pub Vec3);
-
-#[derive(Component, Deref, DerefMut)]
-pub struct ProjectileSpeed(pub f32);
-
-#[derive(Resource, Debug)]
-pub struct ProjectileOffsetGoesLeft(pub bool);
 
 
 
@@ -178,7 +109,7 @@ pub struct CollectExperience{
     pub experience:u32,
 }
 
-
+// UI
 #[derive(Component)]
 pub struct PlayerUI;
 
@@ -187,3 +118,95 @@ pub struct LevelUpUI;
 
 #[derive(Component)]
 pub struct ButtonLevelUpUI;
+
+#[derive(Component)]
+pub struct WorldTextUI {
+    pub lifetime: Timer,
+    pub velocity: Vec2,
+    pub position: Vec2,
+}
+
+#[derive(Component)]
+pub struct HealthUI;
+
+
+
+// Attack and projectile
+#[derive(Component)]
+pub struct Projectile;
+
+#[derive(Component)]
+pub struct ProjectileDamage(pub f32);
+
+#[derive(Component)]
+pub struct DeleteProjectileOnHit;
+
+#[derive(Component)]
+pub struct ProjectileTimeBetweenDamage {
+    pub timer: Timer,
+}
+
+// Use for projectile that target enemies and takes X seconds to meet the target
+// arcane missile use it
+#[derive(Component)]
+pub struct ProjectileSpeedAsTime {
+    pub timer: Timer,
+}
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileVelocity(pub Vec2);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileOrigin(pub Vec3);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileControlPoint(pub Vec3);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileSpeed(pub f32);
+
+#[derive(Component)]
+pub struct ProjectileBendLeftOrRight(pub bool);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileTarget(pub Entity);
+
+
+// lifetime of the projectile
+// Can be use for attack like Claw
+#[derive(Component)]
+pub struct ProjectileLifetime {
+    pub timer: Timer,
+}
+
+#[derive(Component)]
+pub struct AlreadyHitEnemies {
+    // entity ID
+    pub seen:Vec<u32>,
+}
+
+
+// Delay between 2 attacks
+// could be use as reload when the weapon has no real reload time
+// like claw
+// rename cast delay
+#[derive(Component)]
+pub struct AttackDelayBetweenAttacks {
+    pub timer: Timer,
+}
+
+// Delay before weapon can attack again
+// arcane missile fire every X for 3 attacks with a delay of Y between each attacks
+// X is AttackReload, Y would be AttackTimer
+// rename recharge time
+#[derive(Component)]
+pub struct AttackReloadDuration {
+    pub timer: Timer,
+}
+
+#[derive(Component)]
+pub struct AttackAmmo{
+    pub size: u32,
+    pub amount:u32,
+    pub reload_time: f32, //seconds
+}
