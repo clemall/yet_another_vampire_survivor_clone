@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use crate::components::*;
-use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 
 
 pub struct UiLevelUpPlugin;
@@ -27,7 +26,6 @@ fn despawn_level_up_ui(mut commands: Commands, ui: Query<Entity, With<LevelUpUI>
 
 fn spawn_level_up_ui(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
 ) {
     let level_up_parent = (
         NodeBundle {

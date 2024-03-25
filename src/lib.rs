@@ -7,5 +7,6 @@ pub mod ui;
 pub mod enemies;
 pub mod animations;
 pub mod gems;
+pub mod math_utils;
 
 

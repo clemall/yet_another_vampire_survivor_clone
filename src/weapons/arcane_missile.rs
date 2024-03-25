@@ -1,13 +1,10 @@
-use std::time::Duration;
-use bevy_pixel_camera::{PixelViewport, PixelZoom};
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
-use crate::enemies::enemy::{damage_enemy, enemy_death_check};
+use crate::enemies::enemy::{damage_enemy};
 use bevy::{
-    math::{cubic_splines::CubicCurve, vec3},
     prelude::*,
 };
-use bevy_inspector_egui::egui::debug_text::print;
+use crate::math_utils::{find_circle_circle_intersections, simple_bezier};
 
 pub struct ArcaneMissilePlugin;
 
@@ -31,17 +28,9 @@ impl Plugin for ArcaneMissilePlugin {
     }
 }
 
-fn run_if_weapon_is_added(
-     mut player_weapons: Res<PlayerWeapons>,
-     weapon: Query<(), With<ArcaneMissileSpawner>>,
-) -> bool {
-    player_weapons.weapons.contains(&WeaponsTypes::ArcaneMissile) && weapon.is_empty()
-}
-
-
 fn run_if_arcane_missile_present(
-     mut player_weapons: Res<PlayerWeapons>,
-     weapon: Query<(), With<ArcaneMissileSpawner>>,
+    player_weapons: Res<PlayerWeapons>,
+    weapon: Query<(), With<ArcaneMissileSpawner>>,
 ) -> bool {
     player_weapons.weapons.contains(&WeaponsTypes::ArcaneMissile) && weapon.is_empty()
 }
@@ -66,9 +55,8 @@ fn start_reload_arcane_missile(
     mut arcane_missile_spawner: Query<(
         Entity,
         &mut AttackAmmo), (With<ArcaneMissileSpawner>, Without<AttackReload>)>,
-    time: Res<Time>,
 ){
-    if let Ok((entity, mut attack_ammo)) = arcane_missile_spawner.get_single_mut(){
+    if let Ok((entity, attack_ammo)) = arcane_missile_spawner.get_single_mut(){
         if attack_ammo.current == 0 {
             commands.entity(entity).insert(AttackReload{
                 timer:Timer::from_seconds(3.0, TimerMode::Once)
@@ -101,13 +89,13 @@ fn spawn_arcane_missile_attack(
     mut commands: Commands,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>,
-    mut player: Query<(&Transform, &mut Player)>,
+    mut player: Query<&Transform, With<Player>>,
     mut arcane_missile_spawner: Query<(&mut AttackTimer, &mut AttackAmmo),(With<ArcaneMissileSpawner>, Without<AttackReload>)>,
     enemies: Query<(Entity, &Transform),With<Enemy>>,
     mut projectile_offset_bool: ResMut<ProjectileOffsetGoesLeft>,
     time: Res<Time>,
 ){
-    let (player_transform, player) = player.single_mut();
+    let player_transform = player.single_mut();
 
     if let Ok((mut attack_timer,
               mut attack_ammo
@@ -134,9 +122,7 @@ fn spawn_arcane_missile_attack(
                 let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
                 if let Ok((entity, enemy_transform)) = enemies.get(closed_enemy) {
-                    let mut control_point = Vec3::new(player_transform.translation.x ,player_transform.translation.y , 0.0 );
                     let distance_enemy_player = enemy_transform.translation.distance(player_transform.translation);
-
 
                     let (
                         control_point_1,
@@ -148,14 +134,12 @@ fn spawn_arcane_missile_attack(
                         distance_enemy_player/2.0 + 15.0,
                     );
 
-                    if projectile_offset_bool.0{
-                        control_point = control_point_1;
+                    let control_point= if projectile_offset_bool.0{
+                        control_point_1
                     }
                     else {
-                        control_point = control_point_2;
-                    }
-
-
+                        control_point_2
+                    };
 
                     projectile_offset_bool.0 = !projectile_offset_bool.0;
 
@@ -222,14 +206,13 @@ fn arcane_missile_damage(
         Entity,
         &Collider,
         &GlobalTransform,
-        &mut ArcaneMissile,
+        &ArcaneMissile,
     ), Without<ColliderDisabled>>,
     mut enemy: Query<(&mut Health, &Transform), With<Enemy>>,
-    mut player: Query<(&Transform, &mut Player)>,
+    mut player: Query<&Transform, With<Player>>,
     rapier_context: Res<RapierContext>,
-    time: Res<Time>,
 ) {
-    for (arcane_missile_entity, collider, transform, mut arcane_missile) in &mut arcane_missiles {
+    for (arcane_missile_entity, collider, transform, arcane_missile) in &mut arcane_missiles {
 
         rapier_context.intersections_with_shape(
             transform.translation().truncate(),
@@ -237,11 +220,11 @@ fn arcane_missile_damage(
             collider,
             QueryFilter::new(),
             |entity| {
-                if let Ok((mut health, transform)) = enemy.get_mut(entity) {
-                    damage_enemy(&mut commands,entity,  health, transform, arcane_missile.damage);
+                if let Ok((health, transform)) = enemy.get_mut(entity) {
+                    damage_enemy(&mut commands,entity, health, transform, arcane_missile.damage);
 
-                    let (player_transform, player) = player.single_mut();
-                    let mut direction:Vec2 = (transform.translation.truncate() -player_transform.translation.truncate());
+                    let player_transform = player.single_mut();
+                    let direction:Vec2 = transform.translation.truncate() -player_transform.translation.truncate();
                     commands.entity(entity).try_insert(ExternalImpulse   {
                         impulse: direction.normalize() * 2000.0,
                         torque_impulse: 0.0,
@@ -269,28 +252,28 @@ fn move_arcane_missile(
         &mut Transform,
         &mut Sprite,
         &mut ProjectileVelocity,
-        &mut ProjectileSpeed,
-        &mut ProjectileTarget,
+        &ProjectileSpeed,
+        &ProjectileTarget,
         &mut AttackDuration,
         &ProjectileOrigin,
-        &mut ProjectileControlPoint,
+        &ProjectileControlPoint,
     ),(With<ArcaneMissile>,  Without<Enemy>)>,
-    enemies: Query<(Entity, &Transform),(With<Enemy>, Without<ArcaneMissile>)>,
+    enemies: Query<&Transform,(With<Enemy>, Without<ArcaneMissile>)>,
     time: Res<Time>,
-    mut gizmos: Gizmos,
+    // mut gizmos: Gizmos,
 ) {
     for (
         arcane_missile_entity,
         mut transform,
         mut sprite,
         mut velocity,
-        mut speed,
-        mut projectile_target,
+        speed,
+        projectile_target,
         mut attack_duration,
         projectile_origin,
-        mut projectile_control_point,
+        projectile_control_point,
     ) in &mut arcane_missiles {
-        if let Ok((entity, enemy_transform)) = enemies.get(projectile_target.0){
+        if let Ok(enemy_transform) = enemies.get(projectile_target.0){
             attack_duration.timer.tick(time.delta());
 
             //debug
@@ -301,7 +284,7 @@ fn move_arcane_missile(
             // gizmos.circle_2d(Vec2::new(enemy_transform.translation.x,enemy_transform.translation.y),distance_enemy_player/2.0 + 10.0, Color::RED);
 
 
-            let mut direction = (transform.translation.truncate()
+            let direction = (transform.translation.truncate()
                 - enemy_transform.translation.truncate())
                 .normalize();
             sprite.flip_x = direction.x < 0.0;
@@ -323,71 +306,6 @@ fn move_arcane_missile(
     }
 }
 
-
-fn simple_bezier(a: Vec3, b: Vec3, c: Vec3, t: f32) -> Vec3{
-    let ab = a.lerp(b, t);
-    let bc = b.lerp(c, t);
-    ab.lerp(bc, t)
-}
-
-// Find the points where the two circles intersect.
-fn find_circle_circle_intersections(c0: Vec3, r0: f32, c1: Vec3, r1: f32) -> (Vec3, Vec3){
-    // Find the distance between the centers.
-    let dx= c0.x - c1.x;
-    let dy = c0.y - c1.y;
-    let dist = (dx * dx + dy * dy).sqrt();
-
-    if ((dist - (r0 + r1)).abs() < 0.00001)
-    {
-        let intersection1 = c0.lerp(c1, r0 / (r0 + r1));
-        let intersection2 = intersection1;
-        return (intersection1, intersection2)
-    }
-
-    // See how many solutions there are.
-    if (dist > r0 + r1)
-    {
-        // No solutions, the circles are too far apart.
-        let intersection1 = Vec3::new(f32::NAN, f32::NAN, 0.0);
-        let intersection2 = Vec3::new(f32::NAN, f32::NAN, 0.0);
-        return (intersection1, intersection2)
-    }
-    else if (dist < (r0 - r1).abs())
-    {
-        // No solutions, one circle contains the other.
-        let intersection1 = Vec3::new(f32::NAN, f32::NAN, 0.0);
-        let intersection2 = Vec3::new(f32::NAN, f32::NAN, 0.0);
-        return (intersection1, intersection2)
-    }
-    else if ((dist == 0.0) && (r0 == r1))
-    {
-        // No solutions, the circles coincide.
-        let intersection1 = Vec3::new(f32::NAN, f32::NAN, 0.0);
-        let intersection2 = Vec3::new(f32::NAN, f32::NAN, 0.0);
-        return (intersection1, intersection2)
-    }
-    else
-    {
-        // Find a and h.
-        let a = (r0 * r0 -
-                    r1 * r1 + dist * dist) / (2.0 * dist);
-        let h = (r0 * r0 - a * a).sqrt();
-
-        // Find P2.
-        let cx2 = c0.x + a * (c1.x - c0.x) / dist;
-        let cy2 = c0.y + a * (c1.y - c0.y) / dist;
-
-        // Get the points P3.
-        let intersection1 = Vec3::new(
-            (cx2 + h * (c1.y - c0.y) / dist),
-            (cy2 - h * (c1.x - c0.x) / dist), 0.0);
-        let intersection2 = Vec3::new(
-            (cx2 - h * (c1.y - c0.y) / dist),
-            (cy2 + h * (c1.x - c0.x) / dist), 0.0);
-
-         return (intersection1, intersection2)
-    }
-}
 
 
 // fn apply_arcane_missile_velocity(

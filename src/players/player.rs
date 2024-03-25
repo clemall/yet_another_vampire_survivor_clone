@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use bevy_rapier2d::dynamics::{LockedAxes, RigidBody};
-use bevy_rapier2d::geometry::Sensor;
 use bevy_rapier2d::prelude::Collider;
 use crate::components::*;
 use crate::constants::MAP_LEVEL_EXPERIENCE;
@@ -10,7 +8,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (setup_player_plugin));
+        app.add_systems(Startup, setup_player_plugin);
         app.add_systems(Update, (
             player_movement,
             player_game_over,
@@ -107,9 +105,9 @@ pub fn player_movement(
 
 fn player_game_over(
     health: Query<&Health, With<Player>>,
-    // mut game_state: ResMut<NextState<GameState>>,
+    mut game_state: ResMut<NextState<GameState>>,
     // audio: Res<Audio>,
-    assets: Res<AssetServer>,
+    // assets: Res<AssetServer>,
 ) {
     let health = health.single();
 
@@ -122,14 +120,13 @@ fn player_game_over(
         //         speed: 1.0,
         //     },
         // );
-        // game_state.set(GameState::GameOver);
+        game_state.set(GameState::GameOver);
     }
 }
 
 
 
 fn compute_experience(
-    mut commands: Commands,
     mut collect_experience: EventReader<CollectExperience>,
     mut player_experience: ResMut<PlayerExperience>,
     mut next_state: ResMut<NextState<GameState>>,

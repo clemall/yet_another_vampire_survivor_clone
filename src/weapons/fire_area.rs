@@ -1,6 +1,4 @@
-use std::time::Duration;
 use bevy::prelude::*;
-use bevy_pixel_camera::{PixelViewport, PixelZoom};
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::enemies::enemy::{damage_enemy, enemy_death_check};
@@ -25,7 +23,7 @@ impl Plugin for WeaponFireAreaPlugin {
 }
 
 fn run_if_fire_area_present(
-     mut player_weapons: Res<PlayerWeapons>,
+    player_weapons: Res<PlayerWeapons>,
     weapon: Query<(), With<FireArea>>,
 ) -> bool {
     player_weapons.weapons.contains(&WeaponsTypes::FireArea) && weapon.is_empty()
@@ -34,8 +32,7 @@ fn run_if_fire_area_present(
 pub fn setup_fire_area(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    player_transform: Query<(&Transform), With<Player>>,
-    time: Res<Time>,
+    player_transform: Query<&Transform, With<Player>>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>
 ){
     let player_transform = player_transform.single();
@@ -43,7 +40,7 @@ pub fn setup_fire_area(
     let layout = TextureAtlasLayout::from_grid(Vec2::new(48.0, 48.0), 3, 1, Option::from(Vec2::new(1.0, 0.0)), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-    let mut timer = Timer::from_seconds(0.33, TimerMode::Repeating);
+    let timer = Timer::from_seconds(0.33, TimerMode::Repeating);
 
     commands.spawn((
         SpriteBundle {
@@ -90,15 +87,15 @@ fn fire_area_damage(
     mut fire_areas: Query<(
         &Collider,
         &GlobalTransform,
-        &mut FireArea,
+        &FireArea,
         &mut AttackTimer,
     ), Without<ColliderDisabled>>,
     mut enemy: Query<(&mut Health, &Transform), With<Enemy>>,
-    mut player: Query<(&Transform, &mut Player)>,
+    mut player: Query<&Transform, With<Player>>,
     rapier_context: Res<RapierContext>,
     time: Res<Time>,
 ) {
-    for (collider, transform, mut fire_area, mut attack_timer) in &mut fire_areas {
+    for (collider, transform, fire_area, mut attack_timer) in &mut fire_areas {
         attack_timer.timer.tick(time.delta());
 
         if attack_timer.timer.just_finished() {
@@ -108,11 +105,11 @@ fn fire_area_damage(
                 collider,
                 QueryFilter::new(),
                 |entity| {
-                    if let Ok((mut health, transform)) = enemy.get_mut(entity) {
-                        damage_enemy(&mut commands,entity,  health, transform, fire_area.damage);
+                    if let Ok((health, transform)) = enemy.get_mut(entity) {
+                        damage_enemy(&mut commands,entity, health, transform, fire_area.damage);
 
-                        let (player_transform, player) = player.single_mut();
-                        let mut direction:Vec2 = (transform.translation.truncate() -player_transform.translation.truncate());
+                        let player_transform = player.single_mut();
+                        let direction:Vec2 = transform.translation.truncate() -player_transform.translation.truncate();
                         commands.entity(entity).try_insert(ExternalImpulse   {
                             impulse: direction.normalize() * 200.0,
                             torque_impulse: 0.0,

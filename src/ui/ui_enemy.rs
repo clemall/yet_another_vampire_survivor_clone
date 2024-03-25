@@ -69,7 +69,7 @@ fn update_world_text(
 
         world_ui.position = world_ui.position + world_ui.velocity * time.delta_seconds();
 
-        if let Some(mut coords) = camera.world_to_viewport(transform, world_ui.position.extend(0.0)) {
+        if let Some(coords) = camera.world_to_viewport(transform, world_ui.position.extend(0.0)) {
             // let mut coords = coords / Vec2::new(SCREEN_WIDTH as f32, SCREEN_HEIGHT as f32)
             //     * camera.logical_viewport_size().unwrap();
             // coords.y = camera.logical_viewport_size().unwrap().y - coords.y;

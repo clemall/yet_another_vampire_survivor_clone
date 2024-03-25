@@ -1,5 +1,3 @@
-use std::fmt;
-use bevy::math::cubic_splines::CubicCurve;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 

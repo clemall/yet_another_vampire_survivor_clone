@@ -1,13 +1,8 @@
-use std::time::Duration;
-use bevy_pixel_camera::{PixelViewport, PixelZoom};
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
-use crate::enemies::enemy::{damage_enemy, enemy_death_check};
 use bevy::{
-    math::{cubic_splines::CubicCurve, vec3},
     prelude::*,
 };
-use bevy_inspector_egui::egui::debug_text::print;
 
 pub struct GemsPlugin;
 
@@ -58,19 +53,18 @@ fn gem_retrieve_by_user(
         &GlobalTransform,
         &mut Gem,
     ), Without<ColliderDisabled>>,
-    mut player: Query<(&Transform), With<Player>>,
+    mut player: Query<Entity, With<Player>>,
     rapier_context: Res<RapierContext>,
     mut collect_experience: EventWriter<CollectExperience>,
 ) {
-    for (gem_entity, collider, transform, mut gem) in &mut gems {
+    for (gem_entity, collider, transform, gem) in &mut gems {
         rapier_context.intersections_with_shape(
             transform.translation().truncate(),
             0.0,
             collider,
             QueryFilter::new(),
             |entity| {
-                if let Ok((player_transform)) = player.get_mut(entity) {
-                    println!("Add experience ({}) to player", gem.experience);
+                if let Ok(_entity) = player.get_mut(entity) {
                     collect_experience.send(
                         CollectExperience{
                             experience: gem.experience

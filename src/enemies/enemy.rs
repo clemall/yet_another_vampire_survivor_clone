@@ -1,11 +1,8 @@
 use bevy::prelude::*;
-use bevy_rapier2d::dynamics::{Damping, LockedAxes, RigidBody};
 use bevy_rapier2d::pipeline::QueryFilter;
 use bevy_rapier2d::plugin::RapierContext;
-use bevy_rapier2d::prelude::{Collider, ColliderMassProperties, ExternalForce, ExternalImpulse};
-use rand::Rng;
+use bevy_rapier2d::prelude::*;
 use crate::components::*;
-use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use crate::enemies::bats::BatPlugin;
 use crate::ui::ui_enemy::spawn_world_text;
 
@@ -33,12 +30,12 @@ impl Plugin for EnemyPlugin {
 
 fn compute_enemy_velocity(
     player: Query<&Transform, (With<Player>, Without<Enemy>)>,
-    mut enemies: Query<(&mut Transform, &mut Sprite, &mut EnemyVelocity, &mut EnemySpeed),(With<Enemy>,)>,
+    mut enemies: Query<(&Transform, &mut Sprite, &mut EnemyVelocity, &EnemySpeed),(With<Enemy>,)>,
     time: Res<Time>,
 ) {
     let player_transform = player.single();
-    for (mut transform, mut sprite, mut velocity,  mut speed) in &mut enemies {
-        let mut direction = (transform.translation.truncate()
+    for (transform, mut sprite, mut velocity, speed) in &mut enemies {
+        let direction = (transform.translation.truncate()
             - player_transform.translation.truncate())
             .normalize();
         sprite.flip_x = direction.x < 0.0;
@@ -52,9 +49,9 @@ fn compute_enemy_velocity(
 
 
 fn apply_enemy_velocity(
-    mut enemies: Query<(&mut Transform, &mut EnemyVelocity)>,
+    mut enemies: Query<(&mut Transform, &EnemyVelocity)>,
 ) {
-    for (mut transform, mut velocity) in &mut enemies {
+    for (mut transform, velocity) in &mut enemies {
         transform.translation -= velocity.extend(0.0);
     }
 }
@@ -63,7 +60,7 @@ fn apply_enemy_velocity(
 
 fn enemy_damage_player(
     enemies: Query<(&Collider, &GlobalTransform, &EnemyDamageOverTime),(With<Enemy>,)>,
-    mut health: Query<(&mut Health), With<Player>>,
+    mut health: Query<&mut Health, With<Player>>,
     rapier_context: Res<RapierContext>,
     time: Res<Time>,
 ) {
@@ -86,7 +83,7 @@ fn enemy_damage_player(
 
 pub fn damage_enemy(
     commands: &mut Commands,
-    entity: Entity,
+    _entity: Entity,
     mut health: Mut<Health>,
     position: &Transform,
     damage: f32,

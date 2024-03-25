@@ -1,4 +1,4 @@
-use bevy::{prelude::*, utils::Duration};
+use bevy::{prelude::*};
 
 use bevy::input::common_conditions::input_toggle_active;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -11,7 +11,7 @@ use rand::Rng;
 use yet_another_vampire_survivor_clone::components::*;
 use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
 use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
-use yet_another_vampire_survivor_clone::constants::{MAP_LEVEL_EXPERIENCE, SCREEN_HEIGHT, SCREEN_WIDTH};
+use yet_another_vampire_survivor_clone::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
@@ -21,9 +21,9 @@ use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::weapons::arcane_missile::ArcaneMissilePlugin;
 use yet_another_vampire_survivor_clone::weapons::claw::{WeaponClawPlugin};
-use yet_another_vampire_survivor_clone::weapons::fire_area::{setup_fire_area, WeaponFireAreaPlugin};
+use yet_another_vampire_survivor_clone::weapons::fire_area::{ WeaponFireAreaPlugin};
 
-#[allow(unused)]
+
 fn main() {
     App::new()
         // bevy plugin
@@ -75,7 +75,7 @@ fn main() {
         .add_plugins(ArcaneMissilePlugin)
 
         // Setup
-        .add_systems(Startup, setup)
+        // .add_systems(Startup, setup)
         // test
         .add_systems(Startup, background)
         .add_systems(Update, debug_spawn_enemies)
@@ -83,17 +83,17 @@ fn main() {
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    mut player_weapons: ResMut<PlayerWeapons>,
-){
-    // default weapon
-    // setup_claw_spawner(&mut commands);
-    // setup_fire_area(&mut commands);
-    // TODO: change that to use a list of enum representing each weapons
-    // player_weapons.weapons.push(WeaponsTypes::CLAW);
-    // player_weapons.weapons.push(WeaponsTypes::FireArea);
-}
+// fn setup(
+//     mut commands: Commands,
+//     mut player_weapons: ResMut<PlayerWeapons>,
+// ){
+//     // default weapon
+//     // setup_claw_spawner(&mut commands);
+//     // setup_fire_area(&mut commands);
+//     // TODO: change that to use a list of enum representing each weapons
+//     // player_weapons.weapons.push(WeaponsTypes::CLAW);
+//     // player_weapons.weapons.push(WeaponsTypes::FireArea);
+// }
 
 fn background(
     mut commands: Commands,
@@ -113,8 +113,6 @@ fn background(
 
 
 fn debug_add_claw_attack(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
 ){

@@ -7,17 +7,14 @@ pub struct UiPlayerPlugin;
 
 impl Plugin for UiPlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, ( setup_player_ui));
-        app.add_systems(Update, (
-            player_health_ui_sync
-            )
-        );
+        app.add_systems(Startup, setup_player_ui);
+        app.add_systems(Update, player_health_ui_sync);
     }
 }
 
 
-fn setup_player_ui(mut commands: Commands,
-         asset_server: Res<AssetServer>,
+fn setup_player_ui(
+    mut commands: Commands,
 ) {
 
     let parent_node = (
