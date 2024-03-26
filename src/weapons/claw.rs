@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::enemies::enemy::{damage_enemy, enemy_death_check};
+use crate::weapons::generic_systems::start_reload_attack_spawner;
 
 
 const CLAWS_POSITION_X:f32 = 28.0;
@@ -17,7 +18,7 @@ impl Plugin for WeaponClawPlugin {
             )
         );
         app.add_systems(Update,(
-                spawn_claw_attack,
+                spawn_claw_attack.after(start_reload_attack_spawner),
                 claw_attack_animation_and_collider,
             ).run_if(in_state(GameState::Gameplay))
         );
@@ -35,7 +36,7 @@ fn setup_claw_spawner(mut commands: Commands){
     commands.spawn((
         ClawSpawner,
         AttackDelayBetweenAttacks {
-            timer:Timer::from_seconds(0.2, TimerMode::Repeating),
+            timer:Timer::from_seconds(0.6, TimerMode::Repeating),
         },
         AttackAmmo{
             size: 2,
@@ -54,7 +55,7 @@ fn spawn_claw_attack(
         &mut AttackDelayBetweenAttacks,
         &mut AttackAmmo,
         &mut ProjectileBendLeftOrRight
-    ), With<ClawSpawner>>,
+    ), (With<ClawSpawner>, Without<AttackReloadDuration>)>,
     mut player: Query<&Transform, With<Player>>,
     time: Res<Time>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>
@@ -83,6 +84,8 @@ fn spawn_claw_attack(
                     false
                 }
             };
+
+            **projectile_orientation = !projectile_orientation.0;
 
             commands.spawn((
                 SpriteBundle {
@@ -113,10 +116,12 @@ fn spawn_claw_attack(
                 AlreadyHitEnemies{seen:Vec::new()},
                 ProjectileDamage(50.0),
                 Claw,
+                Projectile,
                 Name::new("Claw Attack"),
             ));
+            println!("ammo: {}", attack_ammo.amount);
+            attack_ammo.amount -= 1;
         }
-        attack_ammo.amount -= 1;
     }
 }
 

@@ -165,7 +165,7 @@ pub struct ProjectileControlPoint(pub Vec3);
 #[derive(Component, Deref, DerefMut)]
 pub struct ProjectileSpeed(pub f32);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub struct ProjectileBendLeftOrRight(pub bool);
 
 #[derive(Component, Deref, DerefMut)]
@@ -179,7 +179,7 @@ pub struct ProjectileLifetime {
     pub timer: Timer,
 }
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub struct AlreadyHitEnemies {
     // entity ID
     pub seen:Vec<u32>,

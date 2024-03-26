@@ -1,7 +1,7 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::math::Vec2;
-use bevy::prelude::{Commands, Entity, GlobalTransform, in_state, IntoSystemSetConfigs, Query, Res, resource_exists_and_changed, Time, Timer, TimerMode, Transform, With, Without};
+use bevy::prelude::*;
 use bevy_rapier2d::dynamics::ExternalImpulse;
 use bevy_rapier2d::geometry::{Collider, ColliderDisabled};
 use bevy_rapier2d::pipeline::QueryFilter;
@@ -9,15 +9,21 @@ use bevy_rapier2d::plugin::RapierContext;
 use crate::components::*;
 use crate::enemies::enemy::{damage_enemy, enemy_death_check};
 
+
 pub struct GenericWeaponPlugin;
 
 impl Plugin for GenericWeaponPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            Update,
-            weapon_damage
-                // .run_if(in_state(GameState::Gameplay)).before(enemy_death_check)
+            Update, (
+                weapon_damage.after(enemy_death_check),
+                start_reload_attack_spawner,
+                reloading_attack_spawner,
+                projectile_lifetime_tick,
+                projectile_despawn
+            ).run_if(in_state(GameState::Gameplay)),
         );
+
     }
 }
 
@@ -57,21 +63,36 @@ fn weapon_damage(
             }
         }
 
+        // match hit_enemies {
+        //     None => {}
+        //     Some(mut l) => {
+        //         if l.seen.contains(&projectile_entity.index()){
+        //             println!("toto");
+        //         }
+        //         else {
+        //             l.seen.push(projectile_entity.index());
+        //         }
+        //     }
+        // }
+
+        let mut enemy_entities:Vec<Entity> = Vec::new();
+
         rapier_context.intersections_with_shape(
             transform.translation().truncate(),
             0.0,
             collider,
             QueryFilter::new(),
             |enemy_entity| {
+                enemy_entities.push(enemy_entity);
                 if let Ok((health, transform)) = enemy.get_mut(enemy_entity) {
-                    if let Some(mut hit_enemies) = hit_enemies{
-                        if hit_enemies.seen.contains(&enemy_entity.index()){
-                            return true;
-                        }
-                        else {
-                            hit_enemies.seen.push(enemy_entity.index());
-                        }
-                    }
+                    // if let Some(mut hit_enemies) = hit_enemies{
+                    //
+                    //     if hit_enemies.seen.contains(&enemy_entity.index()){
+                    //         return true
+                    //     }
+                    //     hit_enemies.seen.push(enemy_entity.index());
+                    // }
+
 
                     damage_enemy(&mut commands, enemy_entity, health, transform, damage.0);
 
@@ -90,11 +111,31 @@ fn weapon_damage(
                 true
             },
         );
+
+        // for enemy_entity in enemy_entities {
+        //     if let Ok((health, transform)) = enemy.get_mut(enemy_entity) {
+        //             match hit_enemies {
+        //                 None => {}
+        //                 Some(mut l) => {
+        //                     if l.seen.contains(&projectile_entity.index()){
+        //                         println!("toto");
+        //                     }
+        //                     else {
+        //                         l.seen.push(projectile_entity.index());
+        //                     }
+        //                 }
+        //             }
+        //
+        //
+        //
+        //         }
+        // }
+
     }
 }
 
 
-fn start_reload_attack_spawner(
+pub fn start_reload_attack_spawner(
     mut commands: Commands,
     mut attack_spawners: Query<(Entity, &AttackAmmo),  Without<AttackReloadDuration>>,
 ){
