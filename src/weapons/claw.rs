@@ -1,8 +1,6 @@
-use std::time::Duration;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
-use crate::enemies::enemy::{damage_enemy, enemy_death_check};
 use crate::weapons::generic_systems::start_reload_attack_spawner;
 
 
@@ -35,7 +33,7 @@ fn run_if_claw_present(
 fn setup_claw_spawner(mut commands: Commands){
     commands.spawn((
         ClawSpawner,
-        AttackDelayBetweenAttacks {
+        DelayBetweenAttacks {
             timer:Timer::from_seconds(0.6, TimerMode::Repeating),
         },
         AttackAmmo{
@@ -52,7 +50,7 @@ fn spawn_claw_attack(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut claw_spawner: Query<(
-        &mut AttackDelayBetweenAttacks,
+        &mut DelayBetweenAttacks,
         &mut AttackAmmo,
         &mut ProjectileBendLeftOrRight
     ), (With<ClawSpawner>, Without<AttackReloadDuration>)>,
@@ -87,6 +85,8 @@ fn spawn_claw_attack(
 
             **projectile_orientation = !projectile_orientation.0;
 
+            attack_ammo.amount -= 1;
+
             commands.spawn((
                 SpriteBundle {
                     texture,
@@ -114,13 +114,12 @@ fn spawn_claw_attack(
                     timer:Timer::from_seconds(0.3, TimerMode::Once),
                 },
                 AlreadyHitEnemies{seen:Vec::new()},
-                ProjectileDamage(50.0),
+                ProjectileDamage(5.0),
+                ProjectileImpulse(2000.0),
                 Claw,
                 Projectile,
                 Name::new("Claw Attack"),
             ));
-            println!("ammo: {}", attack_ammo.amount);
-            attack_ammo.amount -= 1;
         }
     }
 }

@@ -139,7 +139,10 @@ pub struct Projectile;
 pub struct ProjectileDamage(pub f32);
 
 #[derive(Component)]
-pub struct DeleteProjectileOnHit;
+pub struct ProjectileDeleteOnHit;
+
+#[derive(Component)]
+pub struct ProjectileFollowPlayer;
 
 #[derive(Component)]
 pub struct ProjectileTimeBetweenDamage {
@@ -171,9 +174,10 @@ pub struct ProjectileBendLeftOrRight(pub bool);
 #[derive(Component, Deref, DerefMut)]
 pub struct ProjectileTarget(pub Entity);
 
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileImpulse(pub f32);
 
-// lifetime of the projectile
-// Can be use for attack like Claw
+
 #[derive(Component)]
 pub struct ProjectileLifetime {
     pub timer: Timer,
@@ -191,22 +195,22 @@ pub struct AlreadyHitEnemies {
 // like claw
 // rename cast delay
 #[derive(Component)]
-pub struct AttackDelayBetweenAttacks {
+pub struct DelayBetweenAttacks {
     pub timer: Timer,
 }
 
-// Delay before weapon can attack again
-// arcane missile fire every X for 3 attacks with a delay of Y between each attacks
-// X is AttackReload, Y would be AttackTimer
-// rename recharge time
-#[derive(Component)]
-pub struct AttackReloadDuration {
-    pub timer: Timer,
-}
+
 
 #[derive(Component)]
 pub struct AttackAmmo{
     pub size: u32,
     pub amount:u32,
     pub reload_time: f32, //seconds
+}
+
+// works with AttackAmmo.reload_time that is used to set
+// the timer on AttackReloadDuration
+#[derive(Component)]
+pub struct AttackReloadDuration {
+    pub timer: Timer,
 }

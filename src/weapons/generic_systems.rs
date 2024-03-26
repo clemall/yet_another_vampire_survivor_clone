@@ -20,7 +20,8 @@ impl Plugin for GenericWeaponPlugin {
                 start_reload_attack_spawner,
                 reloading_attack_spawner,
                 projectile_lifetime_tick,
-                projectile_despawn
+                projectile_despawn,
+                projectile_follow_player,
             ).run_if(in_state(GameState::Gameplay)),
         );
 
@@ -38,7 +39,8 @@ fn weapon_damage(
         &ProjectileDamage,
         Option<&mut ProjectileTimeBetweenDamage>,
         Option<&mut AlreadyHitEnemies>,
-        Option<&DeleteProjectileOnHit>,
+        Option<&ProjectileDeleteOnHit>,
+        Option<&ProjectileImpulse>,
     ), (With<Projectile>, Without<ColliderDisabled>)>,
     mut enemy: Query<(&mut Health, &Transform), With<Enemy>>,
     mut player: Query<&Transform, With<Player>>,
@@ -51,8 +53,9 @@ fn weapon_damage(
         transform,
         damage,
         attack_timer,
-        hit_enemies,
-        should_delete_projectile
+        mut hit_enemies,
+        should_delete_projectile,
+        projectile_impulse,
     ) in &mut attacks {
 
         if let Some(mut attack_timer) = attack_timer{
@@ -62,47 +65,31 @@ fn weapon_damage(
                 return ()
             }
         }
-
-        // match hit_enemies {
-        //     None => {}
-        //     Some(mut l) => {
-        //         if l.seen.contains(&projectile_entity.index()){
-        //             println!("toto");
-        //         }
-        //         else {
-        //             l.seen.push(projectile_entity.index());
-        //         }
-        //     }
-        // }
-
-        let mut enemy_entities:Vec<Entity> = Vec::new();
-
         rapier_context.intersections_with_shape(
             transform.translation().truncate(),
             0.0,
             collider,
             QueryFilter::new(),
             |enemy_entity| {
-                enemy_entities.push(enemy_entity);
                 if let Ok((health, transform)) = enemy.get_mut(enemy_entity) {
-                    // if let Some(mut hit_enemies) = hit_enemies{
-                    //
-                    //     if hit_enemies.seen.contains(&enemy_entity.index()){
-                    //         return true
-                    //     }
-                    //     hit_enemies.seen.push(enemy_entity.index());
-                    // }
-
+                    if let Some(hit_enemies) = hit_enemies.as_deref_mut(){
+                        if hit_enemies.seen.contains(&enemy_entity.index()){
+                            return true
+                        }
+                        hit_enemies.seen.push(enemy_entity.index());
+                    }
 
                     damage_enemy(&mut commands, enemy_entity, health, transform, damage.0);
 
-
-                    let player_transform = player.single_mut();
-                    let direction:Vec2 = transform.translation.truncate() -player_transform.translation.truncate();
-                    commands.entity(enemy_entity).try_insert(ExternalImpulse   {
-                        impulse: direction.normalize() * 2000.0,
-                        torque_impulse: 0.0,
-                    },);
+                    // maybe use events?
+                    if let Some(projectile_impulse) = projectile_impulse{
+                        let player_transform = player.single_mut();
+                        let direction:Vec2 = transform.translation.truncate() -player_transform.translation.truncate();
+                        commands.entity(enemy_entity).try_insert(ExternalImpulse   {
+                            impulse: direction.normalize() * projectile_impulse.0,
+                            torque_impulse: 0.0,
+                        },);
+                    }
 
                     if let Some(_should_delete) = should_delete_projectile{
                         commands.entity(projectile_entity).despawn_recursive();
@@ -111,25 +98,6 @@ fn weapon_damage(
                 true
             },
         );
-
-        // for enemy_entity in enemy_entities {
-        //     if let Ok((health, transform)) = enemy.get_mut(enemy_entity) {
-        //             match hit_enemies {
-        //                 None => {}
-        //                 Some(mut l) => {
-        //                     if l.seen.contains(&projectile_entity.index()){
-        //                         println!("toto");
-        //                     }
-        //                     else {
-        //                         l.seen.push(projectile_entity.index());
-        //                     }
-        //                 }
-        //             }
-        //
-        //
-        //
-        //         }
-        // }
 
     }
 }
@@ -190,6 +158,19 @@ fn projectile_despawn(
     for (entity, attack_duration)  in &mut projectiles {
         if attack_duration.timer.just_finished() {
             commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+
+fn projectile_follow_player(
+    player: Query<&Transform, (With<Player>, Without<FireArea>)>,
+    mut projectile: Query<&mut Transform, (With<ProjectileFollowPlayer>, Without<Player>)>,
+) {
+    if let Ok(mut fire_area) = projectile.get_single_mut() {
+        if let Ok(player) = player.get_single() {
+            fire_area.translation.x = player.translation.x;
+            fire_area.translation.y = player.translation.y;
         }
     }
 }

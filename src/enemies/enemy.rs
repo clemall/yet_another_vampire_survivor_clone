@@ -95,6 +95,8 @@ pub fn damage_enemy(
         &format!("{:?}", damage as i32),
     );
 
+    println!("dmg : {}", damage);
+
     **health -= damage;
 
     // if health.0 <= 0.0 {
@@ -109,13 +111,12 @@ pub fn enemy_death_check(
 ) {
     for (entity, transform, health) in &mut enemies {
         if health.0 <= 0.0 {
-            commands.entity(entity).despawn_recursive();
-
             enemy_died.send(
                 EnemyDied{
                     position: transform.translation.clone(),
                     experience: 100 }
             );
+            commands.entity(entity).despawn_recursive();
         }
     }
 }
