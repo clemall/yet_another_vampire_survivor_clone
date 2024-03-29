@@ -4,7 +4,6 @@ use bevy_rapier2d::plugin::RapierContext;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::enemies::bats::BatPlugin;
-use crate::ui::ui_enemy::spawn_world_text;
 
 pub struct EnemyPlugin;
 
@@ -15,13 +14,14 @@ impl Plugin for EnemyPlugin {
         // basic enemy logic
         app.add_systems(Update, (
             compute_enemy_velocity,
-            apply_enemy_velocity,
-            enemy_damage_player
+            // apply_enemy_velocity,
             ).chain().run_if(in_state(GameState::Gameplay))
         );
 
-        app.add_systems(Update,
-                        (enemy_death_check).run_if(in_state(GameState::Gameplay))
+        app.add_systems(Update, (
+            enemy_damage_player,
+            enemy_applied_received_damage,
+            enemy_death_check).run_if(in_state(GameState::Gameplay))
         );
 
     }
@@ -30,31 +30,31 @@ impl Plugin for EnemyPlugin {
 
 fn compute_enemy_velocity(
     player: Query<&Transform, (With<Player>, Without<Enemy>)>,
-    mut enemies: Query<(&Transform, &mut Sprite, &mut EnemyVelocity, &EnemySpeed),(With<Enemy>,)>,
+    mut enemies: Query<(&mut Transform, &mut Sprite, &EnemySpeed),(With<Enemy>,)>,
     time: Res<Time>,
 ) {
     let player_transform = player.single();
-    for (transform, mut sprite, mut velocity, speed) in &mut enemies {
+    for (mut transform, mut sprite, speed) in &mut enemies {
         let direction = (transform.translation.truncate()
             - player_transform.translation.truncate())
             .normalize();
         sprite.flip_x = direction.x < 0.0;
 
-        velocity.x = direction.x * time.delta_seconds() * speed.0;
-        velocity.y = direction.y * time.delta_seconds() * speed.0;
+        transform.translation.x -= direction.x * time.delta_seconds() * speed.0;
+        transform.translation.y -= direction.y * time.delta_seconds() * speed.0;
     }
 }
 
 
 
 
-fn apply_enemy_velocity(
-    mut enemies: Query<(&mut Transform, &EnemyVelocity)>,
-) {
-    for (mut transform, velocity) in &mut enemies {
-        transform.translation -= velocity.extend(0.0);
-    }
-}
+// fn apply_enemy_velocity(
+//     mut enemies: Query<(&mut Transform, &EnemyVelocity)>,
+// ) {
+//     for (mut transform, velocity) in &mut enemies {
+//         transform.translation -= velocity.extend(0.0);
+//     }
+// }
 
 
 
@@ -81,40 +81,28 @@ fn enemy_damage_player(
 }
 
 
-pub fn damage_enemy(
-    commands: &mut Commands,
-    _entity: Entity,
-    mut health: Mut<Health>,
-    position: &Transform,
-    damage: f32,
+pub fn enemy_applied_received_damage(
+    mut enemies: Query<&mut Health, With<Enemy>>,
+    mut eneny_received_damaged_event: EventReader<EnemyReceivedDamage>,
 ) {
-    // TODO: Use event ?
-    spawn_world_text(
-        commands,
-        position.translation.truncate(),
-        &format!("{:?}", damage as i32),
-    );
-
-    println!("dmg : {}", damage);
-
-    **health -= damage;
-
-    // if health.0 <= 0.0 {
-    //     commands.entity(entity).despawn_recursive();
-    // }
+    for event in eneny_received_damaged_event.read() {
+        if let Ok(mut health) = enemies.get_mut(event.enemy_entity){
+            **health -= event.damage;
+        }
+    }
 }
 
 pub fn enemy_death_check(
     mut commands: Commands,
-    mut enemies: Query<(Entity, &Transform, &Health), With<Enemy>>,
+    mut enemies: Query<(Entity, &Transform, &Health, &EnemyExperienceDrop), With<Enemy>>,
     mut enemy_died: EventWriter<EnemyDied>,
 ) {
-    for (entity, transform, health) in &mut enemies {
+    for (entity, transform, health, experience) in &mut enemies {
         if health.0 <= 0.0 {
             enemy_died.send(
                 EnemyDied{
                     position: transform.translation.clone(),
-                    experience: 100 }
+                    experience: experience.0 }
             );
             commands.entity(entity).despawn_recursive();
         }

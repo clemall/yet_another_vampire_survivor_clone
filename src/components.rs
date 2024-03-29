@@ -30,17 +30,22 @@ pub struct Health(pub f32);
 #[derive(Component, Deref, DerefMut)]
 pub struct MaxHealth(pub f32);
 
+
+// Enemy
 #[derive(Component)]
 pub struct Enemy;
 
-#[derive(Component, Deref, DerefMut)]
-pub struct EnemyVelocity(pub Vec2);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemySpeed(pub f32);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemyDamageOverTime(pub f32);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct EnemyExperienceDrop(pub u32);
+
+// Animation
 
 #[derive(Component)]
 pub struct AnimationIndices {
@@ -64,6 +69,11 @@ pub enum Facing {
 pub struct ClawSpawner;
 #[derive(Component)]
 pub struct ArcaneMissileSpawner;
+#[derive(Component)]
+pub struct ShurikenSpawner;
+
+#[derive(Component)]
+pub struct ChainLightningSpawner;
 
 #[derive(Component)]
 pub struct FireAreaSpawner;
@@ -74,12 +84,19 @@ pub struct ArcaneMissile;
 #[derive(Component)]
 pub struct FireArea;
 
+#[derive(Component)]
+pub struct Shuriken;
+
+#[derive(Component)]
+pub struct ChainLightning;
 
 #[derive(Debug, PartialEq)]
 pub enum WeaponsTypes {
     Claw,
     FireArea,
     ArcaneMissile,
+    Shuriken,
+    ChainLightning,
 }
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
@@ -103,6 +120,14 @@ pub struct EnemyDied{
     pub position:Vec3,
     pub experience:u32,
 }
+
+#[derive(Event)]
+pub struct EnemyReceivedDamage{
+    pub damage:f32,
+    pub enemy_entity:Entity,
+}
+
+
 
 #[derive(Event)]
 pub struct CollectExperience{
@@ -149,15 +174,12 @@ pub struct ProjectileTimeBetweenDamage {
     pub timer: Timer,
 }
 
-// Use for projectile that target enemies and takes X seconds to meet the target
-// arcane missile use it
 #[derive(Component)]
-pub struct ProjectileSpeedAsTime {
-    pub timer: Timer,
-}
+pub struct ProjectileRotateOnSelf;
 
-#[derive(Component, Deref, DerefMut)]
-pub struct ProjectileVelocity(pub Vec2);
+
+// #[derive(Component, Deref, DerefMut)]
+// pub struct ProjectileVelocity(pub Vec2);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct ProjectileOrigin(pub Vec3);
@@ -167,6 +189,22 @@ pub struct ProjectileControlPoint(pub Vec3);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct ProjectileSpeed(pub f32);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ProjectileDirection(pub Vec2);
+
+#[derive(Component)]
+pub struct ProjectileRotateAroundPlayer{
+    pub angle: f32,
+    pub distance: f32,
+}
+
+#[derive(Component)]
+pub struct ProjectileSpiralAroundPlayer{
+    pub angle: f32,
+    pub distance: f32,
+    pub spiral_speed: f32,
+}
 
 #[derive(Component, Deref, DerefMut)]
 pub struct ProjectileBendLeftOrRight(pub bool);
@@ -180,6 +218,13 @@ pub struct ProjectileImpulse(pub f32);
 
 #[derive(Component)]
 pub struct ProjectileLifetime {
+    pub timer: Timer,
+}
+
+// Use for projectile that target enemies and takes X seconds to meet the target
+// arcane missile use it
+#[derive(Component)]
+pub struct ProjectileSpeedAsDuration {
     pub timer: Timer,
 }
 

@@ -18,9 +18,11 @@ use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::weapons::arcane_missile::ArcaneMissilePlugin;
+use yet_another_vampire_survivor_clone::weapons::chain_lightning::ChainLightningPlugin;
 use yet_another_vampire_survivor_clone::weapons::claw::{WeaponClawPlugin};
 use yet_another_vampire_survivor_clone::weapons::generic_systems::GenericWeaponPlugin;
 use yet_another_vampire_survivor_clone::weapons::fire_area::{ WeaponFireAreaPlugin};
+use yet_another_vampire_survivor_clone::weapons::shuriken::ShurikenPlugin;
 
 
 fn main() {
@@ -29,9 +31,11 @@ fn main() {
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         // States
         .init_state::<GameState>()
+
         // Events
         .add_event::<EnemyDied>()
         .add_event::<CollectExperience>()
+        .add_event::<EnemyReceivedDamage>()
 
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
@@ -72,6 +76,8 @@ fn main() {
         .add_plugins(WeaponClawPlugin)
         .add_plugins(WeaponFireAreaPlugin)
         .add_plugins(ArcaneMissilePlugin)
+        .add_plugins(ShurikenPlugin)
+        .add_plugins(ChainLightningPlugin)
 
         // Setup
         // .add_systems(Startup, setup)
@@ -122,6 +128,12 @@ fn debug_add_claw_attack(
     }
     if keyboard_input.just_pressed(KeyCode::Digit3) {
         player_weapons.weapons.push(WeaponsTypes::ArcaneMissile);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit4) {
+        player_weapons.weapons.push(WeaponsTypes::Shuriken);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit5) {
+        player_weapons.weapons.push(WeaponsTypes::ChainLightning);
     }
 }
 

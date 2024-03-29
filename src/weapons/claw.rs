@@ -49,7 +49,7 @@ fn setup_claw_spawner(mut commands: Commands){
 fn spawn_claw_attack(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut claw_spawner: Query<(
+    mut spawner: Query<(
         &mut DelayBetweenAttacks,
         &mut AttackAmmo,
         &mut ProjectileBendLeftOrRight
@@ -62,7 +62,7 @@ fn spawn_claw_attack(
 
     if let Ok(
         (mut attack_timer, mut attack_ammo, mut projectile_orientation)
-    ) = claw_spawner.get_single_mut(){
+    ) = spawner.get_single_mut(){
         attack_timer.timer.tick(time.delta());
 
         if attack_timer.timer.just_finished() {

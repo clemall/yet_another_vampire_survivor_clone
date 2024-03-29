@@ -61,7 +61,10 @@ fn setup_player_ui(
 }
 
 
-fn player_health_ui_sync(mut ui: Query<&mut Style, With<HealthUI>>, health: Query<(&Health,&MaxHealth), With<Player>>) {
+fn player_health_ui_sync(
+    mut ui: Query<&mut Style, With<HealthUI>>,
+    health: Query<(&Health,&MaxHealth), With<Player>>
+) {
     let mut style = ui.single_mut();
     let (health, max_health) = health.single();
 

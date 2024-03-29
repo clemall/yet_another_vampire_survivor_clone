@@ -5,12 +5,31 @@ pub struct UiEnemyPlugin;
 
 impl Plugin for UiEnemyPlugin {
     fn build(&self, app: &mut App) {
-        // app.add_systems(Startup, spawn_claw);
-        // app.add_systems(Update,(claw_attack_facing, claw_attack, claw_damage));
-        app.add_systems(Update, (update_world_text, update_world_text));
+        app.add_systems(Update, (
+            enemy_received_damage_ui,
+            update_world_text,
+            update_world_text
+        ));
     }
 }
 
+
+pub fn enemy_received_damage_ui(
+    mut commands: Commands,
+    mut enemies: Query<&Transform, With<Enemy>>,
+    mut eneny_received_damaged_event: EventReader<EnemyReceivedDamage>,
+) {
+    for event in eneny_received_damaged_event.read() {
+        if let Ok(enemy_transform) = enemies.get_mut(event.enemy_entity){
+            spawn_world_text(
+                &mut commands,
+                enemy_transform.translation.truncate(),
+                &format!("{:?}", event.damage as i32),
+            );
+        }
+    }
+
+}
 
 pub fn spawn_world_text(commands: &mut Commands,  position: Vec2, text: &str) {
     let position = position + Vec2::new(-0.2, 1.4);

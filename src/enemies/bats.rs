@@ -47,10 +47,10 @@ fn spawn_bats(
             ColliderMassProperties::Density(2.0),
             Enemy,
             Health(50.0),
-            MaxHealth(500.0),
-            EnemyVelocity(Vec2::new(0.0, 0.0)),
+            // MaxHealth(500.0),
             EnemySpeed(30.0),
             EnemyDamageOverTime(10.0),
+            EnemyExperienceDrop(1),
         ));
     }
 

@@ -54,7 +54,7 @@ fn spawn_arcane_missile_attack(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
-    mut arcane_missile_spawner: Query<(
+    mut spawner: Query<(
         &mut DelayBetweenAttacks,
         &mut AttackAmmo,
         &mut ProjectileBendLeftOrRight
@@ -67,7 +67,7 @@ fn spawn_arcane_missile_attack(
     if let Ok((mut attack_timer,
               mut attack_ammo,
               mut projectile_orientation
-              )) = arcane_missile_spawner.get_single_mut(){
+              )) = spawner.get_single_mut(){
 
         attack_timer.timer.tick(time.delta());
 
@@ -139,10 +139,13 @@ fn spawn_arcane_missile_attack(
                         ProjectileTarget(entity),
                         ProjectileOrigin(player_transform.translation),
                         ProjectileControlPoint(control_point),
-                        ProjectileImpulse(1000.0),
-                        ProjectileLifetime {
+                        ProjectileImpulse(700.0),
+                        ProjectileSpeedAsDuration{
                             timer:Timer::from_seconds(0.3, TimerMode::Once),
                         },
+                        // ProjectileLifetime {
+                        //     timer:Timer::from_seconds(0.31, TimerMode::Once),
+                        // },
                         Name::new("Arcane missile Attack"),
                     ));
                 }
@@ -161,7 +164,7 @@ fn move_arcane_missile(
         &mut Transform,
         &mut Sprite,
         &ProjectileTarget,
-        &mut ProjectileLifetime,
+        &mut ProjectileSpeedAsDuration,
         &ProjectileOrigin,
         &ProjectileControlPoint,
     ),(With<ArcaneMissile>,  Without<Enemy>)>,
@@ -174,12 +177,12 @@ fn move_arcane_missile(
         mut transform,
         mut sprite,
         projectile_target,
-        mut attack_duration,
+        mut projectile_speed_as_duration,
         projectile_origin,
         projectile_control_point,
     ) in &mut arcane_missiles {
         if let Ok(enemy_transform) = enemies.get(projectile_target.0){
-            attack_duration.timer.tick(time.delta());
+            projectile_speed_as_duration.timer.tick(time.delta());
 
             //debug
             // gizmos.circle_2d(Vec2::new(projectile_control_point.0.x,projectile_control_point.0.y),3.0, Color::WHITE);
@@ -194,8 +197,12 @@ fn move_arcane_missile(
             sprite.flip_x = direction.x < 0.0;
 
 
-            let t =  attack_duration.timer.elapsed().as_millis() as f32 / attack_duration.timer.duration().as_millis()  as f32;
-            transform.translation = simple_bezier(projectile_origin.0, projectile_control_point.0, enemy_transform.translation, t);
+            transform.translation = simple_bezier(
+                projectile_origin.0,
+                projectile_control_point.0,
+                enemy_transform.translation,
+                projectile_speed_as_duration.timer.fraction()
+            );
         }
         else {
             // delete projectile
