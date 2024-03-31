@@ -1,9 +1,7 @@
 use bevy::prelude::*;
-
-use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use bevy_rapier2d::prelude::*;
-use rand::Rng;
 use crate::components::*;
+use crate::math_utils::get_random_position_in_screen;
 
 pub struct BatPlugin;
 
@@ -21,16 +19,12 @@ fn spawn_bats(
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ){
     if keyboard_input.just_pressed(KeyCode::KeyO) || keyboard_input.pressed(KeyCode::KeyP) {
-        let mut rng = rand::thread_rng();
-        let x: i32 = rng.gen_range(-SCREEN_WIDTH/2..SCREEN_WIDTH/2);
-        let y: i32 = rng.gen_range(-SCREEN_HEIGHT/2..SCREEN_HEIGHT/2);
-
         commands.spawn((
             SpriteBundle {
                 texture: asset_server.load("enemies.png"),
                 // transform: Transform::from_xyz(x as f32, y as f32, 0.0),
                 transform: Transform{
-                    translation: Vec3::new(x as f32, y as f32, 0.0),
+                    translation: get_random_position_in_screen().extend(0.0),
                     rotation: Default::default(),
                     scale: Vec3::new(0.5,0.5, 0.0),
                 },
@@ -49,8 +43,13 @@ fn spawn_bats(
             Health(50.0),
             // MaxHealth(500.0),
             EnemySpeed(30.0),
+            EnemyVelocity(Vec2::new(0.0, 0.0)),
             EnemyDamageOverTime(10.0),
             EnemyExperienceDrop(1),
+            VelocityAura{
+                value: 0.5,
+                lifetime: Timer::from_seconds(2.0, TimerMode::Once),
+            },
         ));
     }
 

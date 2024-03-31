@@ -1,6 +1,8 @@
 use bevy::{
     prelude::*,
 };
+use rand::Rng;
+use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 
 pub fn simple_bezier(a: Vec3, b: Vec3, c: Vec3, t: f32) -> Vec3{
     let ab = a.lerp(b, t);
@@ -65,4 +67,13 @@ pub fn find_circle_circle_intersections(c0: Vec3, r0: f32, c1: Vec3, r1: f32) ->
 
          return (intersection1, intersection2)
     }
+}
+
+
+pub fn get_random_position_in_screen() -> Vec2{
+     let mut rng = rand::thread_rng();
+    let x: f32 = rng.gen_range(-SCREEN_WIDTH/2..SCREEN_WIDTH/2) as f32;
+    let y: f32 = rng.gen_range(-SCREEN_HEIGHT/2..SCREEN_HEIGHT/2) as f32;
+    
+    Vec2::new(x,y)
 }

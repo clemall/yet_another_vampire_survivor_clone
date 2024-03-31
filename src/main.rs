@@ -12,6 +12,7 @@ use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePl
 use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
+use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
@@ -23,6 +24,7 @@ use yet_another_vampire_survivor_clone::weapons::claw::{WeaponClawPlugin};
 use yet_another_vampire_survivor_clone::weapons::generic_systems::GenericWeaponPlugin;
 use yet_another_vampire_survivor_clone::weapons::fire_area::{ WeaponFireAreaPlugin};
 use yet_another_vampire_survivor_clone::weapons::shuriken::ShurikenPlugin;
+use yet_another_vampire_survivor_clone::weapons::slow_dome::SlowDomePlugin;
 
 
 fn main() {
@@ -78,12 +80,13 @@ fn main() {
         .add_plugins(ArcaneMissilePlugin)
         .add_plugins(ShurikenPlugin)
         .add_plugins(ChainLightningPlugin)
+        .add_plugins(SlowDomePlugin)
 
         // Setup
         // .add_systems(Startup, setup)
         // test
         .add_systems(Startup, background)
-        .add_systems(Update, debug_add_claw_attack)
+        .add_systems(Update, debug)
         .run();
 }
 
@@ -116,9 +119,10 @@ fn background(
 
 
 
-fn debug_add_claw_attack(
+fn debug(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
+    mut enemy_died: EventWriter<EnemyDied>,
 ){
     if keyboard_input.just_pressed(KeyCode::Digit1) {
         player_weapons.weapons.push(WeaponsTypes::Claw);
@@ -135,5 +139,19 @@ fn debug_add_claw_attack(
     if keyboard_input.just_pressed(KeyCode::Digit5) {
         player_weapons.weapons.push(WeaponsTypes::ChainLightning);
     }
+    if keyboard_input.just_pressed(KeyCode::Digit6) {
+        player_weapons.weapons.push(WeaponsTypes::SlowDome);
+    }
+    
+    if keyboard_input.pressed(KeyCode::KeyG) {
+        enemy_died.send(
+            EnemyDied{ 
+                position: get_random_position_in_screen().extend(0.0),
+                experience: 1 
+            }
+        );
+    }
+    
+    
 }
 

@@ -14,7 +14,8 @@ impl Plugin for EnemyPlugin {
         // basic enemy logic
         app.add_systems(Update, (
             compute_enemy_velocity,
-            // apply_enemy_velocity,
+            apply_aura_on_enemy_velocity,
+            apply_enemy_velocity,
             ).chain().run_if(in_state(GameState::Gameplay))
         );
 
@@ -30,31 +31,47 @@ impl Plugin for EnemyPlugin {
 
 fn compute_enemy_velocity(
     player: Query<&Transform, (With<Player>, Without<Enemy>)>,
-    mut enemies: Query<(&mut Transform, &mut Sprite, &EnemySpeed),(With<Enemy>,)>,
+    mut enemies: Query<(&Transform, &mut Sprite, &mut EnemyVelocity, &EnemySpeed),(With<Enemy>,)>,
     time: Res<Time>,
 ) {
     let player_transform = player.single();
-    for (mut transform, mut sprite, speed) in &mut enemies {
+    for (transform, mut sprite, mut velocity, speed) in &mut enemies {
         let direction = (transform.translation.truncate()
             - player_transform.translation.truncate())
             .normalize();
         sprite.flip_x = direction.x < 0.0;
 
-        transform.translation.x -= direction.x * time.delta_seconds() * speed.0;
-        transform.translation.y -= direction.y * time.delta_seconds() * speed.0;
+        velocity.x = direction.x * time.delta_seconds() * speed.0;
+        velocity.y = direction.y * time.delta_seconds() * speed.0;
     }
 }
 
 
+fn apply_aura_on_enemy_velocity(
+    mut commands: Commands,
+    mut enemies: Query<(Entity, &mut EnemyVelocity, &mut VelocityAura)>,
+    time: Res<Time>,
+) {
+    for (entity, mut velocity, mut aura) in &mut enemies {
+        velocity.x *= aura.value;
+        velocity.y *= aura.value;
+        
+        aura.lifetime.tick(time.delta());
+
+        if aura.lifetime.just_finished() {
+            commands.entity(entity).remove::<VelocityAura>();
+        }
+    }
+}
 
 
-// fn apply_enemy_velocity(
-//     mut enemies: Query<(&mut Transform, &EnemyVelocity)>,
-// ) {
-//     for (mut transform, velocity) in &mut enemies {
-//         transform.translation -= velocity.extend(0.0);
-//     }
-// }
+fn apply_enemy_velocity(
+    mut enemies: Query<(&mut Transform, &EnemyVelocity)>,
+) {
+    for (mut transform, velocity) in &mut enemies {
+        transform.translation -= velocity.extend(0.0);
+    }
+}
 
 
 

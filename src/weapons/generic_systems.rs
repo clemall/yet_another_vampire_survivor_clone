@@ -89,7 +89,7 @@ fn projectile_apply_damage(
                     enemy_received_damage.send(
                         EnemyReceivedDamage{
                             damage: damage.0,
-                            enemy_entity: enemy_entity,
+                            enemy_entity,
                         }
 
                     );
@@ -148,10 +148,11 @@ fn reloading_attack_spawner(
         attack_reload.timer.tick(time.delta());
 
         if attack_reload.timer.just_finished() {
+            attack_ammo.amount = attack_ammo.size;
+            
             commands.entity(entity).remove::<AttackReloadDuration>();
         }
 
-        attack_ammo.amount = attack_ammo.size;
     }
 }
 
@@ -193,14 +194,14 @@ fn projectile_move_toward_direction(
     mut projectiles: Query<(
         &mut Transform,
         &ProjectileSpeed,
-        &mut ProjectileDirection,
+        &ProjectileDirection,
     ), With<Projectile>>,
     time: Res<Time>,
 ) {
     for (
         mut transform,
         speed,
-        mut direction,
+        direction,
     )  in &mut projectiles {
         transform.translation.x -= direction.x * time.delta_seconds() * speed.0;
         transform.translation.y -= direction.y * time.delta_seconds() * speed.0;
@@ -211,7 +212,7 @@ fn projectile_move_around_player(
     mut projectiles: Query<(
         &mut Transform,
         &ProjectileSpeed,
-        &mut ProjectileRotateAroundPlayer,
+        &ProjectileRotateAroundPlayer,
     ), With<Projectile>>,
     player: Query<&mut Transform, (With<Player>, Without<Projectile>)>,
     time: Res<Time>,
@@ -219,7 +220,7 @@ fn projectile_move_around_player(
     for (
         mut transform,
         speed,
-        mut projectile_rotate_around_player,
+        projectile_rotate_around_player,
     )  in &mut projectiles {
         if let Ok(player_transform) = player.get_single() {
             transform.translation.x = (projectile_rotate_around_player.angle + time.elapsed().as_secs_f32() * speed.0).sin() * projectile_rotate_around_player.distance;

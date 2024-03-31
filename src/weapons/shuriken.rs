@@ -66,7 +66,7 @@ fn spawn_shuriken_attack(
             attack_ammo.amount -= 1;
             let incremental_angle = TAU/ attack_ammo.size as f32;
             let angle = incremental_angle * attack_ammo.amount as f32;
-            let direction = Vec2::from_angle(angle);
+            // let direction = Vec2::from_angle(angle);
 
             commands.spawn((
                 SpriteBundle {
@@ -88,11 +88,11 @@ fn spawn_shuriken_attack(
                 //     angle,
                 //     distance: 40.0,
                 // },
-                // ProjectileSpiralAroundPlayer{
-                //     angle,
-                //     distance: 0.0,
-                //     spiral_speed: 60.0,
-                // },
+                ProjectileSpiralAroundPlayer{
+                    angle,
+                    distance: 0.0,
+                    spiral_speed: 60.0,
+                },
                 ProjectileDamage(10.0),
                 ProjectileImpulse(200.0),
                 ProjectileLifetime {

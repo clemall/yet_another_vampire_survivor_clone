@@ -1,9 +1,9 @@
-use std::f32::consts::{TAU};
-use bevy_rapier2d::prelude::*;
+use std::f32::consts::PI;
 use crate::components::*;
 use bevy::{
     prelude::*,
 };
+use bevy::sprite::Anchor;
 
 pub struct ChainLightningPlugin;
 
@@ -35,8 +35,8 @@ fn setup_chain_lightning_spawner(mut commands: Commands){
     commands.spawn((
         ChainLightningSpawner,
         AttackAmmo{
-            size: 3,
-            amount: 3,
+            size: 100,
+            amount: 100,
             reload_time: 5.0,
         },
         Name::new("Chain Lightning Spawner"),
@@ -46,6 +46,7 @@ fn setup_chain_lightning_spawner(mut commands: Commands){
 
 fn spawn_chain_lightning_attack(
     mut commands: Commands,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<&mut AttackAmmo,(With<ChainLightningSpawner>, Without<AttackReloadDuration>)>,
@@ -62,7 +63,10 @@ fn spawn_chain_lightning_attack(
             return
         }
 
-        // let texture = asset_server.load("shuriken_temp.png");
+        let texture = asset_server.load("lightning_strike.png");
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(16.0, 32.0), 5, 1, Option::from(Vec2::new(0.0, 0.0)), None);
+        let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
 
         let mut seen_enemies:Vec<Entity> = Vec::new();
         // Start at player
@@ -89,6 +93,43 @@ fn spawn_chain_lightning_attack(
                 if let Ok((enemy, enemy_transform)) = enemies.get(closed_enemy) {
                     // add current enemy to the list
                     seen_enemies.push(enemy);
+
+                    // draw
+                    let lightning_direction = (enemy_transform.translation.xy() - position_lightning.xy()).normalize();
+                    let lightning_distance = enemy_transform.translation.xy().distance(position_lightning.xy());
+                    let scale_y= lightning_distance / 32.0;
+
+                    commands.spawn((
+                        SpriteBundle {
+                            texture:texture.clone(),
+                            transform: Transform{
+                                translation: Vec3::new(position_lightning.x, position_lightning.y, 1.0),
+                                rotation:Quat::from_rotation_z(lightning_direction.to_angle() - PI/2.0),
+                                scale:Vec3::new(1.0, scale_y, 1.0),
+                                ..default()
+                            },
+                            sprite: Sprite{
+                                anchor:Anchor::BottomCenter,
+                                ..default()
+                            },
+                            ..default()
+                        },
+                        // ImageScaleMode::Tiled {
+                        //     tile_y: true,
+                        //     tile_x: false,
+                        //     stretch_value: 1.0,
+                        // },
+                        TextureAtlas {
+                            layout: texture_atlas_layout.clone(),
+                            index: 0,
+                        },
+                        AnimationIndices { first: 0, last: 4, is_repeating: true },
+                        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+                        Projectile,
+                        ProjectileLifetime {
+                            timer:Timer::from_seconds(0.5, TimerMode::Once),
+                        },
+                    ));
 
                     // move position to the one from the enemy
                     position_lightning = enemy_transform.translation.clone();

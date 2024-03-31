@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::Collider;
+use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::constants::MAP_LEVEL_EXPERIENCE;
 
@@ -12,10 +12,10 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Update, (
             player_movement,
             player_game_over,
-            // compute_experience_from_collect,
+            compute_experience,
+            gem_hit_player_pickup_radius,
             ).run_if(in_state(GameState::Gameplay))
         );
-        app.add_systems(Update,compute_experience.run_if(in_state(GameState::Gameplay)));
 
     }
 }
@@ -31,27 +31,39 @@ fn setup_player_plugin(mut commands: Commands,
     let texture = asset_server.load("player.png");
     let layout = TextureAtlasLayout::from_grid(Vec2::new(16.0, 16.0), 4, 1, Option::from(Vec2::new(1.0, 1.0)), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
-    let animation_indices = AnimationIndices { first: 0, last: 3, is_repeating: true };
 
-
-    commands.spawn(SpriteBundle {
+    let player = (
+        SpriteBundle {
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             texture,
             ..default()
-        })
-        .insert(TextureAtlas {
+        },
+        TextureAtlas {
             layout: texture_atlas_layout,
-            index: animation_indices.first,
-        })
-        .insert(animation_indices)
-        .insert(AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
-        .insert(Collider::ball(4.0),)
-        .insert(Health(100.0))
-        .insert(MaxHealth(100.0))
-        .insert(Player{
+            index: 0,
+        },
+        AnimationIndices { first: 0, last: 3, is_repeating: true },
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        Collider::ball(4.0),
+        Health(100.0),
+        MaxHealth(100.0),
+        Player{
             facing: Facing::Right,
-        })
-        .insert(Name::new("Health UI"));
+        },
+        Name::new("Player")
+    );
+
+    let player_pickup_collider = (
+        Collider::ball(50.0),
+        TransformBundle {..default()},
+        Sensor,
+        PlayerPickupRadius,
+        Name::new("Player pickup collider")
+    );
+
+    commands.spawn(player).with_children(|commands|{
+        commands.spawn(player_pickup_collider);
+    });
 
 
 
@@ -105,7 +117,7 @@ pub fn player_movement(
 
 fn player_game_over(
     health: Query<&Health, With<Player>>,
-    mut game_state: ResMut<NextState<GameState>>,
+    mut _game_state: ResMut<NextState<GameState>>,
     // audio: Res<Audio>,
     // assets: Res<AssetServer>,
 ) {
@@ -120,7 +132,7 @@ fn player_game_over(
         //         speed: 1.0,
         //     },
         // );
-        game_state.set(GameState::GameOver);
+        // game_state.set(GameState::GameOver);
     }
 }
 
@@ -145,8 +157,36 @@ fn compute_experience(
 
         // GG player leveled up
         next_state.set(GameState::PlayerLevelUp);
-        println!("Should be in player level up STATE");
     }
 
 }
 
+
+
+fn gem_hit_player_pickup_radius(
+    mut commands: Commands,
+    mut gems: Query<Entity, (Without<ColliderDisabled>, Without<GemIsAttracted>)>,
+    player: Query<&Children, With<Player>>,
+    player_pickup: Query<( &GlobalTransform, &Collider), With<PlayerPickupRadius>>,
+    rapier_context: Res<RapierContext>,
+) {
+    if let Ok(player_children) = player.get_single() {
+         for &child in player_children.iter() {
+             if let Ok((pickup_transform,pickup_collider)) = player_pickup.get(child) {
+                 rapier_context.intersections_with_shape(
+                    pickup_transform.translation().truncate(),
+                    0.0,
+                    pickup_collider,
+                    QueryFilter::new(),
+                    |entity| {
+                        if let Ok(gem_entity) = gems.get_mut(entity) {
+                            commands.entity(gem_entity).try_insert(GemIsAttracted);
+                        }
+                        true
+                    },
+                );
+             }
+         }
+    }
+
+}

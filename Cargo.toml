@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 dotenvy = "0.15"
 rand = "0.8.5"
-bevy = "0.13"
+bevy = { version = "0.13.0", features = [ "dynamic_linking" ] }
 bevy_pixel_camera="0.13.0"
 bevy-inspector-egui="0.23.3"
 bevy_rapier2d = { version = "0.25.0", features = [ "simd-stable" ] }
@@ -19,3 +19,7 @@ opt-level = 2
 debug = false
 codegen-units = 16
 
+[profile.dev]
+opt-level = 0
+incremental = true
+codegen-units = 256

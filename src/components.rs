@@ -22,6 +22,8 @@ pub struct PlayerExperience {
     pub amount_experience: u32,
 }
 
+#[derive(Component)]
+pub struct PlayerPickupRadius;
 
 
 #[derive(Component, Deref, DerefMut)]
@@ -35,6 +37,8 @@ pub struct MaxHealth(pub f32);
 #[derive(Component)]
 pub struct Enemy;
 
+#[derive(Component, Deref, DerefMut)]
+pub struct EnemyVelocity(pub Vec2);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemySpeed(pub f32);
@@ -71,12 +75,13 @@ pub struct ClawSpawner;
 pub struct ArcaneMissileSpawner;
 #[derive(Component)]
 pub struct ShurikenSpawner;
-
 #[derive(Component)]
 pub struct ChainLightningSpawner;
-
 #[derive(Component)]
 pub struct FireAreaSpawner;
+
+#[derive(Component)]
+pub struct SlowDomeSpawner;
 #[derive(Component)]
 pub struct Claw;
 #[derive(Component)]
@@ -90,6 +95,23 @@ pub struct Shuriken;
 #[derive(Component)]
 pub struct ChainLightning;
 
+#[derive(Component)]
+pub struct SlowDome;
+
+
+#[derive(Component)]
+pub struct VelocityAura{
+    pub value: f32,
+    pub lifetime: Timer,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum AurasTypes {
+    Slow,
+    OnFire,
+    Poisoned,
+}
+
 #[derive(Debug, PartialEq)]
 pub enum WeaponsTypes {
     Claw,
@@ -97,6 +119,7 @@ pub enum WeaponsTypes {
     ArcaneMissile,
     Shuriken,
     ChainLightning,
+    SlowDome,
 }
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
@@ -112,6 +135,8 @@ pub struct Gem{
     pub experience:u32,
 }
 
+#[derive(Component)]
+pub struct GemIsAttracted;
 
 // EVENTS
 
@@ -127,17 +152,24 @@ pub struct EnemyReceivedDamage{
     pub enemy_entity:Entity,
 }
 
-
-
 #[derive(Event)]
 pub struct CollectExperience{
     pub experience:u32,
 }
 
+
 // UI
 #[derive(Component)]
-pub struct PlayerUI;
+pub struct PlayerHealthUIParent;
 
+#[derive(Component)]
+pub struct PlayerHealthUI;
+
+#[derive(Component)]
+pub struct PlayerExperienceBarUIParent;
+
+#[derive(Component)]
+pub struct PlayerExperienceUI;
 #[derive(Component)]
 pub struct LevelUpUI;
 
@@ -151,8 +183,7 @@ pub struct WorldTextUI {
     pub position: Vec2,
 }
 
-#[derive(Component)]
-pub struct HealthUI;
+
 
 
 
@@ -219,6 +250,11 @@ pub struct ProjectileImpulse(pub f32);
 #[derive(Component)]
 pub struct ProjectileLifetime {
     pub timer: Timer,
+}
+
+#[derive(Component)]
+pub struct ProjectileAuraOnHit {
+    pub effects: Vec<AurasTypes>,
 }
 
 // Use for projectile that target enemies and takes X seconds to meet the target

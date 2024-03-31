@@ -12,7 +12,8 @@ impl Plugin for GemsPlugin {
             Update,
             (
                 spawn_gem_on_enemy_death,
-                gem_retrieve_by_user
+                gem_retrieve_by_user,
+                move_gem_attracted_by_player,
             ).run_if(in_state(GameState::Gameplay))
         );
     }
@@ -80,3 +81,25 @@ fn gem_retrieve_by_user(
 
     }
 }
+
+
+
+fn move_gem_attracted_by_player(
+    player: Query<&Transform, (With<Player>, Without<Gem>)>,
+    mut gems: Query<&mut Transform, (Without<ColliderDisabled>,With<Gem>, With<GemIsAttracted>)>,
+    time: Res<Time>,
+) {
+    let player_transform = player.single();
+    for mut gem_transform in &mut gems {
+       
+
+        let direction = (gem_transform.translation.truncate()
+                - player_transform.translation.truncate())
+                .normalize();
+
+        gem_transform.translation.x -= direction.x * time.delta_seconds() * 200.0;
+        gem_transform.translation.y -= direction.y * time.delta_seconds() * 200.0;
+    }
+}
+
+
