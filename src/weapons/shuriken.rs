@@ -79,6 +79,7 @@ fn spawn_shuriken_attack(
                 },
                 Sensor,
                 Collider::ball(32.0/2.0),
+                ProjectileBundleCollider::default(),
                 ArcaneMissile,
             )).insert((
                 Projectile,

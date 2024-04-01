@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
+use crate::constants::*;
 use crate::math_utils::get_random_position_in_screen;
 
 pub struct BatPlugin;
@@ -38,18 +39,22 @@ fn spawn_bats(
                 angular_damping: 1.0,
             },
             Collider::ball(8.0),
+            CollisionGroups::new(ENEMY_GROUP,PLAYER_GROUP | ENEMY_GROUP | PROJECTILE_GROUP),
+            ActiveEvents::COLLISION_EVENTS,
+            CollidingEntities::default(),
+            ActiveCollisionTypes::default(),
+        )).insert((
             ColliderMassProperties::Density(2.0),
             Enemy,
             Health(50.0),
-            // MaxHealth(500.0),
             EnemySpeed(30.0),
             EnemyVelocity(Vec2::new(0.0, 0.0)),
             EnemyDamageOverTime(10.0),
             EnemyExperienceDrop(1),
-            VelocityAura{
-                value: 0.5,
-                lifetime: Timer::from_seconds(2.0, TimerMode::Once),
-            },
+            // VelocityAura{
+            //     value: 0.5,
+            //     lifetime: Timer::from_seconds(2.0, TimerMode::Once),
+            // },
         ));
     }
 

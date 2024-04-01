@@ -95,6 +95,7 @@ fn spawn_slow_dome_attack(
                         },
                         Sensor,
                         Collider::ball(32.0/2.0),
+                        ProjectileBundleCollider::default(),
                         ProjectileLifetime {
                             timer:Timer::from_seconds(8.0, TimerMode::Once),
                         },

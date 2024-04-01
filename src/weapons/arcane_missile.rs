@@ -112,7 +112,7 @@ fn spawn_arcane_missile_attack(
                     **projectile_orientation = !projectile_orientation.0;
 
                     attack_ammo.amount -= 1;
-
+                    
                     commands.spawn((
                         SpriteBundle {
                             texture,
@@ -146,6 +146,7 @@ fn spawn_arcane_missile_attack(
                         // ProjectileLifetime {
                         //     timer:Timer::from_seconds(0.31, TimerMode::Once),
                         // },
+                        ProjectileBundleCollider::default(),
                         Name::new("Arcane missile Attack"),
                     ));
                 }

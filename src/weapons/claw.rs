@@ -86,6 +86,8 @@ fn spawn_claw_attack(
             **projectile_orientation = !projectile_orientation.0;
 
             attack_ammo.amount -= 1;
+            
+      
 
             commands.spawn((
                 SpriteBundle {
@@ -108,8 +110,10 @@ fn spawn_claw_attack(
                 },
                 AnimationIndices { first: 0, last: 1, is_repeating: false },
                 AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-                Sensor,
+                Sensor)
+            ).insert((
                 Collider::cuboid(48.0/2.0, 48.0/2.0),
+                ProjectileBundleCollider::default(),
                 ProjectileLifetime {
                     timer:Timer::from_seconds(0.3, TimerMode::Once),
                 },

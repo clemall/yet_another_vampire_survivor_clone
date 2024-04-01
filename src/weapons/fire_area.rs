@@ -51,6 +51,8 @@ pub fn setup_fire_area(
         AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         Sensor,
         Collider::ball(48.0/2.0),
+        ProjectileBundleCollider::default(),
+    )).insert((
         FireAreaSpawner,
         FireArea,
         Projectile,
@@ -60,8 +62,7 @@ pub fn setup_fire_area(
         ProjectileTimeBetweenDamage {
             timer:Timer::from_seconds(0.33, TimerMode::Repeating),
         },
-        Name::new("Fire area Attack"),
-    ));
+        Name::new("Fire area Attack")));
 }
 
 //

@@ -37,7 +37,9 @@ fn main() {
         // Events
         .add_event::<EnemyDied>()
         .add_event::<CollectExperience>()
+        .add_event::<EnemyHitByProjectile>()
         .add_event::<EnemyReceivedDamage>()
+        .add_event::<PlayerReceivedDamage>()
 
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
@@ -87,6 +89,7 @@ fn main() {
         // test
         .add_systems(Startup, background)
         .add_systems(Update, debug)
+        // .add_systems(Update, display_events)
         .run();
 }
 
@@ -155,3 +158,16 @@ fn debug(
     
 }
 
+
+pub fn display_events(
+    mut collision_events: EventReader<CollisionEvent>,
+    mut contact_force_events: EventReader<ContactForceEvent>,
+) {
+    for collision_event in collision_events.read() {
+        println!("Received collision event: {collision_event:?}");
+    }
+
+    for contact_force_event in contact_force_events.read() {
+        println!("Received contact force event: {contact_force_event:?}");
+    }
+}

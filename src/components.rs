@@ -1,5 +1,7 @@
 use bevy::math::Vec2;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
+use crate::constants::*;
 
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -10,6 +12,11 @@ pub enum GameState {
     GameOver,
     PlayerLevelUp,
 }
+
+
+
+
+// PLAYER
 
 #[derive(Component)]
 pub struct Player{
@@ -25,6 +32,11 @@ pub struct PlayerExperience {
 #[derive(Component)]
 pub struct PlayerPickupRadius;
 
+
+
+
+
+// HEALTH
 
 #[derive(Component, Deref, DerefMut)]
 pub struct Health(pub f32);
@@ -68,6 +80,10 @@ pub enum Facing {
     Right,
 }
 
+
+
+
+// WEAPONS
 
 #[derive(Component)]
 pub struct ClawSpawner;
@@ -130,6 +146,9 @@ pub struct PlayerWeapons {
 
 
 
+
+
+// GEM
 #[derive(Component)]
 pub struct Gem{
     pub experience:u32,
@@ -137,6 +156,15 @@ pub struct Gem{
 
 #[derive(Component)]
 pub struct GemIsAttracted;
+
+
+
+
+
+
+
+
+
 
 // EVENTS
 
@@ -153,9 +181,30 @@ pub struct EnemyReceivedDamage{
 }
 
 #[derive(Event)]
+pub struct PlayerReceivedDamage{
+    pub damage:f32,
+}
+
+#[derive(Event)]
+pub struct EnemyHitByProjectile{
+    pub enemy_entity:Entity,
+    pub impulse: Option<f32>,
+    pub effects: Option<Vec<AurasTypes>>,
+    
+}
+
+#[derive(Event)]
 pub struct CollectExperience{
     pub experience:u32,
 }
+
+
+
+
+
+
+
+
 
 
 // UI
@@ -188,6 +237,25 @@ pub struct WorldTextUI {
 
 
 // Attack and projectile
+
+// bundle
+#[derive(Bundle)]
+pub struct ProjectileBundleCollider{
+    collision_group: CollisionGroups,
+    active_events: ActiveEvents,
+    colliding_entities: CollidingEntities,
+}
+
+impl Default for ProjectileBundleCollider {
+    fn default() -> Self {
+        Self {
+            collision_group: CollisionGroups::new(PROJECTILE_GROUP, ENEMY_GROUP),
+            active_events: ActiveEvents::COLLISION_EVENTS,
+            colliding_entities: CollidingEntities::default(),
+        }
+    }
+}
+
 #[derive(Component)]
 pub struct Projectile;
 
@@ -252,10 +320,14 @@ pub struct ProjectileLifetime {
     pub timer: Timer,
 }
 
+
+
 #[derive(Component)]
 pub struct ProjectileAuraOnHit {
     pub effects: Vec<AurasTypes>,
 }
+
+
 
 // Use for projectile that target enemies and takes X seconds to meet the target
 // arcane missile use it

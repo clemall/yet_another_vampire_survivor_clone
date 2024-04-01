@@ -3,6 +3,7 @@ use crate::components::*;
 use bevy::{
     prelude::*,
 };
+use crate::constants::*;
 
 pub struct GemsPlugin;
 
@@ -36,6 +37,10 @@ fn spawn_gem_on_enemy_death(
             Sensor,
             LockedAxes::ROTATION_LOCKED_Z,
             Collider::ball(7.0),
+            CollisionGroups::new(GEM_GROUP, PLAYER_GROUP),
+            ActiveEvents::COLLISION_EVENTS,
+            ActiveCollisionTypes::STATIC_STATIC,
+            CollidingEntities::default(),
             Gem{
                 experience:event.experience,
             },
@@ -45,40 +50,25 @@ fn spawn_gem_on_enemy_death(
 }
 
 
-
+// TODO move to player, remove Changed<CollidingEntities>
 fn gem_retrieve_by_user(
     mut commands: Commands,
-    mut gems: Query<(
-        Entity,
-        &Collider,
-        &GlobalTransform,
-        &mut Gem,
-    ), Without<ColliderDisabled>>,
-    mut player: Query<Entity, With<Player>>,
-    rapier_context: Res<RapierContext>,
+    mut gems: Query<(Entity, &Gem, &CollidingEntities), (Changed<CollidingEntities>,Without<ColliderDisabled>, With<GemIsAttracted>)>,
+    player: Query<Entity, With<Player>>,
     mut collect_experience: EventWriter<CollectExperience>,
 ) {
-    for (gem_entity, collider, transform, gem) in &mut gems {
-        rapier_context.intersections_with_shape(
-            transform.translation().truncate(),
-            0.0,
-            collider,
-            QueryFilter::new(),
-            |entity| {
-                if let Ok(_entity) = player.get_mut(entity) {
-                    collect_experience.send(
-                        CollectExperience{
-                            experience: gem.experience
-                        }
-                    );
-
-                    // delete gem
-                    commands.entity(gem_entity).despawn_recursive();
+    let player= player.single();
+    for (gem_entity, gem, colliding_entities) in &mut gems {
+        if colliding_entities.contains(player) {
+            collect_experience.send(
+                CollectExperience{
+                    experience: gem.experience
                 }
-                true
-            },
-        );
+            );
 
+            // delete gem
+            commands.entity(gem_entity).despawn_recursive();
+        }
     }
 }
 

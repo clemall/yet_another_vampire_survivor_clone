@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
-use crate::constants::MAP_LEVEL_EXPERIENCE;
+use crate::constants::*;
 
 
 pub struct PlayerPlugin;
@@ -11,6 +11,7 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Startup, setup_player_plugin);
         app.add_systems(Update, (
             player_movement,
+            player_received_damage,
             player_game_over,
             compute_experience,
             gem_hit_player_pickup_radius,
@@ -44,7 +45,16 @@ fn setup_player_plugin(mut commands: Commands,
         },
         AnimationIndices { first: 0, last: 3, is_repeating: true },
         AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        // RigidBody::Dynamic,
+        // LockedAxes::ROTATION_LOCKED_Z,
+        // Damping {
+        //     linear_damping: 100.0,
+        //     angular_damping: 1.0,
+        // },
         Collider::ball(4.0),
+        CollisionGroups::new(PLAYER_GROUP,ENEMY_GROUP|GEM_GROUP),
+        ActiveEvents::COLLISION_EVENTS,
+        ActiveCollisionTypes::default() | ActiveCollisionTypes::STATIC_STATIC,
         Health(100.0),
         MaxHealth(100.0),
         Player{
@@ -54,9 +64,12 @@ fn setup_player_plugin(mut commands: Commands,
     );
 
     let player_pickup_collider = (
-        Collider::ball(50.0),
         TransformBundle {..default()},
         Sensor,
+        Collider::ball(50.0),
+        CollisionGroups::new(PLAYER_GROUP, GEM_GROUP),
+        ActiveEvents::COLLISION_EVENTS,
+        ActiveCollisionTypes::STATIC_STATIC,
         PlayerPickupRadius,
         Name::new("Player pickup collider")
     );
@@ -161,32 +174,59 @@ fn compute_experience(
 
 }
 
+fn player_received_damage(
+    mut received_damage: EventReader<PlayerReceivedDamage>,
+    mut player: Query<&mut Health, With<Player>>,
+) {
+    let mut player_health= player.single_mut();
+    for event in received_damage.read() {
+        player_health.0 -= event.damage;
+    }
 
+  
+
+}
+
+
+
+// fn gem_hit_player_pickup_radius(
+//     mut commands: Commands,
+//     mut gems: Query<Entity, (Without<ColliderDisabled>, Without<GemIsAttracted>)>,
+//     player: Query<&Children, With<Player>>,
+//     player_pickup: Query<( &GlobalTransform, &Collider), With<PlayerPickupRadius>>,
+//     rapier_context: Res<RapierContext>,
+// ) {
+//     if let Ok(player_children) = player.get_single() {
+//          for &child in player_children.iter() {
+//              if let Ok((pickup_transform,pickup_collider)) = player_pickup.get(child) {
+//                  rapier_context.intersections_with_shape(
+//                     pickup_transform.translation().truncate(),
+//                     0.0,
+//                     pickup_collider,
+//                     QueryFilter::new(),
+//                     |entity| {
+//                         if let Ok(gem_entity) = gems.get_mut(entity) {
+//                             commands.entity(gem_entity).try_insert(GemIsAttracted);
+//                         }
+//                         true
+//                     },
+//                 );
+//              }
+//          }
+//     }
+// 
+// }
 
 fn gem_hit_player_pickup_radius(
     mut commands: Commands,
-    mut gems: Query<Entity, (Without<ColliderDisabled>, Without<GemIsAttracted>)>,
-    player: Query<&Children, With<Player>>,
-    player_pickup: Query<( &GlobalTransform, &Collider), With<PlayerPickupRadius>>,
-    rapier_context: Res<RapierContext>,
+    mut gems: Query<(Entity,&CollidingEntities), (Changed<CollidingEntities>,Without<ColliderDisabled>, Without<GemIsAttracted>)>,
+    player_pickup: Query<Entity, With<PlayerPickupRadius>>,
 ) {
-    if let Ok(player_children) = player.get_single() {
-         for &child in player_children.iter() {
-             if let Ok((pickup_transform,pickup_collider)) = player_pickup.get(child) {
-                 rapier_context.intersections_with_shape(
-                    pickup_transform.translation().truncate(),
-                    0.0,
-                    pickup_collider,
-                    QueryFilter::new(),
-                    |entity| {
-                        if let Ok(gem_entity) = gems.get_mut(entity) {
-                            commands.entity(gem_entity).try_insert(GemIsAttracted);
-                        }
-                        true
-                    },
-                );
-             }
-         }
+    let player_pickup= player_pickup.single();
+    for (gem_entity, colliding_entities) in &mut gems {
+        if colliding_entities.contains(player_pickup) {
+            commands.entity(gem_entity).try_insert(GemIsAttracted);
+        }
     }
-
 }
+

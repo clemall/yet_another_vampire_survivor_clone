@@ -1,12 +1,8 @@
 use std::f32::consts::TAU;
 use bevy::app::{App, Plugin, Update};
 use bevy::hierarchy::DespawnRecursiveExt;
-use bevy::math::Vec2;
 use bevy::prelude::*;
-use bevy_rapier2d::dynamics::ExternalImpulse;
-use bevy_rapier2d::geometry::{Collider, ColliderDisabled};
-use bevy_rapier2d::pipeline::QueryFilter;
-use bevy_rapier2d::plugin::RapierContext;
+use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::enemies::enemy::{enemy_death_check};
 
@@ -34,84 +30,163 @@ impl Plugin for GenericWeaponPlugin {
     }
 }
 
+// 
+// 
+// fn projectile_apply_damage2(
+//     mut commands: Commands,
+//     mut attacks: Query<(
+//         Entity,
+//         &Collider,
+//         &GlobalTransform,
+//         &ProjectileDamage,
+//         Option<&mut ProjectileTimeBetweenDamage>,
+//         Option<&mut AlreadyHitEnemies>,
+//         Option<&ProjectileDeleteOnHit>,
+//         Option<&ProjectileImpulse>,
+//     ), (With<Projectile>, Without<ColliderDisabled>)>,
+//     mut enemies: Query<&Transform, With<Enemy>>,
+//     mut player: Query<&Transform, With<Player>>,
+//     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
+//     mut enemy_hit_event: EventWriter<EnemyHitByProjectile>,
+//     rapier_context: Res<RapierContext>,
+//     time: Res<Time>,
+// ) {
+//     for (
+//         projectile_entity,
+//         collider,
+//         transform,
+//         damage,
+//         attack_timer,
+//         mut hit_enemies,
+//         should_delete_projectile,
+//         projectile_impulse,
+//     ) in &mut attacks {
+// 
+//         if let Some(mut attack_timer) = attack_timer{
+//             attack_timer.timer.tick(time.delta());
+//             if !attack_timer.timer.just_finished() {
+//                 // early return, attack not ready
+//                 return ()
+//             }
+//         }
+//         rapier_context.intersections_with_shape(
+//             transform.translation().truncate(),
+//             0.0,
+//             collider,
+//             QueryFilter::new(),
+//             |enemy_entity| {
+//                 if let Ok(transform) = enemies.get_mut(enemy_entity) {
+//                     if let Some(hit_enemies) = hit_enemies.as_deref_mut(){
+//                         if hit_enemies.seen.contains(&enemy_entity.index()){
+//                             return true
+//                         }
+//                         hit_enemies.seen.push(enemy_entity.index());
+//                     }
+// 
+//                     enemy_hit_event.send(
+//                         EnemyHitByProjectile{
+//                             enemy_entity,
+//                         }
+// 
+//                     );
+//                     enemy_received_damage.send(
+//                         EnemyReceivedDamage{
+//                             damage: damage.0,
+//                             enemy_entity,
+//                         }
+// 
+//                     );
+//                     
+// 
+// 
+//                     // maybe use events?
+//                     if let Some(projectile_impulse) = projectile_impulse{
+//                         let player_transform = player.single_mut();
+//                         let direction:Vec2 = transform.translation.truncate() -player_transform.translation.truncate();
+//                         commands.entity(enemy_entity).try_insert(ExternalImpulse   {
+//                             impulse: direction.normalize() * projectile_impulse.0,
+//                             torque_impulse: 0.0,
+//                         },);
+//                     }
+// 
+//                     if let Some(_should_delete) = should_delete_projectile{
+//                         commands.entity(projectile_entity).despawn_recursive();
+//                     }
+//                 }
+//                 true
+//             },
+//         );
+// 
+//     }
+// }
 
 
 fn projectile_apply_damage(
     mut commands: Commands,
     mut attacks: Query<(
         Entity,
-        &Collider,
-        &GlobalTransform,
+        &CollidingEntities,
         &ProjectileDamage,
         Option<&mut ProjectileTimeBetweenDamage>,
         Option<&mut AlreadyHitEnemies>,
         Option<&ProjectileDeleteOnHit>,
         Option<&ProjectileImpulse>,
     ), (With<Projectile>, Without<ColliderDisabled>)>,
-    mut enemies: Query<&Transform, With<Enemy>>,
-    mut player: Query<&Transform, With<Player>>,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
-    rapier_context: Res<RapierContext>,
+    mut enemy_hit_event: EventWriter<EnemyHitByProjectile>,
     time: Res<Time>,
 ) {
     for (
         projectile_entity,
-        collider,
-        transform,
-        damage,
-        attack_timer,
+        colliding_entities,
+        projectile_damage,
+        projectile_delay_between_damage,
         mut hit_enemies,
         should_delete_projectile,
         projectile_impulse,
     ) in &mut attacks {
 
-        if let Some(mut attack_timer) = attack_timer{
+        if let Some(mut attack_timer) = projectile_delay_between_damage{
             attack_timer.timer.tick(time.delta());
             if !attack_timer.timer.just_finished() {
                 // early return, attack not ready
-                return ()
+                continue
             }
         }
-        rapier_context.intersections_with_shape(
-            transform.translation().truncate(),
-            0.0,
-            collider,
-            QueryFilter::new(),
-            |enemy_entity| {
-                if let Ok(transform) = enemies.get_mut(enemy_entity) {
-                    if let Some(hit_enemies) = hit_enemies.as_deref_mut(){
-                        if hit_enemies.seen.contains(&enemy_entity.index()){
-                            return true
-                        }
-                        hit_enemies.seen.push(enemy_entity.index());
-                    }
-
-                    enemy_received_damage.send(
-                        EnemyReceivedDamage{
-                            damage: damage.0,
-                            enemy_entity,
-                        }
-
-                    );
-
-
-                    // maybe use events?
-                    if let Some(projectile_impulse) = projectile_impulse{
-                        let player_transform = player.single_mut();
-                        let direction:Vec2 = transform.translation.truncate() -player_transform.translation.truncate();
-                        commands.entity(enemy_entity).try_insert(ExternalImpulse   {
-                            impulse: direction.normalize() * projectile_impulse.0,
-                            torque_impulse: 0.0,
-                        },);
-                    }
-
-                    if let Some(_should_delete) = should_delete_projectile{
-                        commands.entity(projectile_entity).despawn_recursive();
-                    }
+        
+        for enemy_entity in colliding_entities.iter() {
+            // Maybe check if the entity is an enemy
+            // if let Ok(transform) = enemies.get_mut(enemy_entity) {}
+            
+            if let Some(hit_enemies) = hit_enemies.as_deref_mut(){
+                if hit_enemies.seen.contains(&enemy_entity.index()){ 
+                    continue
                 }
-                true
-            },
-        );
+                hit_enemies.seen.push(enemy_entity.index());
+            }
+            
+            enemy_hit_event.send(
+                EnemyHitByProjectile{
+                    enemy_entity,
+                    impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
+                    effects: None,
+                }
+
+            );
+            enemy_received_damage.send(
+                EnemyReceivedDamage{
+                    damage: projectile_damage.0,
+                    enemy_entity,
+                }
+            );
+            
+            
+            if let Some(_should_delete) = should_delete_projectile{
+                commands.entity(projectile_entity).despawn_recursive();
+            }
+            
+        }
+       
 
     }
 }

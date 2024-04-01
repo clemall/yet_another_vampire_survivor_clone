@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use bevy_rapier2d::pipeline::QueryFilter;
-use bevy_rapier2d::plugin::RapierContext;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::enemies::bats::BatPlugin;
@@ -13,6 +11,9 @@ impl Plugin for EnemyPlugin {
         app.add_plugins(BatPlugin);
         // basic enemy logic
         app.add_systems(Update, (
+            enemy_death_check,
+            enemy_applied_impulse,
+            enemy_applied_received_damage,
             compute_enemy_velocity,
             apply_aura_on_enemy_velocity,
             apply_enemy_velocity,
@@ -21,8 +22,7 @@ impl Plugin for EnemyPlugin {
 
         app.add_systems(Update, (
             enemy_damage_player,
-            enemy_applied_received_damage,
-            enemy_death_check).run_if(in_state(GameState::Gameplay))
+           ).run_if(in_state(GameState::Gameplay))
         );
 
     }
@@ -76,27 +76,43 @@ fn apply_enemy_velocity(
 
 
 fn enemy_damage_player(
-    enemies: Query<(&Collider, &GlobalTransform, &EnemyDamageOverTime),(With<Enemy>,)>,
-    mut health: Query<&mut Health, With<Player>>,
-    rapier_context: Res<RapierContext>,
+    enemies: Query<(&CollidingEntities, &EnemyDamageOverTime),(With<Enemy>)>,
+    player: Query<Entity, With<Player>>,
     time: Res<Time>,
+    mut player_received_damage_event: EventWriter<PlayerReceivedDamage>,
 ) {
-    for (collider, transform, damage) in &enemies {
-        rapier_context.intersections_with_shape(
-            transform.translation().truncate(),
-            0.0,
-            collider,
-            QueryFilter::new(),
-            |entity| {
-                if let Ok(mut health) = health.get_mut(entity) {
-                    **health -= damage.0 * time.delta_seconds();
-                }
-                true
-            },
+    let player= player.single();
+    for (colliding_entities, damage) in enemies.iter() {
+        if colliding_entities.contains(player) {
+            player_received_damage_event.send(
+            PlayerReceivedDamage{
+                damage: damage.0 * time.delta_seconds()
+            }
         );
+        }
     }
+    
 }
 
+pub fn enemy_applied_impulse(
+    mut commands: Commands,
+    mut enemies: Query<(Entity, &Transform), With<Enemy>>,
+    mut player: Query<&Transform, With<Player>>,
+    mut eneny_hit_event: EventReader<EnemyHitByProjectile>,
+) {
+    let player_transform = player.single_mut();
+    for event in eneny_hit_event.read() {
+        if let Some(impulse) = event.impulse{
+            if let Ok((enemy_entity, enemy_transform)) = enemies.get_mut(event.enemy_entity){
+                 let direction:Vec2 = enemy_transform.translation.truncate() -player_transform.translation.truncate();
+                 commands.entity(enemy_entity).try_insert(ExternalImpulse   {
+                    impulse: direction.normalize() * impulse,
+                    torque_impulse: 0.0,
+                 },);
+            }
+        }
+    }
+}
 
 pub fn enemy_applied_received_damage(
     mut enemies: Query<&mut Health, With<Enemy>>,
