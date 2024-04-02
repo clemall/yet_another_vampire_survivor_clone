@@ -49,16 +49,24 @@ fn compute_enemy_velocity(
 
 fn apply_aura_on_enemy_velocity(
     mut commands: Commands,
-    mut enemies: Query<(Entity, &mut EnemyVelocity, &mut VelocityAura)>,
+    mut enemies: Query<(Entity, &mut EnemyVelocity, &mut VelocityAura, &mut Sprite)>,
     time: Res<Time>,
 ) {
-    for (entity, mut velocity, mut aura) in &mut enemies {
+    for (entity, mut velocity, mut aura, mut sprite) in &mut enemies {
         velocity.x *= aura.value;
         velocity.y *= aura.value;
         
         aura.lifetime.tick(time.delta());
+        
+        sprite.color = Color::Rgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 1.0,
+            alpha: 1.0,
+        };
 
         if aura.lifetime.just_finished() {
+            sprite.color = Color::WHITE;
             commands.entity(entity).remove::<VelocityAura>();
         }
     }
@@ -76,7 +84,7 @@ fn apply_enemy_velocity(
 
 
 fn enemy_damage_player(
-    enemies: Query<(&CollidingEntities, &EnemyDamageOverTime),(With<Enemy>)>,
+    enemies: Query<(&CollidingEntities, &EnemyDamageOverTime),With<Enemy>>,
     player: Query<Entity, With<Player>>,
     time: Res<Time>,
     mut player_received_damage_event: EventWriter<PlayerReceivedDamage>,

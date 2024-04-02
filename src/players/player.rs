@@ -14,7 +14,6 @@ impl Plugin for PlayerPlugin {
             player_received_damage,
             player_game_over,
             compute_experience,
-            gem_hit_player_pickup_radius,
             ).run_if(in_state(GameState::Gameplay))
         );
 
@@ -217,16 +216,4 @@ fn player_received_damage(
 // 
 // }
 
-fn gem_hit_player_pickup_radius(
-    mut commands: Commands,
-    mut gems: Query<(Entity,&CollidingEntities), (Changed<CollidingEntities>,Without<ColliderDisabled>, Without<GemIsAttracted>)>,
-    player_pickup: Query<Entity, With<PlayerPickupRadius>>,
-) {
-    let player_pickup= player_pickup.single();
-    for (gem_entity, colliding_entities) in &mut gems {
-        if colliding_entities.contains(player_pickup) {
-            commands.entity(gem_entity).try_insert(GemIsAttracted);
-        }
-    }
-}
 

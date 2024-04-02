@@ -15,6 +15,7 @@ impl Plugin for GemsPlugin {
                 spawn_gem_on_enemy_death,
                 gem_retrieve_by_user,
                 move_gem_attracted_by_player,
+                gem_hit_player_pickup_radius,
             ).run_if(in_state(GameState::Gameplay))
         );
     }
@@ -49,11 +50,23 @@ fn spawn_gem_on_enemy_death(
     }
 }
 
+fn gem_hit_player_pickup_radius(
+    mut commands: Commands,
+    mut gems: Query<(Entity,&CollidingEntities), (Changed<CollidingEntities>,Without<ColliderDisabled>, Without<GemIsAttracted>)>,
+    player_pickup: Query<Entity, With<PlayerPickupRadius>>,
+) {
+    let player_pickup= player_pickup.single();
+    for (gem_entity, colliding_entities) in &mut gems {
+        if colliding_entities.contains(player_pickup) {
+            commands.entity(gem_entity).try_insert(GemIsAttracted);
+        }
+    }
+}
 
-// TODO move to player, remove Changed<CollidingEntities>
+
 fn gem_retrieve_by_user(
     mut commands: Commands,
-    mut gems: Query<(Entity, &Gem, &CollidingEntities), (Changed<CollidingEntities>,Without<ColliderDisabled>, With<GemIsAttracted>)>,
+    mut gems: Query<(Entity, &Gem, &CollidingEntities), (Without<ColliderDisabled>, With<GemIsAttracted>)>,
     player: Query<Entity, With<Player>>,
     mut collect_experience: EventWriter<CollectExperience>,
 ) {

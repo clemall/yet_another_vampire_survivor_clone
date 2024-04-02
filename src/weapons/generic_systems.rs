@@ -131,6 +131,7 @@ fn projectile_apply_damage(
         Option<&mut AlreadyHitEnemies>,
         Option<&ProjectileDeleteOnHit>,
         Option<&ProjectileImpulse>,
+        Option<&TriggersOnHit>,
     ), (With<Projectile>, Without<ColliderDisabled>)>,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
     mut enemy_hit_event: EventWriter<EnemyHitByProjectile>,
@@ -144,6 +145,7 @@ fn projectile_apply_damage(
         mut hit_enemies,
         should_delete_projectile,
         projectile_impulse,
+        triggers_on_hit,
     ) in &mut attacks {
 
         if let Some(mut attack_timer) = projectile_delay_between_damage{
@@ -169,9 +171,7 @@ fn projectile_apply_damage(
                 EnemyHitByProjectile{
                     enemy_entity,
                     impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
-                    effects: None,
                 }
-
             );
             enemy_received_damage.send(
                 EnemyReceivedDamage{
@@ -179,6 +179,18 @@ fn projectile_apply_damage(
                     enemy_entity,
                 }
             );
+            
+            
+            if let Some(trigger) = triggers_on_hit{
+                for aura_system in trigger.auras_systems.iter() {
+                    commands.run_system_with_input(*aura_system, PayloadOnHit{
+                        target: enemy_entity,
+                        target_position: None,
+                    });
+                }
+            }
+            
+            
             
             
             if let Some(_should_delete) = should_delete_projectile{

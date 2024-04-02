@@ -1,3 +1,4 @@
+use bevy::ecs::system::SystemId;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -115,18 +116,24 @@ pub struct ChainLightning;
 pub struct SlowDome;
 
 
+
+pub struct PayloadOnHit{
+    pub target: Entity,
+    pub target_position: Option<Vec3>,
+}
+
+
+#[derive(Resource, Debug)]
+pub struct SlowDomeOnHitSystems {
+    // entity ID
+    pub slow_enemy:SystemId<PayloadOnHit>,
+}
 #[derive(Component)]
 pub struct VelocityAura{
     pub value: f32,
     pub lifetime: Timer,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum AurasTypes {
-    Slow,
-    OnFire,
-    Poisoned,
-}
 
 #[derive(Debug, PartialEq)]
 pub enum WeaponsTypes {
@@ -189,7 +196,6 @@ pub struct PlayerReceivedDamage{
 pub struct EnemyHitByProjectile{
     pub enemy_entity:Entity,
     pub impulse: Option<f32>,
-    pub effects: Option<Vec<AurasTypes>>,
     
 }
 
@@ -239,6 +245,8 @@ pub struct WorldTextUI {
 // Attack and projectile
 
 // bundle
+/// Minimum component for a projectile to be colliding with enemies
+/// Set the group, activate events and more
 #[derive(Bundle)]
 pub struct ProjectileBundleCollider{
     collision_group: CollisionGroups,
@@ -323,8 +331,8 @@ pub struct ProjectileLifetime {
 
 
 #[derive(Component)]
-pub struct ProjectileAuraOnHit {
-    pub effects: Vec<AurasTypes>,
+pub struct TriggersOnHit{
+    pub auras_systems: Vec<SystemId<PayloadOnHit>>
 }
 
 

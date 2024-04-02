@@ -3,11 +3,15 @@ use crate::components::*;
 use bevy::{
     prelude::*,
 };
+use crate::math_utils::find_closest;
 
 pub struct SlowDomePlugin;
 
 impl Plugin for SlowDomePlugin {
     fn build(&self, app: &mut App) {
+        app.add_systems(
+            Startup, setup_on_hit,
+        );
         app.add_systems(
             Update,
             setup_slow_dome_spawner.run_if(
@@ -29,6 +33,14 @@ fn run_if_slow_dome_present(
     player_weapons.weapons.contains(&WeaponsTypes::SlowDome) && weapon.is_empty()
 }
 
+
+fn setup_on_hit(world: &mut World){
+    let id = world.register_system(apply_slow_on_hit);
+    world.insert_resource(SlowDomeOnHitSystems { 
+        slow_enemy: id 
+    })
+    
+}
 fn setup_slow_dome_spawner(mut commands: Commands){
 
     commands.spawn((
@@ -54,8 +66,9 @@ fn spawn_slow_dome_attack(
         &mut DelayBetweenAttacks,
         &mut AttackAmmo,
     ), (With<SlowDomeSpawner>, Without<AttackReloadDuration>)>,
-    enemies: Query<(Entity, &Transform),With<Enemy>>,
+    mut enemies: Query<(Entity, &Transform),With<Enemy>>,
     time: Res<Time>,
+    systems: Res<SlowDomeOnHitSystems>,
 ){
     let player_transform = player.single_mut();
     
@@ -70,15 +83,11 @@ fn spawn_slow_dome_attack(
             }
             attack_ammo.amount -= 1;
             
-            let mut closed_enemy:Option<Entity>= None;
-            let mut closed_enemy_distance:f32 = 999999.0;
-            for (entity, enemy_transform) in &enemies {
-                let distance = player_transform.translation.distance(enemy_transform.translation);
-                if distance < closed_enemy_distance {
-                    closed_enemy_distance = distance;
-                    closed_enemy = Some(entity);
-                }
-            }
+            let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
+            let closed_enemy:Option<Entity> = find_closest(
+                player_transform.translation,
+                enemies_lens.query()
+            );
             
             if let Some(closed_enemy) = closed_enemy{
                 if let Ok((_enemy, enemy_transform)) = enemies.get(closed_enemy) {
@@ -99,12 +108,15 @@ fn spawn_slow_dome_attack(
                         ProjectileLifetime {
                             timer:Timer::from_seconds(8.0, TimerMode::Once),
                         },
-                        ProjectileDamage(10.0),
+                        ProjectileDamage(1.0),
                         ProjectileTimeBetweenDamage {
                             timer:Timer::from_seconds(0.33, TimerMode::Repeating),
                         },
                         SlowDome,
                         Projectile,
+                        TriggersOnHit{ 
+                            auras_systems: vec![systems.slow_enemy] 
+                        },
                         Name::new("Slow dome Attack"),
                     ));
                 }
@@ -112,4 +124,15 @@ fn spawn_slow_dome_attack(
             
         }
     }
+}
+
+
+fn apply_slow_on_hit(
+    In(payload): In<PayloadOnHit>,
+    mut commands: Commands, 
+){
+    commands.entity(payload.target).insert(VelocityAura {
+        value: 0.5,
+        lifetime: Timer::from_seconds(2.0, TimerMode::Once),
+    },);
 }

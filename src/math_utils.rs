@@ -74,6 +74,20 @@ pub fn get_random_position_in_screen() -> Vec2{
      let mut rng = rand::thread_rng();
     let x: f32 = rng.gen_range(-SCREEN_WIDTH/2..SCREEN_WIDTH/2) as f32;
     let y: f32 = rng.gen_range(-SCREEN_HEIGHT/2..SCREEN_HEIGHT/2) as f32;
-    
+
     Vec2::new(x,y)
+}
+
+pub fn find_closest(origin:Vec3, entities:Query<(Entity, &Transform)>) -> Option<Entity>{
+    let mut closed_enemy:Option<Entity>= None;
+    let mut closed_enemy_distance:f32 = 999999.0;
+    for (entity, enemy_transform) in entities.iter() {
+        let distance = origin.distance(enemy_transform.translation);
+        if distance < closed_enemy_distance {
+            closed_enemy_distance = distance;
+            closed_enemy = Some(entity);
+        }
+    }
+    
+    closed_enemy
 }
