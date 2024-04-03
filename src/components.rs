@@ -328,6 +328,8 @@ pub struct ProjectileLifetime {
     pub timer: Timer,
 }
 
+#[derive(Component)]
+pub struct ProjectileDeleteMe;
 
 
 #[derive(Component)]

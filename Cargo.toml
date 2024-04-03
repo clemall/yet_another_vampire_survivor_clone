@@ -14,12 +14,11 @@ bevy-inspector-egui="0.23.3"
 bevy_rapier2d = { version = "0.25.0", features = [ "simd-stable" ] }
 
 
-[profile.dev.package.bevy_rapier2d]
-opt-level = 2
+[profile.dev.package."*"]
+opt-level = 3
 debug = false
 codegen-units = 16
 
 [profile.dev]
 opt-level = 0
 incremental = true
-codegen-units = 256

@@ -17,7 +17,7 @@ impl Plugin for GenericWeaponPlugin {
                 start_reload_attack_spawner,
                 reloading_attack_spawner,
                 projectile_lifetime_tick,
-                projectile_despawn,
+                projectile_despawn_after_lifetime,
                 projectile_follow_player,
                 projectile_move_toward_direction,
                 projectile_move_around_player,
@@ -26,7 +26,18 @@ impl Plugin for GenericWeaponPlugin {
                 projectile_rotate_on_self,
             ).run_if(in_state(GameState::Gameplay)),
         );
+        app.add_systems(PostUpdate, projectile_delete);
 
+    }
+}
+
+
+fn projectile_delete(
+    mut commands: Commands,
+        projectiles: Query<Entity, (With<Projectile>, With<ProjectileDeleteMe>)>){
+
+    for projectile_entity in &projectiles {
+        commands.entity(projectile_entity).despawn_recursive();
     }
 }
 
@@ -194,7 +205,9 @@ fn projectile_apply_damage(
             
             
             if let Some(_should_delete) = should_delete_projectile{
-                commands.entity(projectile_entity).despawn_recursive();
+                commands.entity(projectile_entity).insert(ProjectileDeleteMe);
+
+                // commands.entity(projectile_entity).despawn_recursive();
             }
             
         }
@@ -253,7 +266,7 @@ fn projectile_lifetime_tick(
      }
 }
 
-fn projectile_despawn(
+fn projectile_despawn_after_lifetime(
     mut commands: Commands,
     mut projectiles: Query<(Entity, &mut ProjectileLifetime), With<Projectile>>,
 ) {
