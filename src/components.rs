@@ -185,6 +185,8 @@ pub struct EnemyDied{
 pub struct EnemyReceivedDamage{
     pub damage:f32,
     pub enemy_entity:Entity,
+    pub impulse: Option<f32>,
+    // pub position: Vec3,
 }
 
 #[derive(Event)]
@@ -192,12 +194,6 @@ pub struct PlayerReceivedDamage{
     pub damage:f32,
 }
 
-#[derive(Event)]
-pub struct EnemyHitByProjectile{
-    pub enemy_entity:Entity,
-    pub impulse: Option<f32>,
-    
-}
 
 #[derive(Event)]
 pub struct CollectExperience{

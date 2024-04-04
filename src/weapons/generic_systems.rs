@@ -145,7 +145,6 @@ fn projectile_apply_damage(
         Option<&TriggersOnHit>,
     ), (With<Projectile>, Without<ColliderDisabled>)>,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
-    mut enemy_hit_event: EventWriter<EnemyHitByProjectile>,
     time: Res<Time>,
 ) {
     for (
@@ -178,16 +177,12 @@ fn projectile_apply_damage(
                 hit_enemies.seen.push(enemy_entity.index());
             }
             
-            enemy_hit_event.send(
-                EnemyHitByProjectile{
-                    enemy_entity,
-                    impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
-                }
-            );
+
             enemy_received_damage.send(
                 EnemyReceivedDamage{
                     damage: projectile_damage.0,
                     enemy_entity,
+                    impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
                 }
             );
             
@@ -201,12 +196,9 @@ fn projectile_apply_damage(
                 }
             }
             
-            
-            
-            
+
             if let Some(_should_delete) = should_delete_projectile{
                 commands.entity(projectile_entity).insert(ProjectileDeleteMe);
-
                 // commands.entity(projectile_entity).despawn_recursive();
             }
             
@@ -272,7 +264,8 @@ fn projectile_despawn_after_lifetime(
 ) {
     for (entity, attack_duration)  in &mut projectiles {
         if attack_duration.timer.just_finished() {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).insert(ProjectileDeleteMe);
+            // commands.entity(entity).despawn_recursive();
         }
     }
 }

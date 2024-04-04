@@ -138,50 +138,12 @@ fn spawn_chain_lightning_attack(
                         EnemyReceivedDamage{
                             damage: 50.0,
                             enemy_entity: enemy,
+                            impulse: None,
                         }
 
                     );
                 }
             }
-
-
-            //
-            //
-            // commands.spawn((
-            //     SpriteBundle {
-            //         texture: texture.clone(),
-            //         transform: Transform{
-            //             translation: Vec3::new(player_transform.translation.x, player_transform.translation.y, 1.0),
-            //             ..default()
-            //         },
-            //         ..default()
-            //     },
-            //     Sensor,
-            //     Collider::ball(32.0/2.0),
-            //     ArcaneMissile,
-            // )).insert((
-            //     Projectile,
-            //     ProjectileSpeed(2.0),
-            //     // ProjectileDirection(direction),
-            //     // ProjectileRotateAroundPlayer{
-            //     //     angle,
-            //     //     distance: 40.0,
-            //     // },
-            //     // ProjectileSpiralAroundPlayer{
-            //     //     angle,
-            //     //     distance: 0.0,
-            //     //     spiral_speed: 60.0,
-            //     // },
-            //     ProjectileDamage(10.0),
-            //     ProjectileImpulse(200.0),
-            //     ProjectileLifetime {
-            //         timer:Timer::from_seconds(10.0, TimerMode::Once),
-            //     },
-            //     AlreadyHitEnemies{seen:Vec::new()},
-            //     ProjectileRotateOnSelf,
-            //     ProjectileOrigin(player_transform.translation),
-            //     Name::new("Shuriken Attack"),
-            // ));
         }
     }
 }

@@ -37,7 +37,6 @@ fn main() {
         // Events
         .add_event::<EnemyDied>()
         .add_event::<CollectExperience>()
-        .add_event::<EnemyHitByProjectile>()
         .add_event::<EnemyReceivedDamage>()
         .add_event::<PlayerReceivedDamage>()
 

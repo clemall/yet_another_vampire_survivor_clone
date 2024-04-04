@@ -106,7 +106,7 @@ pub fn enemy_applied_impulse(
     mut commands: Commands,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     mut player: Query<&Transform, With<Player>>,
-    mut eneny_hit_event: EventReader<EnemyHitByProjectile>,
+    mut eneny_hit_event: EventReader<EnemyReceivedDamage>,
 ) {
     let player_transform = player.single_mut();
     for event in eneny_hit_event.read() {
