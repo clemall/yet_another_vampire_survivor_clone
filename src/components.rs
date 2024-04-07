@@ -1,4 +1,3 @@
-use bevy::ecs::system::SystemId;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -96,38 +95,37 @@ pub struct ShurikenSpawner;
 pub struct ChainLightningSpawner;
 #[derive(Component)]
 pub struct FireAreaSpawner;
-
 #[derive(Component)]
 pub struct SlowDomeSpawner;
+#[derive(Component)]
+pub struct BouncingBallSpawner;
 #[derive(Component)]
 pub struct Claw;
 #[derive(Component)]
 pub struct ArcaneMissile;
 #[derive(Component)]
 pub struct FireArea;
-
 #[derive(Component)]
 pub struct Shuriken;
-
 #[derive(Component)]
 pub struct ChainLightning;
-
 #[derive(Component)]
 pub struct SlowDome;
+#[derive(Component)]
+pub struct BouncingBall;
 
 
+// pub struct PayloadOnHit{
+//     pub target: Entity,
+//     pub target_position: Option<Vec3>,
+// }
 
-pub struct PayloadOnHit{
-    pub target: Entity,
-    pub target_position: Option<Vec3>,
-}
 
-
-#[derive(Resource, Debug)]
-pub struct SlowDomeOnHitSystems {
-    // entity ID
-    pub slow_enemy:SystemId<PayloadOnHit>,
-}
+// #[derive(Resource, Debug)]
+// pub struct SlowDomeOnHitSystems {
+//     // entity ID
+//     pub slow_enemy:SystemId<PayloadOnHit>,
+// }
 #[derive(Component)]
 pub struct VelocityAura{
     pub value: f32,
@@ -135,7 +133,7 @@ pub struct VelocityAura{
 }
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum WeaponsTypes {
     Claw,
     FireArea,
@@ -143,6 +141,8 @@ pub enum WeaponsTypes {
     Shuriken,
     ChainLightning,
     SlowDome,
+    BouncingBall,
+    BouncingBallSplit,
 }
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
@@ -185,8 +185,10 @@ pub struct EnemyDied{
 pub struct EnemyReceivedDamage{
     pub damage:f32,
     pub enemy_entity:Entity,
+    pub projectile_position:Vec3,
     pub impulse: Option<f32>,
     // pub position: Vec3,
+    pub weapon_projectile_type: WeaponsTypes,
 }
 
 #[derive(Event)]
@@ -264,6 +266,9 @@ impl Default for ProjectileBundleCollider {
 pub struct Projectile;
 
 #[derive(Component)]
+pub struct ProjectileType(pub WeaponsTypes);
+
+#[derive(Component)]
 pub struct ProjectileDamage(pub f32);
 
 #[derive(Component)]
@@ -328,10 +333,10 @@ pub struct ProjectileLifetime {
 pub struct ProjectileDeleteMe;
 
 
-#[derive(Component)]
-pub struct TriggersOnHit{
-    pub auras_systems: Vec<SystemId<PayloadOnHit>>
-}
+// #[derive(Component)]
+// pub struct TriggersOnHit{
+//     pub auras_systems: Vec<SystemId<PayloadOnHit>>
+// }
 
 
 

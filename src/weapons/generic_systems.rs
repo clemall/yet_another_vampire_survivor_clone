@@ -136,26 +136,30 @@ fn projectile_apply_damage(
     mut commands: Commands,
     mut attacks: Query<(
         Entity,
+        &Transform,
         &CollidingEntities,
         &ProjectileDamage,
+        &ProjectileType,
         Option<&mut ProjectileTimeBetweenDamage>,
         Option<&mut AlreadyHitEnemies>,
         Option<&ProjectileDeleteOnHit>,
         Option<&ProjectileImpulse>,
-        Option<&TriggersOnHit>,
+        // Option<&TriggersOnHit>,
     ), (With<Projectile>, Without<ColliderDisabled>)>,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
     time: Res<Time>,
 ) {
     for (
         projectile_entity,
+        projectile_transform,
         colliding_entities,
         projectile_damage,
+        projectile_type,
         projectile_delay_between_damage,
         mut hit_enemies,
         should_delete_projectile,
         projectile_impulse,
-        triggers_on_hit,
+        // triggers_on_hit,
     ) in &mut attacks {
 
         if let Some(mut attack_timer) = projectile_delay_between_damage{
@@ -180,21 +184,23 @@ fn projectile_apply_damage(
 
             enemy_received_damage.send(
                 EnemyReceivedDamage{
-                    damage: projectile_damage.0,
                     enemy_entity,
+                    damage: projectile_damage.0,
+                    projectile_position: projectile_transform.translation,
+                    weapon_projectile_type: projectile_type.0,
                     impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
                 }
             );
             
             
-            if let Some(trigger) = triggers_on_hit{
-                for aura_system in trigger.auras_systems.iter() {
-                    commands.run_system_with_input(*aura_system, PayloadOnHit{
-                        target: enemy_entity,
-                        target_position: None,
-                    });
-                }
-            }
+            // if let Some(trigger) = triggers_on_hit{
+            //     for aura_system in trigger.auras_systems.iter() {
+            //         commands.run_system_with_input(*aura_system, PayloadOnHit{
+            //             target: enemy_entity,
+            //             target_position: None,
+            //         });
+            //     }
+            // }
             
 
             if let Some(_should_delete) = should_delete_projectile{

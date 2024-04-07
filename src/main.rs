@@ -6,6 +6,7 @@ use bevy_pixel_camera::{
     PixelCameraPlugin
 };
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy::window::WindowMode;
 use bevy_rapier2d::prelude::*;
 use yet_another_vampire_survivor_clone::components::*;
 use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
@@ -19,6 +20,7 @@ use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::weapons::arcane_missile::ArcaneMissilePlugin;
+use yet_another_vampire_survivor_clone::weapons::bouncing_ball::BouncingBallPlugin;
 use yet_another_vampire_survivor_clone::weapons::chain_lightning::ChainLightningPlugin;
 use yet_another_vampire_survivor_clone::weapons::claw::{WeaponClawPlugin};
 use yet_another_vampire_survivor_clone::weapons::generic_systems::GenericWeaponPlugin;
@@ -82,10 +84,12 @@ fn main() {
         .add_plugins(ShurikenPlugin)
         .add_plugins(ChainLightningPlugin)
         .add_plugins(SlowDomePlugin)
+        .add_plugins(BouncingBallPlugin)
 
         // Setup
         // .add_systems(Startup, setup)
         // test
+        .insert_resource(Time::<Fixed>::from_hz(64.0))
         .add_systems(Startup, background)
         .add_systems(Update, debug)
         // .add_systems(Update, display_events)
@@ -122,6 +126,7 @@ fn background(
 
 
 fn debug(
+    mut windows: Query<&mut Window>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
     mut enemy_died: EventWriter<EnemyDied>,
@@ -144,7 +149,20 @@ fn debug(
     if keyboard_input.just_pressed(KeyCode::Digit6) {
         player_weapons.weapons.push(WeaponsTypes::SlowDome);
     }
-    
+    if keyboard_input.just_pressed(KeyCode::Digit7) {
+        player_weapons.weapons.push(WeaponsTypes::BouncingBall);
+    }
+
+    let mut window = windows.single_mut();
+
+    if keyboard_input.just_pressed(KeyCode::F1) {
+        window.mode = WindowMode::BorderlessFullscreen;
+    }
+    if keyboard_input.just_pressed(KeyCode::F2) {
+        window.mode = WindowMode::Windowed;
+    }
+
+
     if keyboard_input.pressed(KeyCode::KeyG) {
         enemy_died.send(
             EnemyDied{ 

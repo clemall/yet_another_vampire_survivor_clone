@@ -78,6 +78,37 @@ pub fn get_random_position_in_screen() -> Vec2{
     Vec2::new(x,y)
 }
 
+pub fn get_random_position_outside_screen() -> Vec2{
+    let mut rng = rand::thread_rng();
+    let mut position = Vec2::default();
+    let side = rng.gen_range(1 ..= 4);
+    match side {
+        1 => {
+            // top
+            position.x = rng.gen_range(-SCREEN_WIDTH/2 - 100 ..SCREEN_WIDTH/2 + 100) as f32;
+            position.y = rng.gen_range( -SCREEN_HEIGHT/2 - 200 ..-SCREEN_HEIGHT/2 -50 ) as f32;
+        }
+        2 => {
+            // bottom
+            position.x = rng.gen_range(-SCREEN_WIDTH/2 - 100 ..SCREEN_WIDTH/2 + 100) as f32;
+            position.y = rng.gen_range( SCREEN_HEIGHT/2 +  50 .. SCREEN_HEIGHT/2 + 200) as f32;
+        }
+        3 => {
+            // left
+            position.x = rng.gen_range(-SCREEN_WIDTH/2 - 200 ..-SCREEN_WIDTH/2 - 50) as f32;
+            position.y = rng.gen_range(-SCREEN_HEIGHT/2 - 100..SCREEN_HEIGHT/2 + 100) as f32;
+        }
+        4 => {
+            // right
+            position.x = rng.gen_range(SCREEN_WIDTH/2 + 50 ..SCREEN_WIDTH/2 + 200) as f32;
+            position.y = rng.gen_range(-SCREEN_HEIGHT/2 - 100..SCREEN_HEIGHT/2 + 100) as f32;
+        }
+        _ => {} // never used
+    }
+
+    position
+}
+
 pub fn find_closest(origin:Vec3, entities:Query<(Entity, &Transform)>) -> Option<Entity>{
     let mut closed_enemy:Option<Entity>= None;
     let mut closed_enemy_distance:f32 = 999999.0;

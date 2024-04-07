@@ -22,6 +22,7 @@ fn setup_camera(mut commands: Commands) {
             width: SCREEN_WIDTH,
             height: SCREEN_HEIGHT,
         },
+        // PixelZoom::Fixed(1),
         PixelViewport,
     ));
 }

@@ -4,6 +4,7 @@ use bevy::{
     prelude::*,
 };
 use bevy::sprite::Anchor;
+use crate::math_utils::find_closest;
 
 pub struct ChainLightningPlugin;
 
@@ -34,6 +35,7 @@ fn setup_chain_lightning_spawner(mut commands: Commands){
 
     commands.spawn((
         ChainLightningSpawner,
+        ChainLightning,
         AttackAmmo{
             size: 100,
             amount: 100,
@@ -50,7 +52,7 @@ fn spawn_chain_lightning_attack(
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<&mut AttackAmmo,(With<ChainLightningSpawner>, Without<AttackReloadDuration>)>,
-    enemies: Query<(Entity, &Transform),With<Enemy>>,
+    mut enemies: Query<(Entity, &Transform),With<Enemy>>,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
 ){
     let player_transform = player.single_mut();
@@ -76,18 +78,12 @@ fn spawn_chain_lightning_attack(
             attack_ammo.amount -= 1;
 
 
-            let mut closed_enemy:Option<Entity>= None;
-            let mut closed_enemy_distance:f32 = 999999.0;
-            for (entity, enemy_transform) in &enemies {
-                if seen_enemies.contains(&entity){
-                    continue;
-                }
-                let distance = position_lightning.distance(enemy_transform.translation);
-                if distance < closed_enemy_distance {
-                    closed_enemy_distance = distance;
-                    closed_enemy = Some(entity);
-                }
-            }
+            // get closed enemy
+            let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
+            let closed_enemy:Option<Entity> = find_closest(
+                player_transform.translation,
+                enemies_lens.query()
+            );
 
             if let Some(closed_enemy) = closed_enemy{
                 if let Ok((enemy, enemy_transform)) = enemies.get(closed_enemy) {
@@ -138,7 +134,9 @@ fn spawn_chain_lightning_attack(
                         EnemyReceivedDamage{
                             damage: 50.0,
                             enemy_entity: enemy,
+                            projectile_position: enemy_transform.translation,
                             impulse: None,
+                            weapon_projectile_type: WeaponsTypes::ChainLightning,
                         }
 
                     );

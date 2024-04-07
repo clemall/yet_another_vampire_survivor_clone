@@ -3,7 +3,7 @@ use crate::components::*;
 use bevy::{
     prelude::*,
 };
-use crate::math_utils::{find_circle_circle_intersections, simple_bezier};
+use crate::math_utils::{find_circle_circle_intersections, find_closest, simple_bezier};
 
 pub struct ArcaneMissilePlugin;
 
@@ -59,7 +59,7 @@ fn spawn_arcane_missile_attack(
         &mut AttackAmmo,
         &mut ProjectileBendLeftOrRight
     ),(With<ArcaneMissileSpawner>, Without<AttackReloadDuration>)>,
-    enemies: Query<(Entity, &Transform),With<Enemy>>,
+    mut enemies: Query<(Entity, &Transform),With<Enemy>>,
     time: Res<Time>,
 ){
     let player_transform = player.single_mut();
@@ -72,17 +72,16 @@ fn spawn_arcane_missile_attack(
         attack_timer.timer.tick(time.delta());
 
         if attack_timer.timer.just_finished() {
+            if attack_ammo.amount == 0 {
+                return
+            }
 
             // get closed enemy
-            let mut closed_enemy:Option<Entity>= None;
-            let mut closed_enemy_distance:f32 = 999999.0;
-            for (entity, enemy_transform) in &enemies {
-                let distance = player_transform.translation.distance(enemy_transform.translation);
-                if distance < closed_enemy_distance {
-                    closed_enemy_distance = distance;
-                    closed_enemy = Some(entity);
-                }
-            }
+            let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
+            let closed_enemy:Option<Entity> = find_closest(
+                player_transform.translation,
+                enemies_lens.query()
+            );
 
             if let Some(closed_enemy) = closed_enemy{
                 let texture = asset_server.load("arcane_missile.png");
@@ -134,6 +133,7 @@ fn spawn_arcane_missile_attack(
                         ArcaneMissile,
                     )).insert((
                         Projectile,
+                        ProjectileType(WeaponsTypes::ArcaneMissile),
                         ProjectileDeleteOnHit,
                         ProjectileDamage(1.0),
                         ProjectileTarget(entity),

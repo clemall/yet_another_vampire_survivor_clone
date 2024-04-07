@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::constants::*;
-use crate::math_utils::get_random_position_in_screen;
+use crate::math_utils::{get_random_position_in_screen, get_random_position_outside_screen};
 
 pub struct BatPlugin;
 
@@ -25,7 +25,7 @@ fn spawn_bats(
                 texture: asset_server.load("enemies.png"),
                 // transform: Transform::from_xyz(x as f32, y as f32, 0.0),
                 transform: Transform{
-                    translation: get_random_position_in_screen().extend(0.0),
+                    translation: get_random_position_outside_screen().extend(0.0),
                     rotation: Default::default(),
                     scale: Vec3::new(0.5,0.5, 0.0),
                 },

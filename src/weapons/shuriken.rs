@@ -83,6 +83,8 @@ fn spawn_shuriken_attack(
                 ArcaneMissile,
             )).insert((
                 Projectile,
+                ProjectileType(WeaponsTypes::Shuriken),
+                Shuriken,
                 ProjectileSpeed(2.0),
                 // ProjectileDirection(direction),
                 // ProjectileRotateAroundPlayer{
