@@ -4,24 +4,24 @@ use crate::components::*;
 use crate::enemies::enemies_bundle::EnemyBundle;
 use crate::math_utils::{get_random_position_outside_screen};
 
-pub struct BatPlugin;
+pub struct GolemPlugin;
 
-impl Plugin for BatPlugin {
+impl Plugin for GolemPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, spawn_bats);
+        app.add_systems(Update, spawn_golem);
     }
 }
 
 
 
-fn spawn_bats(
+fn spawn_golem(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ){
-    if keyboard_input.just_pressed(KeyCode::KeyO) || keyboard_input.pressed(KeyCode::KeyP) {
-        let texture = asset_server.load("Bat_Fly.png");
+    if keyboard_input.just_pressed(KeyCode::KeyN) || keyboard_input.pressed(KeyCode::KeyM) {
+        let texture = asset_server.load("Golem_Run.png");
         let layout = TextureAtlasLayout::from_grid(Vec2::new(64.0, 64.0), 4, 1, Option::from(Vec2::new(0.0, 0.0)), None);
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
@@ -31,7 +31,7 @@ fn spawn_bats(
                  transform: Transform{
                      translation: get_random_position_outside_screen().extend(0.0),
                      rotation: Default::default(),
-                     scale: Vec3::new(1.0,1.0, 0.0),
+                     scale: Vec3::new(1.4,1.4, 0.0),
                  },
                   ..default()
              },
@@ -40,12 +40,11 @@ fn spawn_bats(
                 index: 0,
              },
              animation_indices: AnimationIndices { first: 0, last: 3, is_repeating: true },
-             enemy_speed: EnemySpeed(35.0),
              ..default()
          }).with_children(|children| {
             children.spawn((
-                Collider::ball(16.0/2.0),
-                TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)),
+                Collider::capsule_y(4.0,20.0/2.0),
+                TransformBundle::from(Transform::from_xyz(0.0, -2.0, 0.0)),
             ));
          });
     }

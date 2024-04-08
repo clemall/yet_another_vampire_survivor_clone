@@ -2,13 +2,21 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::enemies::bats::BatPlugin;
+use crate::enemies::bee::BeePlugin;
+use crate::enemies::golem::GolemPlugin;
+use crate::enemies::rabbit::RabbitPlugin;
+use crate::enemies::skull::SkullPlugin;
 
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        // bats enemy
+        // enemies
         app.add_plugins(BatPlugin);
+        app.add_plugins(SkullPlugin);
+        app.add_plugins(GolemPlugin);
+        app.add_plugins(RabbitPlugin);
+        app.add_plugins(BeePlugin);
         // basic enemy logic
         app.add_systems(Update, (
             enemy_death_check,
@@ -39,7 +47,7 @@ fn compute_enemy_velocity(
         let direction = (transform.translation.truncate()
             - player_transform.translation.truncate())
             .normalize();
-        sprite.flip_x = direction.x < 0.0;
+        sprite.flip_x = direction.x > 0.0;
 
         velocity.x = direction.x * time.delta_seconds() * speed.0;
         velocity.y = direction.y * time.delta_seconds() * speed.0;
