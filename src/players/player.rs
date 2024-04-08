@@ -85,6 +85,7 @@ fn setup_player_plugin(mut commands: Commands,
 
 
 
+
 // public because of the camera, see camera.rs
 pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
