@@ -1,5 +1,6 @@
 use bevy::math::Vec2;
 use bevy::prelude::*;
+use bevy::time::Stopwatch;
 use bevy_rapier2d::prelude::*;
 use crate::constants::*;
 
@@ -377,4 +378,15 @@ pub struct AttackAmmo{
 #[derive(Component)]
 pub struct AttackReloadDuration {
     pub timer: Timer,
+}
+
+
+
+// Waves
+#[derive(Resource)]
+pub struct WaveManager;
+
+#[derive(Resource)]
+pub struct WaveManagerGlobalTime {
+    pub global_time: Stopwatch,
 }

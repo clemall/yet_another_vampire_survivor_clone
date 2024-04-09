@@ -22,7 +22,7 @@ fn spawn_golem(
 ){
     if keyboard_input.just_pressed(KeyCode::KeyN) || keyboard_input.pressed(KeyCode::KeyM) {
         let texture = asset_server.load("Golem_Run.png");
-        let layout = TextureAtlasLayout::from_grid(Vec2::new(64.0, 64.0), 4, 1, Option::from(Vec2::new(0.0, 0.0)), None);
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(32.0, 32.0), 4, 1, Option::from(Vec2::new(0.0, 0.0)), None);
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
          commands.spawn(EnemyBundle {
@@ -40,12 +40,14 @@ fn spawn_golem(
                 index: 0,
              },
              animation_indices: AnimationIndices { first: 0, last: 3, is_repeating: true },
+             enemy_speed: EnemySpeed(18.0),
+             collider: Collider::capsule_y(3.5,18.0/2.0),
              ..default()
-         }).with_children(|children| {
-            children.spawn((
-                Collider::capsule_y(4.0,20.0/2.0),
-                TransformBundle::from(Transform::from_xyz(0.0, -2.0, 0.0)),
-            ));
          });
+         // }).with_children(|children| {
+         //    children.spawn((
+         //        TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)),
+         //    ));
+         // });
     }
 }

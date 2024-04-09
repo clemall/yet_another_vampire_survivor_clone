@@ -22,7 +22,7 @@ fn spawn_bee(
 ){
     if keyboard_input.just_pressed(KeyCode::KeyH) || keyboard_input.pressed(KeyCode::KeyJ) {
         let texture = asset_server.load("Bee_Walk.png");
-        let layout = TextureAtlasLayout::from_grid(Vec2::new(64.0, 64.0), 4, 4, Option::from(Vec2::new(0.0, 0.0)), None);
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(32.0, 32.0), 4, 1, Option::from(Vec2::new(0.0, 0.0)), None);
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
          commands.spawn(EnemyBundle {
@@ -39,13 +39,16 @@ fn spawn_bee(
                 layout: texture_atlas_layout.clone(),
                 index: 0,
              },
-             animation_indices: AnimationIndices { first: 8, last: 11, is_repeating: true },
+             animation_indices: AnimationIndices { first: 0, last: 3, is_repeating: true },
+             enemy_speed: EnemySpeed(30.0),
+             collider: Collider::capsule_x(2.0,8.0/2.0),
              ..default()
-         }).with_children(|children| {
-            children.spawn((
-                Collider::capsule_x(2.0,8.0/2.0),
-                TransformBundle::from(Transform::from_xyz(0.0, 5.0, 0.0)),
-            ));
          });
+         // }).with_children(|children| {
+         //    children.spawn((
+         //        Collider::capsule_x(2.0,8.0/2.0),
+         //        TransformBundle::from(Transform::from_xyz(0.0, 5.0, 0.0)),
+         //    ));
+         // });
     }
 }

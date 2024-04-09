@@ -22,7 +22,7 @@ fn spawn_skulls(
 ){
     if keyboard_input.just_pressed(KeyCode::KeyK) || keyboard_input.pressed(KeyCode::KeyL) {
         let texture = asset_server.load("Bones_SingleSkull_Fly.png");
-        let layout = TextureAtlasLayout::from_grid(Vec2::new(64.0, 64.0), 4, 2, Option::from(Vec2::new(0.0, 0.0)), None);
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(32.0, 32.0), 8, 1, Option::from(Vec2::new(0.0, 0.0)), None);
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
          commands.spawn(EnemyBundle {
@@ -40,13 +40,15 @@ fn spawn_skulls(
                 index: 0,
              },
              animation_indices: AnimationIndices { first: 0, last: 7, is_repeating: true },
+             collider: Collider::capsule_x(3.0,8.0/2.0),
              ..default()
-         }).with_children(|children| {
-            children.spawn((
-                Collider::capsule_x(3.0,8.0/2.0),
-                TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)),
-            ));
          });
+         // }).with_children(|children| {
+         //    children.spawn((
+         //        Collider::capsule_x(3.0,8.0/2.0),
+         //        TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)),
+         //    ));
+         // });
 
     }
 }

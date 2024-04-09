@@ -22,7 +22,7 @@ fn spawn_rabbit(
 ){
     if keyboard_input.just_pressed(KeyCode::KeyU) || keyboard_input.pressed(KeyCode::KeyI) {
         let texture = asset_server.load("Rabbit_Brown_Move.png");
-        let layout = TextureAtlasLayout::from_grid(Vec2::new(128.0, 128.0), 6, 4, Option::from(Vec2::new(0.0, 0.0)), None);
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(32.0, 32.0), 6, 1, Option::from(Vec2::new(0.0, 0.0)), None);
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
          commands.spawn(EnemyBundle {
@@ -39,13 +39,16 @@ fn spawn_rabbit(
                 layout: texture_atlas_layout.clone(),
                 index: 0,
              },
-             animation_indices: AnimationIndices { first: 12, last: 17, is_repeating: true },
+             animation_indices: AnimationIndices { first: 0, last: 5, is_repeating: true },
+             enemy_speed: EnemySpeed(40.0),
+             collider: Collider::capsule_x(3.0,12.0/2.0),
              ..default()
-         }).with_children(|children| {
-             children.spawn((
-                 Collider::capsule_x(3.0,12.0/2.0),
-                 TransformBundle::from(Transform::from_xyz(0.0, -10.0, 0.0)),
-             ));
          });
+         // }).with_children(|children| {
+         //     children.spawn((
+         //         Collider::capsule_x(3.0,12.0/2.0),
+         //         TransformBundle::from(Transform::from_xyz(0.0, -10.0, 0.0)),
+         //     ));
+         // });
     }
 }

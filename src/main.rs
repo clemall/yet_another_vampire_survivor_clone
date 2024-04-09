@@ -6,6 +6,7 @@ use bevy_pixel_camera::{
     PixelCameraPlugin
 };
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy::time::Stopwatch;
 use bevy::window::WindowMode;
 use bevy_rapier2d::prelude::*;
 use yet_another_vampire_survivor_clone::components::*;
@@ -65,6 +66,9 @@ fn main() {
             amount_experience: 0,
         })
         .add_plugins(PlayerPlugin)
+        // Waves
+        .insert_resource(WaveManagerGlobalTime{ global_time:Stopwatch::new() })
+
         // Enemies plugin
         .add_plugins(EnemyPlugin)
         // UI
@@ -92,33 +96,28 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(64.0))
         .add_systems(Startup, background)
         .add_systems(Update, debug)
-        // .add_systems(Update, display_events)
         .run();
 }
-
-// fn setup(
-//     mut commands: Commands,
-//     mut player_weapons: ResMut<PlayerWeapons>,
-// ){
-//     // default weapon
-//     // setup_claw_spawner(&mut commands);
-//     // setup_fire_area(&mut commands);
-//     // TODO: change that to use a list of enum representing each weapons
-//     // player_weapons.weapons.push(WeaponsTypes::CLAW);
-//     // player_weapons.weapons.push(WeaponsTypes::FireArea);
-// }
 
 fn background(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
-    commands.spawn((
-        SpriteBundle {
-            texture: asset_server.load("background.png"),
-            transform: Transform::from_xyz(0.0, 0.0, -1.0),
-            ..default()
-        },
-    ));
+    let texture = asset_server.load("map_1/png/background_level_1.png");
+
+    for i in -3..3 {
+        for y in -3..3 {
+            commands.spawn((
+                SpriteBundle {
+                    texture: texture.clone(),
+                    transform: Transform::from_xyz(i as f32 * 1024.0, y as f32 * 1024.0, -1.0),
+                    ..default()
+                },
+                Name::new("Background")
+            ));
+        }
+    }
+
 
 }
 
@@ -174,70 +173,3 @@ fn debug(
     
     
 }
-
-
-pub fn display_events(
-    mut collision_events: EventReader<CollisionEvent>,
-    mut contact_force_events: EventReader<ContactForceEvent>,
-) {
-    for collision_event in collision_events.read() {
-        println!("Received collision event: {collision_event:?}");
-    }
-
-    for contact_force_event in contact_force_events.read() {
-        println!("Received contact force event: {contact_force_event:?}");
-    }
-}
-
-// 
-// 
-// 
-// use bevy::{
-//     ecs::system::{RunSystemOnce, SystemId},
-//     prelude::*,
-// };
-// 
-// fn main() {
-//     App::new()
-//         .add_systems(Startup, (count_entities, setup))
-//         .add_systems(PostUpdate, count_entities)
-//         .add_systems(Update, evaluate_callbacks)
-//         .run();
-// }
-// 
-// // Any ordinary system can be run via commands.run_system or world.run_system.
-// fn count_entities(all_entities: Query<()>) {
-//     dbg!(all_entities.iter().count());
-// }
-// 
-// #[derive(Component)]
-// struct Callback(SystemId);
-// 
-// #[derive(Component)]
-// struct Triggered;
-// 
-// fn setup(world: &mut World) {
-//     let button_pressed_id = world.register_system(button_pressed);
-//     world.spawn((Callback(button_pressed_id), Triggered));
-//     // This entity does not have a Triggered component, so its callback won't run.
-//     let slider_toggled_id = world.register_system(slider_toggled);
-//     world.spawn(Callback(slider_toggled_id));
-//     world.run_system_once(count_entities);
-// }
-// 
-// fn button_pressed() {
-//     println!("A button was pressed!");
-// }
-// 
-// fn slider_toggled() {
-//     println!("A slider was toggled!");
-// }
-// 
-// /// Runs the systems associated with each `Callback` component if the entity also has a Triggered component.
-// ///
-// /// This could be done in an exclusive system rather than using `Commands` if preferred.
-// fn evaluate_callbacks(query: Query<&Callback, With<Triggered>>, mut commands: Commands) {
-//     for callback in query.iter() {
-//         commands.run_system(callback.0);
-//     }
-// }
