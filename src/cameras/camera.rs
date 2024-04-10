@@ -1,11 +1,10 @@
+use crate::components::Player;
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::*;
 use bevy_pixel_camera::{PixelViewport, PixelZoom};
-use crate::components::{ Player};
 
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use crate::players::player::player_movement;
-
 
 pub struct PlayerCameraPlugin;
 

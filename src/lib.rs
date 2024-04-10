@@ -1,12 +1,11 @@
-pub mod components;
-pub mod players;
-pub mod constants;
-pub mod cameras;
-pub mod weapons;
-pub mod ui;
-pub mod enemies;
 pub mod animations;
+pub mod cameras;
+pub mod components;
+pub mod constants;
+pub mod enemies;
 pub mod gems;
 pub mod math_utils;
-
-
+pub mod players;
+pub mod ui;
+pub mod waves;
+pub mod weapons;

@@ -1,18 +1,20 @@
-use bevy::prelude::*;
 use crate::components::*;
+use bevy::prelude::*;
 
 pub struct UiEnemyPlugin;
 
 impl Plugin for UiEnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (
-            enemy_received_damage_ui,
-            update_world_text,
-            update_world_text
-        ));
+        app.add_systems(
+            Update,
+            (
+                enemy_received_damage_ui,
+                update_world_text,
+                update_world_text,
+            ),
+        );
     }
 }
-
 
 pub fn enemy_received_damage_ui(
     mut commands: Commands,
@@ -20,7 +22,7 @@ pub fn enemy_received_damage_ui(
     mut eneny_received_damaged_event: EventReader<EnemyReceivedDamage>,
 ) {
     for event in eneny_received_damaged_event.read() {
-        if let Ok(enemy_transform) = enemies.get_mut(event.enemy_entity){
+        if let Ok(enemy_transform) = enemies.get_mut(event.enemy_entity) {
             spawn_world_text(
                 &mut commands,
                 enemy_transform.translation.truncate(),
@@ -28,10 +30,9 @@ pub fn enemy_received_damage_ui(
             );
         }
     }
-
 }
 
-pub fn spawn_world_text(commands: &mut Commands,  position: Vec2, text: &str) {
+pub fn spawn_world_text(commands: &mut Commands, position: Vec2, text: &str) {
     let position = position + Vec2::new(-0.2, 1.4);
 
     let parent = (
@@ -94,7 +95,6 @@ fn update_world_text(
             // coords.y = camera.logical_viewport_size().unwrap().y - coords.y;
             style.left = Val::Px(coords.x);
             style.top = Val::Px(coords.y);
-
         }
     }
 }

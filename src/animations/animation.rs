@@ -1,6 +1,5 @@
-use bevy::prelude::*;
 use crate::components::{AnimationIndices, AnimationTimer, GameState};
-
+use bevy::prelude::*;
 
 pub struct AnimationSimplePlugin;
 
@@ -24,13 +23,11 @@ fn animate_sprite(
                 } else {
                     atlas.index + 1
                 };
-            }
-            else {
-                if  atlas.index < indices.last{
+            } else {
+                if atlas.index < indices.last {
                     atlas.index = atlas.index + 1;
                 }
             }
-
         }
     }
 }

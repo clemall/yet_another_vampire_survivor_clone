@@ -1,11 +1,11 @@
-use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 use crate::components::*;
 use crate::enemies::bats::BatPlugin;
 use crate::enemies::bee::BeePlugin;
 use crate::enemies::golem::GolemPlugin;
 use crate::enemies::rabbit::RabbitPlugin;
 use crate::enemies::skull::SkullPlugin;
+use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 pub struct EnemyPlugin;
 
@@ -18,42 +18,43 @@ impl Plugin for EnemyPlugin {
         app.add_plugins(RabbitPlugin);
         app.add_plugins(BeePlugin);
         // basic enemy logic
-        app.add_systems(Update, (
-            enemy_death_check,
-            enemy_applied_impulse,
-            enemy_applied_received_damage,
-            compute_enemy_velocity,
-            apply_aura_on_enemy_velocity,
-            apply_enemy_velocity,
-            ).chain().run_if(in_state(GameState::Gameplay))
+        app.add_systems(
+            Update,
+            (
+                enemy_death_check,
+                enemy_applied_impulse,
+                enemy_applied_received_damage,
+                compute_enemy_velocity,
+                apply_aura_on_enemy_velocity,
+                apply_enemy_velocity,
+            )
+                .chain()
+                .run_if(in_state(GameState::Gameplay)),
         );
 
-        app.add_systems(Update, (
-            enemy_damage_player,
-           ).run_if(in_state(GameState::Gameplay))
+        app.add_systems(
+            Update,
+            (enemy_damage_player,).run_if(in_state(GameState::Gameplay)),
         );
-
     }
 }
 
-
 fn compute_enemy_velocity(
     player: Query<&Transform, (With<Player>, Without<Enemy>)>,
-    mut enemies: Query<(&Transform, &mut Sprite, &mut EnemyVelocity, &EnemySpeed),(With<Enemy>,)>,
+    mut enemies: Query<(&Transform, &mut Sprite, &mut EnemyVelocity, &EnemySpeed), (With<Enemy>,)>,
     time: Res<Time>,
 ) {
     let player_transform = player.single();
     for (transform, mut sprite, mut velocity, speed) in &mut enemies {
         let direction = (transform.translation.truncate()
             - player_transform.translation.truncate())
-            .normalize();
+        .normalize();
         sprite.flip_x = direction.x > 0.0;
 
         velocity.x = direction.x * time.delta_seconds() * speed.0;
         velocity.y = direction.y * time.delta_seconds() * speed.0;
     }
 }
-
 
 fn apply_aura_on_enemy_velocity(
     mut commands: Commands,
@@ -63,9 +64,9 @@ fn apply_aura_on_enemy_velocity(
     for (entity, mut velocity, mut aura, mut sprite) in &mut enemies {
         velocity.x *= aura.value;
         velocity.y *= aura.value;
-        
+
         aura.lifetime.tick(time.delta());
-        
+
         sprite.color = Color::Rgba {
             red: 0.0,
             green: 0.0,
@@ -80,34 +81,26 @@ fn apply_aura_on_enemy_velocity(
     }
 }
 
-
-fn apply_enemy_velocity(
-    mut enemies: Query<(&mut Transform, &EnemyVelocity)>,
-) {
+fn apply_enemy_velocity(mut enemies: Query<(&mut Transform, &EnemyVelocity)>) {
     for (mut transform, velocity) in &mut enemies {
         transform.translation -= velocity.extend(0.0);
     }
 }
 
-
-
 fn enemy_damage_player(
-    enemies: Query<(&CollidingEntities, &EnemyDamageOverTime),With<Enemy>>,
+    enemies: Query<(&CollidingEntities, &EnemyDamageOverTime), With<Enemy>>,
     player: Query<Entity, With<Player>>,
     time: Res<Time>,
     mut player_received_damage_event: EventWriter<PlayerReceivedDamage>,
 ) {
-    let player= player.single();
+    let player = player.single();
     for (colliding_entities, damage) in enemies.iter() {
         if colliding_entities.contains(player) {
-            player_received_damage_event.send(
-            PlayerReceivedDamage{
-                damage: damage.0 * time.delta_seconds()
-            }
-        );
+            player_received_damage_event.send(PlayerReceivedDamage {
+                damage: damage.0 * time.delta_seconds(),
+            });
         }
     }
-    
 }
 
 pub fn enemy_applied_impulse(
@@ -118,13 +111,14 @@ pub fn enemy_applied_impulse(
 ) {
     let player_transform = player.single_mut();
     for event in eneny_hit_event.read() {
-        if let Some(impulse) = event.impulse{
-            if let Ok((enemy_entity, enemy_transform)) = enemies.get_mut(event.enemy_entity){
-                 let direction:Vec2 = enemy_transform.translation.truncate() -player_transform.translation.truncate();
-                 commands.entity(enemy_entity).try_insert(ExternalImpulse   {
+        if let Some(impulse) = event.impulse {
+            if let Ok((enemy_entity, enemy_transform)) = enemies.get_mut(event.enemy_entity) {
+                let direction: Vec2 = enemy_transform.translation.truncate()
+                    - player_transform.translation.truncate();
+                commands.entity(enemy_entity).try_insert(ExternalImpulse {
                     impulse: direction.normalize() * impulse,
                     torque_impulse: 0.0,
-                 },);
+                });
             }
         }
     }
@@ -135,7 +129,7 @@ pub fn enemy_applied_received_damage(
     mut eneny_received_damaged_event: EventReader<EnemyReceivedDamage>,
 ) {
     for event in eneny_received_damaged_event.read() {
-        if let Ok(mut health) = enemies.get_mut(event.enemy_entity){
+        if let Ok(mut health) = enemies.get_mut(event.enemy_entity) {
             **health -= event.damage;
         }
     }
@@ -148,11 +142,10 @@ pub fn enemy_death_check(
 ) {
     for (entity, transform, health, experience) in &mut enemies {
         if health.0 <= 0.0 {
-            enemy_died.send(
-                EnemyDied{
-                    position: transform.translation.clone(),
-                    experience: experience.0 }
-            );
+            enemy_died.send(EnemyDied {
+                position: transform.translation.clone(),
+                experience: experience.0,
+            });
             commands.entity(entity).despawn_recursive();
         }
     }
@@ -198,7 +191,6 @@ pub fn enemy_death_check(
 //         transform.translation -= enemy.velocity.extend(0.0);
 //     }
 // }
-
 
 //
 // fn check_enemy_neighbour(

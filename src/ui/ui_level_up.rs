@@ -1,6 +1,5 @@
-use bevy::prelude::*;
 use crate::components::*;
-
+use bevy::prelude::*;
 
 pub struct UiLevelUpPlugin;
 
@@ -8,7 +7,10 @@ impl Plugin for UiLevelUpPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::PlayerLevelUp), spawn_level_up_ui);
         app.add_systems(OnExit(GameState::PlayerLevelUp), despawn_level_up_ui);
-        app.add_systems(Update, button_interaction.run_if(in_state(GameState::PlayerLevelUp)));
+        app.add_systems(
+            Update,
+            button_interaction.run_if(in_state(GameState::PlayerLevelUp)),
+        );
     }
 }
 
@@ -16,17 +18,13 @@ const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
-
 fn despawn_level_up_ui(mut commands: Commands, ui: Query<Entity, With<LevelUpUI>>) {
     for ui in &ui {
         commands.entity(ui).despawn_recursive();
     }
 }
 
-
-fn spawn_level_up_ui(
-    mut commands: Commands,
-) {
+fn spawn_level_up_ui(mut commands: Commands) {
     let level_up_parent = (
         NodeBundle {
             style: Style {
@@ -71,7 +69,7 @@ fn spawn_level_up_ui(
             // image: UiImage::default().with_color( NORMAL_BUTTON),
             ..default()
         },
-        ButtonLevelUpUI
+        ButtonLevelUpUI,
     );
 
     let button_test_text = TextBundle::from_section(

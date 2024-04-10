@@ -1,9 +1,8 @@
+use crate::constants::*;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
 use bevy_rapier2d::prelude::*;
-use crate::constants::*;
-
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
@@ -14,28 +13,21 @@ pub enum GameState {
     PlayerLevelUp,
 }
 
-
-
-
 // PLAYER
 
 #[derive(Component)]
-pub struct Player{
+pub struct Player {
     pub facing: Facing,
 }
 
 #[derive(Resource, Debug)]
 pub struct PlayerExperience {
-    pub level:u32,
+    pub level: u32,
     pub amount_experience: u32,
 }
 
 #[derive(Component)]
 pub struct PlayerPickupRadius;
-
-
-
-
 
 // HEALTH
 
@@ -45,10 +37,32 @@ pub struct Health(pub f32);
 #[derive(Component, Deref, DerefMut)]
 pub struct MaxHealth(pub f32);
 
-
 // Enemy
 #[derive(Component)]
 pub struct Enemy;
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum EnemyTypes {
+    Bat,
+    Bee,
+    Golem,
+    Rabbit,
+    Skull,
+}
+#[derive(Component)]
+pub struct Bat;
+
+#[derive(Component)]
+pub struct Bee;
+
+#[derive(Component)]
+pub struct Golem;
+
+#[derive(Component)]
+pub struct Rabbit;
+
+#[derive(Component)]
+pub struct Skull;
 
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemyVelocity(pub Vec2);
@@ -74,15 +88,10 @@ pub struct AnimationIndices {
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(pub Timer);
 
-
-
 pub enum Facing {
     Left,
     Right,
 }
-
-
-
 
 // WEAPONS
 
@@ -115,12 +124,10 @@ pub struct SlowDome;
 #[derive(Component)]
 pub struct BouncingBall;
 
-
 // pub struct PayloadOnHit{
 //     pub target: Entity,
 //     pub target_position: Option<Vec3>,
 // }
-
 
 // #[derive(Resource, Debug)]
 // pub struct SlowDomeOnHitSystems {
@@ -128,11 +135,10 @@ pub struct BouncingBall;
 //     pub slow_enemy:SystemId<PayloadOnHit>,
 // }
 #[derive(Component)]
-pub struct VelocityAura{
+pub struct VelocityAura {
     pub value: f32,
     pub lifetime: Timer,
 }
-
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum WeaponsTypes {
@@ -148,69 +154,50 @@ pub enum WeaponsTypes {
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
     // entity ID
-    pub weapons:Vec<WeaponsTypes>,
+    pub weapons: Vec<WeaponsTypes>,
 }
-
-
-
-
-
 
 // GEM
 #[derive(Component)]
-pub struct Gem{
-    pub experience:u32,
+pub struct Gem {
+    pub experience: u32,
 }
 
 #[derive(Component)]
 pub struct GemIsAttracted;
 
-
-
-
-
-
-
-
-
-
 // EVENTS
 
 #[derive(Event)]
-pub struct EnemyDied{
-    pub position:Vec3,
-    pub experience:u32,
+pub struct EnemyDied {
+    pub position: Vec3,
+    pub experience: u32,
 }
 
 #[derive(Event)]
-pub struct EnemyReceivedDamage{
-    pub damage:f32,
-    pub enemy_entity:Entity,
-    pub projectile_position:Vec3,
+pub struct EnemyReceivedDamage {
+    pub damage: f32,
+    pub enemy_entity: Entity,
+    pub projectile_position: Vec3,
     pub impulse: Option<f32>,
     // pub position: Vec3,
     pub weapon_projectile_type: WeaponsTypes,
 }
 
 #[derive(Event)]
-pub struct PlayerReceivedDamage{
-    pub damage:f32,
+pub struct PlayerReceivedDamage {
+    pub damage: f32,
 }
-
 
 #[derive(Event)]
-pub struct CollectExperience{
-    pub experience:u32,
+pub struct CollectExperience {
+    pub experience: u32,
 }
 
-
-
-
-
-
-
-
-
+#[derive(Event)]
+pub struct SpawnEnemy {
+    pub enemy_types: EnemyTypes,
+}
 
 // UI
 #[derive(Component)]
@@ -237,17 +224,13 @@ pub struct WorldTextUI {
     pub position: Vec2,
 }
 
-
-
-
-
 // Attack and projectile
 
 // bundle
 /// Minimum component for a projectile to be colliding with enemies
 /// Set the group, activate events and more
 #[derive(Bundle)]
-pub struct ProjectileBundleCollider{
+pub struct ProjectileBundleCollider {
     collision_group: CollisionGroups,
     active_events: ActiveEvents,
     colliding_entities: CollidingEntities,
@@ -286,7 +269,6 @@ pub struct ProjectileTimeBetweenDamage {
 #[derive(Component)]
 pub struct ProjectileRotateOnSelf;
 
-
 // #[derive(Component, Deref, DerefMut)]
 // pub struct ProjectileVelocity(pub Vec2);
 
@@ -303,13 +285,13 @@ pub struct ProjectileSpeed(pub f32);
 pub struct ProjectileDirection(pub Vec2);
 
 #[derive(Component)]
-pub struct ProjectileRotateAroundPlayer{
+pub struct ProjectileRotateAroundPlayer {
     pub angle: f32,
     pub distance: f32,
 }
 
 #[derive(Component)]
-pub struct ProjectileSpiralAroundPlayer{
+pub struct ProjectileSpiralAroundPlayer {
     pub angle: f32,
     pub distance: f32,
     pub spiral_speed: f32,
@@ -324,7 +306,6 @@ pub struct ProjectileTarget(pub Entity);
 #[derive(Component, Deref, DerefMut)]
 pub struct ProjectileImpulse(pub f32);
 
-
 #[derive(Component)]
 pub struct ProjectileLifetime {
     pub timer: Timer,
@@ -333,13 +314,10 @@ pub struct ProjectileLifetime {
 #[derive(Component)]
 pub struct ProjectileDeleteMe;
 
-
 // #[derive(Component)]
 // pub struct TriggersOnHit{
 //     pub auras_systems: Vec<SystemId<PayloadOnHit>>
 // }
-
-
 
 // Use for projectile that target enemies and takes X seconds to meet the target
 // arcane missile use it
@@ -351,9 +329,8 @@ pub struct ProjectileSpeedAsDuration {
 #[derive(Component, Deref, DerefMut)]
 pub struct AlreadyHitEnemies {
     // entity ID
-    pub seen:Vec<u32>,
+    pub seen: Vec<u32>,
 }
-
 
 // Delay between 2 attacks
 // could be use as reload when the weapon has no real reload time
@@ -364,12 +341,10 @@ pub struct DelayBetweenAttacks {
     pub timer: Timer,
 }
 
-
-
 #[derive(Component)]
-pub struct AttackAmmo{
+pub struct AttackAmmo {
     pub size: u32,
-    pub amount:u32,
+    pub amount: u32,
     pub reload_time: f32, //seconds
 }
 
@@ -380,11 +355,20 @@ pub struct AttackReloadDuration {
     pub timer: Timer,
 }
 
-
-
 // Waves
-#[derive(Resource)]
-pub struct WaveManager;
+#[derive(Component)]
+pub struct WaveManager {
+    pub start_delay: Timer,
+    pub end_delay: Timer,
+    pub waves_prefab: Vec<Wave>,
+    pub waves: Vec<Entity>,
+}
+
+#[derive(Component, Clone)]
+pub struct Wave {
+    pub enemy_type: EnemyTypes,
+    pub delay_between_spawn: Timer,
+}
 
 #[derive(Resource)]
 pub struct WaveManagerGlobalTime {

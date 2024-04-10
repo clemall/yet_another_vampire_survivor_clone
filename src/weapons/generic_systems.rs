@@ -1,18 +1,18 @@
-use std::f32::consts::TAU;
+use crate::components::*;
+use crate::enemies::enemy::enemy_death_check;
 use bevy::app::{App, Plugin, Update};
 use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use crate::components::*;
-use crate::enemies::enemy::{enemy_death_check};
-
+use std::f32::consts::TAU;
 
 pub struct GenericWeaponPlugin;
 
 impl Plugin for GenericWeaponPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            Update, (
+            Update,
+            (
                 projectile_apply_damage.after(enemy_death_check),
                 start_reload_attack_spawner,
                 reloading_attack_spawner,
@@ -24,25 +24,24 @@ impl Plugin for GenericWeaponPlugin {
                 projectile_move_spiral,
                 // projectile_move_boomerang,
                 projectile_rotate_on_self,
-            ).run_if(in_state(GameState::Gameplay)),
+            )
+                .run_if(in_state(GameState::Gameplay)),
         );
         app.add_systems(PostUpdate, projectile_delete);
-
     }
 }
 
-
 fn projectile_delete(
     mut commands: Commands,
-        projectiles: Query<Entity, (With<Projectile>, With<ProjectileDeleteMe>)>){
-
+    projectiles: Query<Entity, (With<Projectile>, With<ProjectileDeleteMe>)>,
+) {
     for projectile_entity in &projectiles {
         commands.entity(projectile_entity).despawn_recursive();
     }
 }
 
-// 
-// 
+//
+//
 // fn projectile_apply_damage2(
 //     mut commands: Commands,
 //     mut attacks: Query<(
@@ -72,7 +71,7 @@ fn projectile_delete(
 //         should_delete_projectile,
 //         projectile_impulse,
 //     ) in &mut attacks {
-// 
+//
 //         if let Some(mut attack_timer) = attack_timer{
 //             attack_timer.timer.tick(time.delta());
 //             if !attack_timer.timer.just_finished() {
@@ -93,23 +92,23 @@ fn projectile_delete(
 //                         }
 //                         hit_enemies.seen.push(enemy_entity.index());
 //                     }
-// 
+//
 //                     enemy_hit_event.send(
 //                         EnemyHitByProjectile{
 //                             enemy_entity,
 //                         }
-// 
+//
 //                     );
 //                     enemy_received_damage.send(
 //                         EnemyReceivedDamage{
 //                             damage: damage.0,
 //                             enemy_entity,
 //                         }
-// 
+//
 //                     );
-//                     
-// 
-// 
+//
+//
+//
 //                     // maybe use events?
 //                     if let Some(projectile_impulse) = projectile_impulse{
 //                         let player_transform = player.single_mut();
@@ -119,7 +118,7 @@ fn projectile_delete(
 //                             torque_impulse: 0.0,
 //                         },);
 //                     }
-// 
+//
 //                     if let Some(_should_delete) = should_delete_projectile{
 //                         commands.entity(projectile_entity).despawn_recursive();
 //                     }
@@ -127,25 +126,27 @@ fn projectile_delete(
 //                 true
 //             },
 //         );
-// 
+//
 //     }
 // }
 
-
 fn projectile_apply_damage(
     mut commands: Commands,
-    mut attacks: Query<(
-        Entity,
-        &Transform,
-        &CollidingEntities,
-        &ProjectileDamage,
-        &ProjectileType,
-        Option<&mut ProjectileTimeBetweenDamage>,
-        Option<&mut AlreadyHitEnemies>,
-        Option<&ProjectileDeleteOnHit>,
-        Option<&ProjectileImpulse>,
-        // Option<&TriggersOnHit>,
-    ), (With<Projectile>, Without<ColliderDisabled>)>,
+    mut attacks: Query<
+        (
+            Entity,
+            &Transform,
+            &CollidingEntities,
+            &ProjectileDamage,
+            &ProjectileType,
+            Option<&mut ProjectileTimeBetweenDamage>,
+            Option<&mut AlreadyHitEnemies>,
+            Option<&ProjectileDeleteOnHit>,
+            Option<&ProjectileImpulse>,
+            // Option<&TriggersOnHit>,
+        ),
+        (With<Projectile>, Without<ColliderDisabled>),
+    >,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
     time: Res<Time>,
 ) {
@@ -160,39 +161,35 @@ fn projectile_apply_damage(
         should_delete_projectile,
         projectile_impulse,
         // triggers_on_hit,
-    ) in &mut attacks {
-
-        if let Some(mut attack_timer) = projectile_delay_between_damage{
+    ) in &mut attacks
+    {
+        if let Some(mut attack_timer) = projectile_delay_between_damage {
             attack_timer.timer.tick(time.delta());
             if !attack_timer.timer.just_finished() {
                 // early return, attack not ready
-                continue
+                continue;
             }
         }
-        
+
         for enemy_entity in colliding_entities.iter() {
             // Maybe check if the entity is an enemy
             // if let Ok(transform) = enemies.get_mut(enemy_entity) {}
-            
-            if let Some(hit_enemies) = hit_enemies.as_deref_mut(){
-                if hit_enemies.seen.contains(&enemy_entity.index()){ 
-                    continue
+
+            if let Some(hit_enemies) = hit_enemies.as_deref_mut() {
+                if hit_enemies.seen.contains(&enemy_entity.index()) {
+                    continue;
                 }
                 hit_enemies.seen.push(enemy_entity.index());
             }
-            
 
-            enemy_received_damage.send(
-                EnemyReceivedDamage{
-                    enemy_entity,
-                    damage: projectile_damage.0,
-                    projectile_position: projectile_transform.translation,
-                    weapon_projectile_type: projectile_type.0,
-                    impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
-                }
-            );
-            
-            
+            enemy_received_damage.send(EnemyReceivedDamage {
+                enemy_entity,
+                damage: projectile_damage.0,
+                projectile_position: projectile_transform.translation,
+                weapon_projectile_type: projectile_type.0,
+                impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
+            });
+
             // if let Some(trigger) = triggers_on_hit{
             //     for aura_system in trigger.auras_systems.iter() {
             //         commands.run_system_with_input(*aura_system, PayloadOnHit{
@@ -201,74 +198,63 @@ fn projectile_apply_damage(
             //         });
             //     }
             // }
-            
 
-            if let Some(_should_delete) = should_delete_projectile{
-                commands.entity(projectile_entity).insert(ProjectileDeleteMe);
+            if let Some(_should_delete) = should_delete_projectile {
+                commands
+                    .entity(projectile_entity)
+                    .insert(ProjectileDeleteMe);
                 // commands.entity(projectile_entity).despawn_recursive();
             }
-            
         }
-       
-
     }
 }
 
-
 pub fn start_reload_attack_spawner(
     mut commands: Commands,
-    mut attack_spawners: Query<(Entity, &AttackAmmo),  Without<AttackReloadDuration>>,
-){
+    mut attack_spawners: Query<(Entity, &AttackAmmo), Without<AttackReloadDuration>>,
+) {
     for (entity, attack_ammo) in &mut attack_spawners {
         if attack_ammo.amount == 0 {
             commands.entity(entity).insert(AttackReloadDuration {
-                timer:Timer::from_seconds(attack_ammo.reload_time, TimerMode::Once)
-            },);
+                timer: Timer::from_seconds(attack_ammo.reload_time, TimerMode::Once),
+            });
         }
     }
-
 }
 
 fn reloading_attack_spawner(
     mut commands: Commands,
-    mut attack_spawners: Query<(
-        Entity,
-        &mut AttackReloadDuration,
-        &mut AttackAmmo
-    ), With<AttackReloadDuration>>,
+    mut attack_spawners: Query<
+        (Entity, &mut AttackReloadDuration, &mut AttackAmmo),
+        With<AttackReloadDuration>,
+    >,
     time: Res<Time>,
-){
-    for (
-        entity,
-        mut attack_reload,
-        mut attack_ammo
-    ) in &mut attack_spawners {
+) {
+    for (entity, mut attack_reload, mut attack_ammo) in &mut attack_spawners {
         attack_reload.timer.tick(time.delta());
 
         if attack_reload.timer.just_finished() {
             attack_ammo.amount = attack_ammo.size;
-            
+
             commands.entity(entity).remove::<AttackReloadDuration>();
         }
-
     }
 }
-
 
 fn projectile_lifetime_tick(
     mut projectiles: Query<&mut ProjectileLifetime, With<Projectile>>,
     time: Res<Time>,
 ) {
-     for mut attack_duration in &mut projectiles {
-         attack_duration.timer.tick(time.delta());
-     }
+    for mut attack_duration in &mut projectiles {
+        attack_duration.timer.tick(time.delta());
+    }
 }
 
 fn projectile_despawn_after_lifetime(
     mut commands: Commands,
     mut projectiles: Query<(Entity, &mut ProjectileLifetime), With<Projectile>>,
 ) {
-    for (entity, attack_duration)  in &mut projectiles {
+    for (entity, attack_duration) in &mut projectiles {
         if attack_duration.timer.just_finished() {
             commands.entity(entity).insert(ProjectileDeleteMe);
             // commands.entity(entity).despawn_recursive();
@@ -276,12 +262,11 @@ fn projectile_despawn_after_lifetime(
     }
 }
 
-
 fn projectile_follow_player(
     player: Query<&mut Transform, (With<Player>, Without<FireArea>)>,
     mut projectiles: Query<&mut Transform, (With<ProjectileFollowPlayer>, Without<Player>)>,
 ) {
-    for mut transform  in &mut projectiles {
+    for mut transform in &mut projectiles {
         if let Ok(player) = player.get_single() {
             transform.translation.x = player.translation.x;
             transform.translation.y = player.translation.y;
@@ -290,40 +275,40 @@ fn projectile_follow_player(
 }
 
 fn projectile_move_toward_direction(
-    mut projectiles: Query<(
-        &mut Transform,
-        &ProjectileSpeed,
-        &ProjectileDirection,
-    ), With<Projectile>>,
+    mut projectiles: Query<
+        (&mut Transform, &ProjectileSpeed, &ProjectileDirection),
+        With<Projectile>,
+    >,
     time: Res<Time>,
 ) {
-    for (
-        mut transform,
-        speed,
-        direction,
-    )  in &mut projectiles {
+    for (mut transform, speed, direction) in &mut projectiles {
         transform.translation.x -= direction.x * time.delta_seconds() * speed.0;
         transform.translation.y -= direction.y * time.delta_seconds() * speed.0;
     }
 }
 
 fn projectile_move_around_player(
-    mut projectiles: Query<(
-        &mut Transform,
-        &ProjectileSpeed,
-        &ProjectileRotateAroundPlayer,
-    ), With<Projectile>>,
+    mut projectiles: Query<
+        (
+            &mut Transform,
+            &ProjectileSpeed,
+            &ProjectileRotateAroundPlayer,
+        ),
+        With<Projectile>,
+    >,
     player: Query<&mut Transform, (With<Player>, Without<Projectile>)>,
     time: Res<Time>,
 ) {
-    for (
-        mut transform,
-        speed,
-        projectile_rotate_around_player,
-    )  in &mut projectiles {
+    for (mut transform, speed, projectile_rotate_around_player) in &mut projectiles {
         if let Ok(player_transform) = player.get_single() {
-            transform.translation.x = (projectile_rotate_around_player.angle + time.elapsed().as_secs_f32() * speed.0).sin() * projectile_rotate_around_player.distance;
-            transform.translation.y = (projectile_rotate_around_player.angle + time.elapsed().as_secs_f32() * speed.0).cos() * projectile_rotate_around_player.distance;
+            transform.translation.x = (projectile_rotate_around_player.angle
+                + time.elapsed().as_secs_f32() * speed.0)
+                .sin()
+                * projectile_rotate_around_player.distance;
+            transform.translation.y = (projectile_rotate_around_player.angle
+                + time.elapsed().as_secs_f32() * speed.0)
+                .cos()
+                * projectile_rotate_around_player.distance;
 
             transform.translation.x += player_transform.translation.x;
             transform.translation.y += player_transform.translation.y;
@@ -332,30 +317,34 @@ fn projectile_move_around_player(
 }
 
 fn projectile_move_spiral(
-    mut projectiles: Query<(
-        &mut Transform,
-        &ProjectileSpeed,
-        &mut ProjectileSpiralAroundPlayer,
-        &ProjectileOrigin,
-    ), With<Projectile>>,
+    mut projectiles: Query<
+        (
+            &mut Transform,
+            &ProjectileSpeed,
+            &mut ProjectileSpiralAroundPlayer,
+            &ProjectileOrigin,
+        ),
+        With<Projectile>,
+    >,
     time: Res<Time>,
 ) {
-    for (
-        mut transform,
-        speed,
-        mut projectile_spiral_around_player,
-        projectile_origin,
-    )  in &mut projectiles {
-        transform.translation.x = (projectile_spiral_around_player.angle + time.elapsed().as_secs_f32() * speed.0).sin() * projectile_spiral_around_player.distance;
-        transform.translation.y = (projectile_spiral_around_player.angle + time.elapsed().as_secs_f32() * speed.0).cos() * projectile_spiral_around_player.distance;
+    for (mut transform, speed, mut projectile_spiral_around_player, projectile_origin) in
+        &mut projectiles
+    {
+        transform.translation.x =
+            (projectile_spiral_around_player.angle + time.elapsed().as_secs_f32() * speed.0).sin()
+                * projectile_spiral_around_player.distance;
+        transform.translation.y =
+            (projectile_spiral_around_player.angle + time.elapsed().as_secs_f32() * speed.0).cos()
+                * projectile_spiral_around_player.distance;
 
         transform.translation.x += projectile_origin.x;
         transform.translation.y += projectile_origin.y;
 
-        projectile_spiral_around_player.distance += projectile_spiral_around_player.spiral_speed * time.delta_seconds();
+        projectile_spiral_around_player.distance +=
+            projectile_spiral_around_player.spiral_speed * time.delta_seconds();
     }
 }
-
 
 //
 // fn projectile_move_boomerang(

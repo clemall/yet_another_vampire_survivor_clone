@@ -1,28 +1,23 @@
-use bevy::prelude::*;
 use crate::components::*;
 use crate::constants::{MAP_LEVEL_EXPERIENCE, SCREEN_HEIGHT, SCREEN_WIDTH};
-
+use bevy::prelude::*;
 
 pub struct UiPlayerPlugin;
 
 impl Plugin for UiPlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (
-            setup_player_health_ui,
-            setup_player_experience_bar_ui
-        ));
-        app.add_systems(Update, (
-            player_health_ui_sync,
-            player_experience_bar_ui_sync,
-        ));
+        app.add_systems(
+            Startup,
+            (setup_player_health_ui, setup_player_experience_bar_ui),
+        );
+        app.add_systems(
+            Update,
+            (player_health_ui_sync, player_experience_bar_ui_sync),
+        );
     }
 }
 
-
-fn setup_player_health_ui(
-    mut commands: Commands,
-) {
-
+fn setup_player_health_ui(mut commands: Commands) {
     let parent_node = (
         NodeBundle {
             style: Style {
@@ -63,13 +58,11 @@ fn setup_player_health_ui(
     commands.spawn(parent_node).with_children(|commands| {
         commands.spawn(health_node);
     });
-
 }
-
 
 fn player_health_ui_sync(
     mut ui: Query<&mut Style, With<PlayerHealthUI>>,
-    health: Query<(&Health,&MaxHealth), With<Player>>
+    health: Query<(&Health, &MaxHealth), With<Player>>,
 ) {
     let mut style = ui.single_mut();
     let (health, max_health) = health.single();
@@ -78,12 +71,7 @@ fn player_health_ui_sync(
     style.width = Val::Percent(percent * 100.0);
 }
 
-
-
-fn setup_player_experience_bar_ui(
-    mut commands: Commands,
-) {
-
+fn setup_player_experience_bar_ui(mut commands: Commands) {
     let parent_node = (
         NodeBundle {
             style: Style {
@@ -120,13 +108,10 @@ fn setup_player_experience_bar_ui(
         PlayerExperienceUI,
         Name::new("Player exeprience UI"),
     );
-    
-    
-    
+
     commands.spawn(parent_node).with_children(|commands| {
         commands.spawn(bar_node);
     });
-
 }
 
 fn player_experience_bar_ui_sync(
@@ -134,9 +119,9 @@ fn player_experience_bar_ui_sync(
     player_experience: Res<PlayerExperience>,
 ) {
     let mut style = ui.single_mut();
-    
+
     let total = MAP_LEVEL_EXPERIENCE[player_experience.level as usize];
-    
+
     //early return when the value is 0 to avoid dividing by 0
     if player_experience.amount_experience == 0 {
         style.width = Val::Percent(0.0);
