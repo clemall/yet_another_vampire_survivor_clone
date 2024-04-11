@@ -12,7 +12,7 @@ impl Plugin for PlayerCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_camera);
         app.add_systems(Update, camera_follow.after(player_movement));
-        // app.add_systems(Update, debug_camera);
+        app.add_systems(Update, debug_camera);
     }
 }
 
@@ -39,15 +39,16 @@ fn camera_follow(
     }
 }
 
-//
-// fn debug_camera(
-//     mut mouse_events: EventReader<MouseMotion>,
-//     mut camera: Query<&mut Transform, (With<Camera>, Without<Player>)>,
-// ) {
-//     let mut camera = camera.single_mut();
-//     for mouse_event in mouse_events.read() {
-//         camera.translation.x += mouse_event.delta.x;
-//         camera.translation.y += mouse_event.delta.y;
-//     }
-//
-// }
+
+fn debug_camera(
+    mut mouse_events: EventReader<MouseMotion>,
+    mut camera: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+) {
+    return;
+    let mut camera = camera.single_mut();
+    for mouse_event in mouse_events.read() {
+        camera.translation.x += mouse_event.delta.x;
+        camera.translation.y += mouse_event.delta.y;
+    }
+
+}

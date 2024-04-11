@@ -14,6 +14,7 @@ use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
+use yet_another_vampire_survivor_clone::stepping::SteppingPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
@@ -37,6 +38,7 @@ fn main() {
         .init_state::<GameState>()
         // Events
         .add_event::<EnemyDied>()
+        .add_event::<EnemyBossDied>()
         .add_event::<CollectExperience>()
         .add_event::<EnemyReceivedDamage>()
         .add_event::<PlayerReceivedDamage>()
@@ -98,6 +100,12 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(64.0))
         .add_systems(Startup, background)
         .add_systems(Update, debug)
+        .add_plugins(
+            SteppingPlugin::default()
+                .add_schedule(Update)
+                .add_schedule(FixedUpdate)
+                .at(Val::Percent(35.0), Val::Percent(50.0)),
+        )
         .run();
 }
 

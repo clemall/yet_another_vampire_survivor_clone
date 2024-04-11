@@ -23,7 +23,6 @@ pub struct EnemyBundle {
     pub enemy_speed: EnemySpeed,
     pub enemy_velocity: EnemyVelocity,
     pub enemy_damage_overtime: EnemyDamageOverTime,
-    pub enemy_experience_drop: EnemyExperienceDrop,
 }
 
 impl Default for EnemyBundle {
@@ -57,7 +56,6 @@ impl Default for EnemyBundle {
             enemy_speed: EnemySpeed(25.0),
             enemy_velocity: EnemyVelocity(Vec2::new(0.0, 0.0)),
             enemy_damage_overtime: EnemyDamageOverTime(10.0),
-            enemy_experience_drop: EnemyExperienceDrop(1),
         }
     }
 }

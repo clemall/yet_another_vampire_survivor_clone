@@ -48,6 +48,7 @@ pub enum EnemyTypes {
     Golem,
     Rabbit,
     Skull,
+    BossWolf,
 }
 #[derive(Component)]
 pub struct Bat;
@@ -64,6 +65,9 @@ pub struct Rabbit;
 #[derive(Component)]
 pub struct Skull;
 
+#[derive(Component)]
+pub struct BossWolf;
+
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemyVelocity(pub Vec2);
 
@@ -75,6 +79,9 @@ pub struct EnemyDamageOverTime(pub f32);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemyExperienceDrop(pub u32);
+
+#[derive(Component)]
+pub struct EnemyBossDrop;
 
 // Animation
 
@@ -173,6 +180,12 @@ pub struct EnemyDied {
     pub position: Vec3,
     pub experience: u32,
 }
+
+#[derive(Event)]
+pub struct EnemyBossDied {
+    pub position: Vec3,
+}
+
 
 #[derive(Event)]
 pub struct EnemyReceivedDamage {
@@ -368,6 +381,7 @@ pub struct WaveManager {
 pub struct Wave {
     pub enemy_type: EnemyTypes,
     pub delay_between_spawn: Timer,
+    pub amount_per_timer_trigger: u32,
 }
 
 #[derive(Resource)]

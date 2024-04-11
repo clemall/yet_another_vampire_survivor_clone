@@ -6,6 +6,7 @@ use crate::enemies::rabbit::RabbitPlugin;
 use crate::enemies::skull::SkullPlugin;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use crate::enemies::boss_wolf::BossWolfPlugin;
 
 pub struct EnemyPlugin;
 
@@ -17,6 +18,7 @@ impl Plugin for EnemyPlugin {
         app.add_plugins(GolemPlugin);
         app.add_plugins(RabbitPlugin);
         app.add_plugins(BeePlugin);
+        app.add_plugins(BossWolfPlugin);
         // basic enemy logic
         app.add_systems(
             Update,
@@ -145,6 +147,21 @@ pub fn enemy_death_check(
             enemy_died.send(EnemyDied {
                 position: transform.translation.clone(),
                 experience: experience.0,
+            });
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+pub fn enemy_boss_death_check(
+    mut commands: Commands,
+    mut enemies: Query<(Entity, &Transform, &Health, &EnemyBossDrop), With<Enemy>>,
+    mut enemy_boss_died: EventWriter<EnemyBossDied>,
+) {
+    for (entity, transform, health, _boss_drop) in &mut enemies {
+        if health.0 <= 0.0 {
+            enemy_boss_died.send(EnemyBossDied {
+                position: transform.translation.clone(),
             });
             commands.entity(entity).despawn_recursive();
         }

@@ -39,9 +39,13 @@ fn waves_spawn(
             continue;
         }
 
-        spawn_enemy.send(SpawnEnemy {
-            enemy_types: wave.enemy_type,
-        });
+        for _ in 0..wave.amount_per_timer_trigger {
+            spawn_enemy.send(SpawnEnemy {
+                enemy_types: wave.enemy_type,
+            });
+        }
+
+        
 
         // match wave.enemy_type {
         //     EnemyTypes::Bat => {

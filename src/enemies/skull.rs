@@ -28,9 +28,9 @@ fn spawn_skulls(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     mut spawn_enemy: EventReader<SpawnEnemy>,
-    camera: Query<&Transform, With<Camera>>,
+    player: Query<&Transform, With<Player>>,
 ) {
-    let camera = camera.single();
+    let camera = player.single();
     for event in spawn_enemy.read() {
         if event.enemy_types != EnemyTypes::Skull {
             continue;
@@ -70,6 +70,7 @@ fn spawn_skulls(
                 ..default()
             },
             Skull,
+            EnemyExperienceDrop(1)
         ));
         // }).with_children(|children| {
         //    children.spawn((
