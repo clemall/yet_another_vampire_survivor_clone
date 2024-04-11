@@ -76,12 +76,12 @@ pub fn get_random_position_outside_screen(camera_position: Vec2) -> Vec2 {
     let side = rng.gen_range(1..=4);
     match side {
         1 => {
-            // top
+            // bottom
             position.x = rng.gen_range(-SCREEN_WIDTH / 2 - 100..SCREEN_WIDTH / 2 + 100) as f32;
             position.y = rng.gen_range(-SCREEN_HEIGHT / 2 - 200..-SCREEN_HEIGHT / 2 - 50) as f32;
         }
         2 => {
-            // bottom
+            // top
             position.x = rng.gen_range(-SCREEN_WIDTH / 2 - 100..SCREEN_WIDTH / 2 + 100) as f32;
             position.y = rng.gen_range(SCREEN_HEIGHT / 2 + 50..SCREEN_HEIGHT / 2 + 200) as f32;
         }

@@ -16,7 +16,7 @@ fn spawn_boss_wolf_debug(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut spawn_enemy: EventWriter<SpawnEnemy>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::KeyB){
+    if keyboard_input.just_pressed(KeyCode::KeyB) {
         spawn_enemy.send(SpawnEnemy {
             enemy_types: EnemyTypes::BossWolf,
         });
@@ -37,7 +37,7 @@ fn spawn_boss_wolf(
         }
         let texture = asset_server.load("Canine_White_Run.png");
         let layout = TextureAtlasLayout::from_grid(
-            Vec2::new(48.0, 35.0),
+            Vec2::new(48.0, 32.0),
             4,
             2,
             Option::from(Vec2::new(0.0, 0.0)),
@@ -66,8 +66,9 @@ fn spawn_boss_wolf(
                     last: 5,
                     is_repeating: true,
                 },
-                enemy_speed: EnemySpeed(40.0),
-                collider: Collider::capsule_x(3.0, 12.0 / 2.0),
+                animation_timer: AnimationTimer(Timer::from_seconds(0.14, TimerMode::Repeating)),
+                enemy_speed: EnemySpeed(45.0),
+                collider: Collider::capsule_x(4.0, 24.0 / 2.0),
                 ..default()
             },
             BossWolf,
@@ -75,7 +76,6 @@ fn spawn_boss_wolf(
             EnemyBossDrop,
         ));
 
-        
         // }).with_children(|children| {
         //    children.spawn((
         //        Collider::ball(16.0/2.0),

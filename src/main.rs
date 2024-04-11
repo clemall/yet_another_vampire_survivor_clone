@@ -10,6 +10,7 @@ use bevy_rapier2d::prelude::*;
 use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
 use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
 use yet_another_vampire_survivor_clone::components::*;
+use yet_another_vampire_survivor_clone::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
@@ -145,6 +146,7 @@ fn debug(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
     mut enemy_died: EventWriter<EnemyDied>,
+    // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
         player_weapons.weapons.push(WeaponsTypes::Claw);
@@ -183,4 +185,42 @@ fn debug(
             experience: 1,
         });
     }
+
+    // gizmos.rect_2d(
+    //     Vec2::new(0.0, (-SCREEN_HEIGHT - 50 + 100) as f32),
+    //     0.0,
+    //     Vec2::new(
+    //         (-SCREEN_WIDTH / 2 - 100 - SCREEN_WIDTH / 2 + 100) as f32,
+    //         (SCREEN_HEIGHT / 2 - 50 - SCREEN_HEIGHT / 2 - 100) as f32,
+    //     ),
+    //     Color::BLUE,
+    // );
+    //
+    // gizmos.rect_2d(
+    //     Vec2::new(0.0, (SCREEN_HEIGHT + 50 - 200) as f32),
+    //     0.0,
+    //     Vec2::new(
+    //         (-SCREEN_WIDTH / 2 - 100 - SCREEN_WIDTH / 2 + 100) as f32,
+    //         (SCREEN_HEIGHT / 2 + 200 - SCREEN_HEIGHT / 2 + 50) as f32,
+    //     ),
+    //     Color::PURPLE,
+    // )
+
+    //     2 => {
+    //         // bottom
+    //         position.x = rng.gen_range(-SCREEN_WIDTH / 2 - 100..SCREEN_WIDTH / 2 + 100) as f32;
+    //         position.y = rng.gen_range(SCREEN_HEIGHT / 2 + 50..SCREEN_HEIGHT / 2 + 200) as f32;
+    //     }
+    //     3 => {
+    //         // left
+    //         position.x = rng.gen_range(-SCREEN_WIDTH / 2 - 200..-SCREEN_WIDTH / 2 - 50) as f32;
+    //         position.y = rng.gen_range(-SCREEN_HEIGHT / 2 - 100..SCREEN_HEIGHT / 2 + 100) as f32;
+    //     }
+    //     4 => {
+    //         // right
+    //         position.x = rng.gen_range(SCREEN_WIDTH / 2 + 50..SCREEN_WIDTH / 2 + 200) as f32;
+    //         position.y = rng.gen_range(-SCREEN_HEIGHT / 2 - 100..SCREEN_HEIGHT / 2 + 100) as f32;
+    //     }
+    //     _ => {} // never used
+    // }
 }

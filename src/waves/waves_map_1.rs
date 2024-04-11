@@ -10,7 +10,6 @@ impl Plugin for WavesMap1Plugin {
 }
 
 fn setup_waves_map_1(mut commands: Commands) {
-    
     commands.spawn((
         WaveManager {
             start_delay: Timer::from_seconds(0.0, TimerMode::Once),
@@ -18,8 +17,8 @@ fn setup_waves_map_1(mut commands: Commands) {
             waves_prefab: vec![
                 Wave {
                     enemy_type: EnemyTypes::Bat,
-                    delay_between_spawn: Timer::from_seconds(1.0, TimerMode::Repeating),
-                    amount_per_timer_trigger: 1,
+                    delay_between_spawn: Timer::from_seconds(0.1, TimerMode::Repeating),
+                    amount_per_timer_trigger: 10,
                 },
                 Wave {
                     enemy_type: EnemyTypes::Bat,
