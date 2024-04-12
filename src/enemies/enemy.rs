@@ -1,24 +1,20 @@
+use std::fs;
 use crate::components::*;
-use crate::enemies::bats::BatPlugin;
-use crate::enemies::bee::BeePlugin;
-use crate::enemies::golem::GolemPlugin;
-use crate::enemies::rabbit::RabbitPlugin;
-use crate::enemies::skull::SkullPlugin;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use crate::enemies::boss_wolf::BossWolfPlugin;
+use crate::enemies::enemy_bundle::EnemyBundle;
+use crate::math_utils::get_random_position_outside_screen;
+
+
 
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
+        let data = fs::read_to_string("assets/enemies.ron").unwrap();
+        let enemy_resource: EnemiesResource = ron::from_str(&data).unwrap();
         // enemies
-        app.add_plugins(BatPlugin);
-        app.add_plugins(SkullPlugin);
-        app.add_plugins(GolemPlugin);
-        app.add_plugins(RabbitPlugin);
-        app.add_plugins(BeePlugin);
-        app.add_plugins(BossWolfPlugin);
+        app.insert_resource(enemy_resource);
         // basic enemy logic
         app.add_systems(
             Update,
@@ -36,10 +32,80 @@ impl Plugin for EnemyPlugin {
 
         app.add_systems(
             Update,
-            (enemy_damage_player,).run_if(in_state(GameState::Gameplay)),
+            (enemy_damage_player,
+             spawn_enemy).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
+
+
+fn spawn_enemy(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut spawn_enemy: EventReader<SpawnEnemy>,
+    player: Query<&Transform, With<Player>>,
+    enemies_resource: Res<EnemiesResource>,
+) {
+    let player = player.single();
+    for event in spawn_enemy.read() {
+        let enemy_data = match event.enemy_types {
+            EnemyTypes::Bat => {&enemies_resource.bat}
+            EnemyTypes::Bee => {&enemies_resource.bee}
+            EnemyTypes::Golem => {&enemies_resource.golem}
+            EnemyTypes::Rabbit => {&enemies_resource.rabbit}
+            EnemyTypes::Skull => {&enemies_resource.skull}
+            EnemyTypes::BossWolf => {&enemies_resource.boss_wolf}
+        };
+
+        let texture = asset_server.load(&enemy_data.texture_patch);
+        let layout = TextureAtlasLayout::from_grid(
+            enemy_data.texture_layout_size,
+            enemy_data.texture_layout_columns,
+            enemy_data.texture_layout_rows,
+            Option::from(Vec2::new(0.0, 0.0)),
+            None,
+        );
+        let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
+        let new_enemy = commands.spawn((
+            EnemyBundle {
+                sprite_bundle: SpriteBundle {
+                    texture: texture.clone(),
+                    transform: Transform {
+                        translation: get_random_position_outside_screen(player.translation.xy())
+                            .extend(0.0),
+                        rotation: Default::default(),
+                        scale: Vec3::new(1.0, 1.0, 0.0),
+                    },
+                    ..default()
+                },
+                texture_atlas: TextureAtlas {
+                    layout: texture_atlas_layout.clone(),
+                    index: 0,
+                },
+                animation_indices: AnimationIndices {
+                    first: 0,
+                    last: enemy_data.animation_last_indice,
+                    is_repeating: true,
+                },
+                health: Health(enemy_data.health),
+                enemy_speed: EnemySpeed(enemy_data.speed),
+                enemy_damage_overtime: EnemyDamageOverTime(enemy_data.damage),
+                collider: Collider::capsule_x(3.0, 12.0 / 2.0),
+                ..default()
+            },
+
+        )).id();
+
+        if let Some(experience) = enemy_data.experience_drop {
+            commands.entity(new_enemy).insert(EnemyExperienceDrop(experience));
+        }
+
+
+    }
+}
+
 
 fn compute_enemy_velocity(
     player: Query<&Transform, (With<Player>, Without<Enemy>)>,
@@ -139,30 +205,30 @@ pub fn enemy_applied_received_damage(
 
 pub fn enemy_death_check(
     mut commands: Commands,
-    mut enemies: Query<(Entity, &Transform, &Health, &EnemyExperienceDrop), With<Enemy>>,
+    mut enemies: Query<(
+        Entity,
+        &Transform,
+        &Health,
+        Option<&EnemyExperienceDrop>,
+        Option<&EnemyBossDrop>),
+        With<Enemy>>,
     mut enemy_died: EventWriter<EnemyDied>,
-) {
-    for (entity, transform, health, experience) in &mut enemies {
-        if health.0 <= 0.0 {
-            enemy_died.send(EnemyDied {
-                position: transform.translation.clone(),
-                experience: experience.0,
-            });
-            commands.entity(entity).despawn_recursive();
-        }
-    }
-}
-
-pub fn enemy_boss_death_check(
-    mut commands: Commands,
-    mut enemies: Query<(Entity, &Transform, &Health, &EnemyBossDrop), With<Enemy>>,
     mut enemy_boss_died: EventWriter<EnemyBossDied>,
 ) {
-    for (entity, transform, health, _boss_drop) in &mut enemies {
+    for (entity, transform, health, experience, boss_drop) in &mut enemies {
         if health.0 <= 0.0 {
-            enemy_boss_died.send(EnemyBossDied {
-                position: transform.translation.clone(),
-            });
+
+            if let Some(experience) = experience {
+                enemy_died.send(EnemyDied {
+                    position: transform.translation.clone(),
+                    experience: experience.0,
+                });
+            }
+            if let Some(_boss_drop) = boss_drop {
+                enemy_boss_died.send(EnemyBossDied {
+                    position: transform.translation.clone(),
+                });
+            }
             commands.entity(entity).despawn_recursive();
         }
     }

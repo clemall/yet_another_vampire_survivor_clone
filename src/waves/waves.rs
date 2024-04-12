@@ -1,10 +1,15 @@
 use crate::components::*;
 use bevy::prelude::*;
+use bevy::time::Stopwatch;
 
 pub struct WavesPlugin;
 
 impl Plugin for WavesPlugin {
+    
     fn build(&self, app: &mut App) {
+        app.insert_resource(WaveManagerGlobalTime {
+            global_time: Stopwatch::new(),
+        })
         app.add_systems(Update, (waves_manager_tick, waves_spawn));
     }
 }

@@ -3,6 +3,7 @@ use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
 use bevy_rapier2d::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
@@ -18,6 +19,11 @@ pub enum GameState {
 #[derive(Component)]
 pub struct Player {
     pub facing: Facing,
+}
+
+#[derive(Resource, Debug, Deserialize, Serialize)]
+pub struct PlayerStats{
+
 }
 
 #[derive(Resource, Debug)]
@@ -38,6 +44,35 @@ pub struct Health(pub f32);
 pub struct MaxHealth(pub f32);
 
 // Enemy
+
+#[derive(Resource, Debug, Deserialize, Serialize)]
+pub struct EnemiesResource{
+    pub bat: EnemyData,
+    pub bee: EnemyData,
+    pub golem: EnemyData,
+    pub rabbit: EnemyData,
+    pub skull: EnemyData,
+    pub boss_wolf: EnemyData,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EnemyData{
+    pub texture_patch: String,
+    pub texture_layout_size: Vec2,
+    pub texture_layout_columns: usize,
+    pub texture_layout_rows: usize,
+    pub animation_last_indice: usize,
+    pub health: f32,
+    pub speed: f32,
+    pub damage: f32,
+    pub collider_height: f32,
+    pub collider_radius: f32,
+    pub mass: f32,
+    pub experience_drop: Option<u32>,
+    pub is_boss: bool,
+    pub is_semi_boss: bool,
+}
+
 #[derive(Component)]
 pub struct Enemy;
 

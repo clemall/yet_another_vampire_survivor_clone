@@ -18,7 +18,7 @@ fn setup_waves_map_1(mut commands: Commands) {
                 Wave {
                     enemy_type: EnemyTypes::Bat,
                     delay_between_spawn: Timer::from_seconds(0.1, TimerMode::Repeating),
-                    amount_per_timer_trigger: 10,
+                    amount_per_timer_trigger: 1,
                 },
                 Wave {
                     enemy_type: EnemyTypes::Bat,

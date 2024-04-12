@@ -32,7 +32,6 @@ fn camera_follow(
     player: Query<&Transform, (With<Player>, Without<Camera>)>,
     mut camera: Query<&mut Transform, (With<Camera>, Without<Player>)>,
 ) {
-    return;
     if let Ok(player) = player.get_single() {
         let mut camera = camera.single_mut();
         camera.translation.x = player.translation.x;
@@ -44,7 +43,7 @@ fn debug_camera(
     mut mouse_events: EventReader<MouseMotion>,
     mut camera: Query<&mut Transform, (With<Camera>, Without<Player>)>,
 ) {
-    // return;
+    return;
     let mut camera = camera.single_mut();
     for mouse_event in mouse_events.read() {
         camera.translation.x += mouse_event.delta.x;

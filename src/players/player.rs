@@ -7,6 +7,13 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(PlayerExperience {
+            level: 1,
+            amount_experience: 0,
+        });
+        app.insert_resource(PlayerWeapons {
+            weapons: Vec::new(),
+        });
         app.add_systems(Startup, setup_player_plugin);
         app.add_systems(
             Update,

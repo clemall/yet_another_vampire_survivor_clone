@@ -2,15 +2,14 @@ use bevy::prelude::*;
 
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
-use bevy::time::Stopwatch;
 use bevy::window::WindowMode;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_pixel_camera::PixelCameraPlugin;
 use bevy_rapier2d::prelude::*;
+
 use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
 use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
 use yet_another_vampire_survivor_clone::components::*;
-use yet_another_vampire_survivor_clone::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
@@ -62,15 +61,9 @@ fn main() {
         .add_plugins(PixelCameraPlugin)
         .add_plugins(PlayerCameraPlugin)
         // Player plugin
-        .insert_resource(PlayerExperience {
-            level: 1,
-            amount_experience: 0,
-        })
         .add_plugins(PlayerPlugin)
         // Waves
-        .insert_resource(WaveManagerGlobalTime {
-            global_time: Stopwatch::new(),
-        })
+
         .add_plugins(WavesPlugin)
         .add_plugins(WavesMap1Plugin) // Temp
         // Enemies plugin
@@ -84,9 +77,7 @@ fn main() {
         // gems
         .add_plugins(GemsPlugin)
         // Weapons
-        .insert_resource(PlayerWeapons {
-            weapons: Vec::new(),
-        })
+
         .add_plugins(GenericWeaponPlugin)
         .add_plugins(WeaponClawPlugin)
         .add_plugins(WeaponFireAreaPlugin)
@@ -146,6 +137,7 @@ fn debug(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
     mut enemy_died: EventWriter<EnemyDied>,
+    mut spawn_enemy: EventWriter<SpawnEnemy>,
     // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
@@ -168,6 +160,39 @@ fn debug(
     }
     if keyboard_input.just_pressed(KeyCode::Digit7) {
         player_weapons.weapons.push(WeaponsTypes::BouncingBall);
+    }
+    
+
+    
+    if keyboard_input.just_pressed(KeyCode::KeyP) {
+        spawn_enemy.send(SpawnEnemy {
+            enemy_types: EnemyTypes::Bat,
+        });
+    }
+    if keyboard_input.just_pressed(KeyCode::KeyO) {
+        spawn_enemy.send(SpawnEnemy {
+            enemy_types: EnemyTypes::Bee,
+        });
+    }
+    if keyboard_input.just_pressed(KeyCode::KeyI) {
+        spawn_enemy.send(SpawnEnemy {
+            enemy_types: EnemyTypes::Golem,
+        });
+    }
+    if keyboard_input.just_pressed(KeyCode::KeyU) {
+        spawn_enemy.send(SpawnEnemy {
+            enemy_types: EnemyTypes::Rabbit,
+        });
+    }
+    if keyboard_input.just_pressed(KeyCode::KeyY) {
+        spawn_enemy.send(SpawnEnemy {
+            enemy_types: EnemyTypes::Skull,
+        });
+    }
+    if keyboard_input.just_pressed(KeyCode::KeyT) {
+        spawn_enemy.send(SpawnEnemy {
+            enemy_types: EnemyTypes::BossWolf,
+        });
     }
 
     let mut window = windows.single_mut();
