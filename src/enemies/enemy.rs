@@ -42,9 +42,16 @@ fn spawn_enemy(
     mut spawn_enemy: EventReader<SpawnEnemy>,
     player: Query<&Transform, With<Player>>,
     enemies_resource: Res<EnemiesResource>,
+    enemies: Query<Entity, With<Enemy>>,
 ) {
     let player = player.single();
     for event in spawn_enemy.read() {
+        // Do not spawn more enemies if we already have more than 400
+        if enemies.iter().count() > 600 {
+            println!("Too many enemies, no more !");
+            return;
+        }
+
         let enemy_data = match event.enemy_types {
             EnemyTypes::Bat => &enemies_resource.bat,
             EnemyTypes::Bee => &enemies_resource.bee,
