@@ -210,7 +210,6 @@ fn handle_input(keyboard_input: Res<ButtonInput<KeyCode>>, mut stepping: ResMut<
         if stepping.is_enabled() {
             stepping.disable();
             debug!("disabled stepping");
-            
         } else {
             stepping.enable();
             debug!("enabled stepping");

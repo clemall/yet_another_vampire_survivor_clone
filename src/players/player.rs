@@ -7,6 +7,27 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
+        // TODO: META value, load from file, maybe ron file or bin?
+        app.insert_resource(PlayerMetaStats {
+            data: PlayerStats {
+                mul_max_health: 0.1,
+                mul_move_speed: 0.1,
+                mul_magnet: 1.0,
+            },
+        });
+
+        // TODO: add more characters loaded from ron file
+        app.insert_resource(CharacterStats {
+            data: PlayerStats {
+                mul_max_health: 0.1,
+                mul_move_speed: 0.1,
+                mul_magnet: 0.0,
+            },
+        });
+
+        // Default value for all character before multiplication
+        app.insert_resource(PlayerInGameStats { ..default() });
+
         app.insert_resource(PlayerExperience {
             level: 1,
             amount_experience: 0,
@@ -14,7 +35,16 @@ impl Plugin for PlayerPlugin {
         app.insert_resource(PlayerWeapons {
             weapons: Vec::new(),
         });
-        app.add_systems(Startup, setup_player_plugin);
+
+        // app.insert_resource(PlayerItems { items: Vec::new() });
+
+        app.add_systems(Startup, (setup_player_stats, setup_player_plugin).chain());
+
+        app.add_systems(
+            Update,
+            update_player_stats.run_if(resource_exists_and_changed::<PlayerInGameStats>),
+        );
+
         app.add_systems(
             Update,
             (
@@ -28,12 +58,44 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-const AVATAR_SPEED: f32 = 60.0;
+fn setup_player_stats(
+    meta_stats: Res<PlayerMetaStats>,
+    character_stats: Res<CharacterStats>,
+    mut player_stats: ResMut<PlayerInGameStats>,
+) {
+    player_stats.max_health += (BASE_MAX_HEALTH * meta_stats.data.mul_max_health)
+        + (BASE_MAX_HEALTH * character_stats.data.mul_max_health);
+
+    player_stats.move_speed += (BASE_MOVE_SPEED * meta_stats.data.mul_move_speed)
+        + (BASE_MOVE_SPEED * character_stats.data.mul_move_speed);
+
+    player_stats.magnet += (BASE_MAGNET * meta_stats.data.mul_magnet)
+        + (BASE_MAGNET * character_stats.data.mul_magnet);
+
+    println!("setup_player_stats");
+}
+
+fn update_player_stats(
+    mut commands: Commands,
+    player_stats: Res<PlayerInGameStats>,
+    mut max_health: Query<&mut MaxHealth, With<Player>>,
+    pickup_radius_entity: Query<Entity, With<PlayerPickupRadius>>,
+) {
+    println!("update stats");
+    let mut max_health = max_health.single_mut();
+    max_health.0 = player_stats.max_health;
+
+    let pickup_radius_entity = pickup_radius_entity.single();
+    commands
+        .entity(pickup_radius_entity)
+        .insert(Collider::ball(player_stats.magnet));
+}
 
 fn setup_player_plugin(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let texture = asset_server.load("player.png");
     let layout = TextureAtlasLayout::from_grid(
@@ -71,8 +133,8 @@ fn setup_player_plugin(
         CollisionGroups::new(PLAYER_GROUP, ENEMY_GROUP | GEM_GROUP),
         ActiveEvents::COLLISION_EVENTS,
         ActiveCollisionTypes::default() | ActiveCollisionTypes::STATIC_STATIC,
-        Health(100.0),
-        MaxHealth(100.0),
+        Health(player_stats.max_health),
+        MaxHealth(player_stats.max_health),
         Player {
             facing: Facing::Right,
         },
@@ -82,7 +144,7 @@ fn setup_player_plugin(
     let player_pickup_collider = (
         TransformBundle { ..default() },
         Sensor,
-        Collider::ball(50.0),
+        Collider::ball(player_stats.magnet),
         CollisionGroups::new(PLAYER_GROUP, GEM_GROUP),
         ActiveEvents::COLLISION_EVENTS,
         ActiveCollisionTypes::STATIC_STATIC,
@@ -99,6 +161,7 @@ fn setup_player_plugin(
 pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut query: Query<(&mut Transform, &mut Sprite, &mut Player), With<Player>>,
+    player_stats: Res<PlayerInGameStats>,
     time: Res<Time>,
 ) {
     let (mut avatar_transform, mut avatar_sprite, mut player) = query.single_mut();
@@ -127,8 +190,8 @@ pub fn player_movement(
 
     direction = direction.normalize_or_zero();
 
-    avatar_transform.translation.x += direction.x * AVATAR_SPEED * time.delta_seconds();
-    avatar_transform.translation.y += direction.y * AVATAR_SPEED * time.delta_seconds();
+    avatar_transform.translation.x += direction.x * player_stats.move_speed * time.delta_seconds();
+    avatar_transform.translation.y += direction.y * player_stats.move_speed * time.delta_seconds();
 }
 
 fn player_game_over(
@@ -184,31 +247,3 @@ fn player_received_damage(
         player_health.0 -= event.damage;
     }
 }
-
-// fn gem_hit_player_pickup_radius(
-//     mut commands: Commands,
-//     mut gems: Query<Entity, (Without<ColliderDisabled>, Without<GemIsAttracted>)>,
-//     player: Query<&Children, With<Player>>,
-//     player_pickup: Query<( &GlobalTransform, &Collider), With<PlayerPickupRadius>>,
-//     rapier_context: Res<RapierContext>,
-// ) {
-//     if let Ok(player_children) = player.get_single() {
-//          for &child in player_children.iter() {
-//              if let Ok((pickup_transform,pickup_collider)) = player_pickup.get(child) {
-//                  rapier_context.intersections_with_shape(
-//                     pickup_transform.translation().truncate(),
-//                     0.0,
-//                     pickup_collider,
-//                     QueryFilter::new(),
-//                     |entity| {
-//                         if let Ok(gem_entity) = gems.get_mut(entity) {
-//                             commands.entity(gem_entity).try_insert(GemIsAttracted);
-//                         }
-//                         true
-//                     },
-//                 );
-//              }
-//          }
-//     }
-//
-// }

@@ -1,11 +1,9 @@
-use std::fs;
 use crate::components::*;
-use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 use crate::enemies::enemy_bundle::EnemyBundle;
 use crate::math_utils::get_random_position_outside_screen;
-
-
+use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
+use std::fs;
 
 pub struct EnemyPlugin;
 
@@ -32,12 +30,10 @@ impl Plugin for EnemyPlugin {
 
         app.add_systems(
             Update,
-            (enemy_damage_player,
-             spawn_enemy).run_if(in_state(GameState::Gameplay)),
+            (enemy_damage_player, spawn_enemy).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
-
 
 fn spawn_enemy(
     mut commands: Commands,
@@ -50,12 +46,12 @@ fn spawn_enemy(
     let player = player.single();
     for event in spawn_enemy.read() {
         let enemy_data = match event.enemy_types {
-            EnemyTypes::Bat => {&enemies_resource.bat}
-            EnemyTypes::Bee => {&enemies_resource.bee}
-            EnemyTypes::Golem => {&enemies_resource.golem}
-            EnemyTypes::Rabbit => {&enemies_resource.rabbit}
-            EnemyTypes::Skull => {&enemies_resource.skull}
-            EnemyTypes::BossWolf => {&enemies_resource.boss_wolf}
+            EnemyTypes::Bat => &enemies_resource.bat,
+            EnemyTypes::Bee => &enemies_resource.bee,
+            EnemyTypes::Golem => &enemies_resource.golem,
+            EnemyTypes::Rabbit => &enemies_resource.rabbit,
+            EnemyTypes::Skull => &enemies_resource.skull,
+            EnemyTypes::BossWolf => &enemies_resource.boss_wolf,
         };
 
         let texture = asset_server.load(&enemy_data.texture_patch);
@@ -68,8 +64,8 @@ fn spawn_enemy(
         );
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-        let new_enemy = commands.spawn((
-            EnemyBundle {
+        let new_enemy = commands
+            .spawn((EnemyBundle {
                 sprite_bundle: SpriteBundle {
                     texture: texture.clone(),
                     transform: Transform {
@@ -94,18 +90,16 @@ fn spawn_enemy(
                 enemy_damage_overtime: EnemyDamageOverTime(enemy_data.damage),
                 collider: Collider::capsule_x(3.0, 12.0 / 2.0),
                 ..default()
-            },
-
-        )).id();
+            },))
+            .id();
 
         if let Some(experience) = enemy_data.experience_drop {
-            commands.entity(new_enemy).insert(EnemyExperienceDrop(experience));
+            commands
+                .entity(new_enemy)
+                .insert(EnemyExperienceDrop(experience));
         }
-
-
     }
 }
-
 
 fn compute_enemy_velocity(
     player: Query<&Transform, (With<Player>, Without<Enemy>)>,
@@ -150,9 +144,12 @@ fn apply_aura_on_enemy_velocity(
 }
 
 fn apply_enemy_velocity(mut enemies: Query<(&mut Transform, &EnemyVelocity)>) {
+    // let mut counter = 1;
     for (mut transform, velocity) in &mut enemies {
         transform.translation -= velocity.extend(0.0);
+        // counter += 1;
     }
+    // println!("{}", counter);
 }
 
 fn enemy_damage_player(
@@ -205,19 +202,21 @@ pub fn enemy_applied_received_damage(
 
 pub fn enemy_death_check(
     mut commands: Commands,
-    mut enemies: Query<(
-        Entity,
-        &Transform,
-        &Health,
-        Option<&EnemyExperienceDrop>,
-        Option<&EnemyBossDrop>),
-        With<Enemy>>,
+    mut enemies: Query<
+        (
+            Entity,
+            &Transform,
+            &Health,
+            Option<&EnemyExperienceDrop>,
+            Option<&EnemyBossDrop>,
+        ),
+        With<Enemy>,
+    >,
     mut enemy_died: EventWriter<EnemyDied>,
     mut enemy_boss_died: EventWriter<EnemyBossDied>,
 ) {
     for (entity, transform, health, experience, boss_drop) in &mut enemies {
         if health.0 <= 0.0 {
-
             if let Some(experience) = experience {
                 enemy_died.send(EnemyDied {
                     position: transform.translation.clone(),

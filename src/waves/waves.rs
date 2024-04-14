@@ -5,11 +5,10 @@ use bevy::time::Stopwatch;
 pub struct WavesPlugin;
 
 impl Plugin for WavesPlugin {
-    
     fn build(&self, app: &mut App) {
         app.insert_resource(WaveManagerGlobalTime {
             global_time: Stopwatch::new(),
-        })
+        });
         app.add_systems(Update, (waves_manager_tick, waves_spawn));
     }
 }
@@ -49,8 +48,6 @@ fn waves_spawn(
                 enemy_types: wave.enemy_type,
             });
         }
-
-        
 
         // match wave.enemy_type {
         //     EnemyTypes::Bat => {

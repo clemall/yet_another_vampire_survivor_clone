@@ -21,9 +21,67 @@ pub struct Player {
     pub facing: Facing,
 }
 
-#[derive(Resource, Debug, Deserialize, Serialize)]
-pub struct PlayerStats{
+#[derive(Debug, Deserialize, Serialize)]
+pub struct PlayerStats {
+    pub mul_max_health: f32,
+    pub mul_move_speed: f32,
+    // pub mul_recovery: u32,
+    // pub mul_resistance: f32,
+    // pub mul_power: f32,
+    // pub mul_area: f32,
+    // pub mul_attack_speed: f32,
+    // pub mul_attack_duration: f32,
+    // pub mul_attack_amount: u32,
+    // pub mul_attack_reload_duration: f32,
+    // pub mul_luck: f32,
+    // pub mul_experience: f32,
+    // pub mul_greed: f32,
+    // pub mul_curse: f32,
+    pub mul_magnet: f32,
+    // pub mul_extra_life: f32,
+}
 
+#[derive(Resource, Debug, Deserialize, Serialize)]
+pub struct PlayerMetaStats {
+    pub data: PlayerStats,
+}
+
+// Will be set by a ron file for each character
+#[derive(Resource, Debug, Deserialize, Serialize)]
+pub struct CharacterStats {
+    pub data: PlayerStats,
+}
+#[derive(Resource, Debug, Deserialize, Serialize)]
+pub struct PlayerInGameStats {
+    pub max_health: f32,
+    pub move_speed: f32,
+    // pub recovery: u32,
+    // pub resistance: f32,
+    // pub power: f32,
+    // pub area: f32,
+    // pub attack_speed: f32,
+    // pub attack_duration: f32,
+    // pub attack_amount: u32,
+    // pub attack_reload_duration: f32,
+    // pub luck: f32,
+    // pub experience: f32,
+    // pub greed: f32,
+    // pub curse: f32,
+    pub magnet: f32,
+    // pub extra_life: f32,
+}
+pub const BASE_MAX_HEALTH: f32 = 100.0;
+pub const BASE_MOVE_SPEED: f32 = 60.0;
+pub const BASE_MAGNET: f32 = 20.0;
+// Default value for all character before multiplication
+impl Default for PlayerInGameStats {
+    fn default() -> Self {
+        Self {
+            max_health: BASE_MAX_HEALTH,
+            move_speed: BASE_MOVE_SPEED,
+            magnet: BASE_MAGNET,
+        }
+    }
 }
 
 #[derive(Resource, Debug)]
@@ -46,7 +104,7 @@ pub struct MaxHealth(pub f32);
 // Enemy
 
 #[derive(Resource, Debug, Deserialize, Serialize)]
-pub struct EnemiesResource{
+pub struct EnemiesResource {
     pub bat: EnemyData,
     pub bee: EnemyData,
     pub golem: EnemyData,
@@ -56,7 +114,7 @@ pub struct EnemiesResource{
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct EnemyData{
+pub struct EnemyData {
     pub texture_patch: String,
     pub texture_layout_size: Vec2,
     pub texture_layout_columns: usize,
@@ -85,23 +143,6 @@ pub enum EnemyTypes {
     Skull,
     BossWolf,
 }
-#[derive(Component)]
-pub struct Bat;
-
-#[derive(Component)]
-pub struct Bee;
-
-#[derive(Component)]
-pub struct Golem;
-
-#[derive(Component)]
-pub struct Rabbit;
-
-#[derive(Component)]
-pub struct Skull;
-
-#[derive(Component)]
-pub struct BossWolf;
 
 #[derive(Component, Deref, DerefMut)]
 pub struct EnemyVelocity(pub Vec2);
@@ -220,7 +261,6 @@ pub struct EnemyDied {
 pub struct EnemyBossDied {
     pub position: Vec3,
 }
-
 
 #[derive(Event)]
 pub struct EnemyReceivedDamage {
