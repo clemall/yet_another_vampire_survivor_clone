@@ -148,6 +148,7 @@ fn projectile_apply_damage(
         (With<Projectile>, Without<ColliderDisabled>),
     >,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
+    player_stats: Res<PlayerInGameStats>,
     time: Res<Time>,
 ) {
     for (
@@ -181,10 +182,9 @@ fn projectile_apply_damage(
                 }
                 hit_enemies.seen.push(enemy_entity.index());
             }
-
             enemy_received_damage.send(EnemyReceivedDamage {
                 enemy_entity,
-                damage: projectile_damage.0,
+                damage: projectile_damage.0 * player_stats.power,
                 projectile_position: projectile_transform.translation,
                 weapon_projectile_type: projectile_type.0,
                 impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),

@@ -27,7 +27,7 @@ pub struct PlayerStats {
     pub mul_move_speed: f32,
     // pub mul_recovery: u32,
     // pub mul_resistance: f32,
-    // pub mul_power: f32,
+    pub mul_power: f32,
     // pub mul_area: f32,
     // pub mul_attack_speed: f32,
     // pub mul_attack_duration: f32,
@@ -57,7 +57,7 @@ pub struct PlayerInGameStats {
     pub move_speed: f32,
     // pub recovery: u32,
     // pub resistance: f32,
-    // pub power: f32,
+    pub power: f32,
     // pub area: f32,
     // pub attack_speed: f32,
     // pub attack_duration: f32,
@@ -73,12 +73,18 @@ pub struct PlayerInGameStats {
 pub const BASE_MAX_HEALTH: f32 = 100.0;
 pub const BASE_MOVE_SPEED: f32 = 60.0;
 pub const BASE_MAGNET: f32 = 20.0;
+// The power is a percentage so multiplying facteur will be the base percentage multiply by another
+// percentage.
+// Default value is 1.0 for 100% damage by default.
+pub const BASE_POWER: f32 = 1.0; // percentage
+
 // Default value for all character before multiplication
 impl Default for PlayerInGameStats {
     fn default() -> Self {
         Self {
             max_health: BASE_MAX_HEALTH,
             move_speed: BASE_MOVE_SPEED,
+            power: BASE_POWER,
             magnet: BASE_MAGNET,
         }
     }
@@ -250,6 +256,12 @@ pub struct Gem {
 pub struct GemIsAttracted;
 
 // EVENTS
+
+#[derive(Event)]
+pub struct ItemPickup {
+    pub item_type: ItemsTypes,
+    pub rarity: Rarity,
+}
 
 #[derive(Event)]
 pub struct EnemyDied {
@@ -462,4 +474,26 @@ pub struct Wave {
 #[derive(Resource)]
 pub struct WaveManagerGlobalTime {
     pub global_time: Stopwatch,
+}
+
+// items
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum Rarity {
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+    Unique, // TODO: Check how to have unique item boost
+    Cursed,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ItemsTypes {
+    MaxHealth,
+    MoveSpeed,
+    Magnet,
+    Power,
+    WipCurseDamage,
 }

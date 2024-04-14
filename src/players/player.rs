@@ -12,6 +12,7 @@ impl Plugin for PlayerPlugin {
             data: PlayerStats {
                 mul_max_health: 0.1,
                 mul_move_speed: 0.1,
+                mul_power: 0.0,
                 mul_magnet: 1.0,
             },
         });
@@ -21,6 +22,7 @@ impl Plugin for PlayerPlugin {
             data: PlayerStats {
                 mul_max_health: 0.1,
                 mul_move_speed: 0.1,
+                mul_power: 0.0,
                 mul_magnet: 0.0,
             },
         });
@@ -35,8 +37,6 @@ impl Plugin for PlayerPlugin {
         app.insert_resource(PlayerWeapons {
             weapons: Vec::new(),
         });
-
-        // app.insert_resource(PlayerItems { items: Vec::new() });
 
         app.add_systems(Startup, (setup_player_stats, setup_player_plugin).chain());
 
@@ -81,7 +81,6 @@ fn update_player_stats(
     mut max_health: Query<&mut MaxHealth, With<Player>>,
     pickup_radius_entity: Query<Entity, With<PlayerPickupRadius>>,
 ) {
-    println!("update stats");
     let mut max_health = max_health.single_mut();
     max_health.0 = player_stats.max_health;
 
@@ -89,6 +88,12 @@ fn update_player_stats(
     commands
         .entity(pickup_radius_entity)
         .insert(Collider::ball(player_stats.magnet));
+
+    println!("Debug player stats:");
+    println!("max_health: {}", player_stats.max_health);
+    println!("move_speed: {}", player_stats.move_speed);
+    println!("magnet: {}", player_stats.magnet);
+    println!("power: {}", player_stats.power);
 }
 
 fn setup_player_plugin(

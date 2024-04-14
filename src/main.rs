@@ -12,6 +12,7 @@ use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
 use yet_another_vampire_survivor_clone::components::*;
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
+use yet_another_vampire_survivor_clone::items::item::ItemsPlugin;
 use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
 use yet_another_vampire_survivor_clone::stepping::SteppingPlugin;
@@ -43,6 +44,7 @@ fn main() {
         .add_event::<EnemyReceivedDamage>()
         .add_event::<PlayerReceivedDamage>()
         .add_event::<SpawnEnemy>()
+        .add_event::<ItemPickup>()
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(UiFPSPlugin)
@@ -62,8 +64,9 @@ fn main() {
         .add_plugins(PlayerCameraPlugin)
         // Player plugin
         .add_plugins(PlayerPlugin)
+        // items
+        .add_plugins(ItemsPlugin)
         // Waves
-
         .add_plugins(WavesPlugin)
         .add_plugins(WavesMap1Plugin) // Temp
         // Enemies plugin
@@ -77,7 +80,6 @@ fn main() {
         // gems
         .add_plugins(GemsPlugin)
         // Weapons
-
         .add_plugins(GenericWeaponPlugin)
         .add_plugins(WeaponClawPlugin)
         .add_plugins(WeaponFireAreaPlugin)
@@ -138,6 +140,7 @@ fn debug(
     mut player_weapons: ResMut<PlayerWeapons>,
     mut enemy_died: EventWriter<EnemyDied>,
     mut spawn_enemy: EventWriter<SpawnEnemy>,
+    mut item_pickup: EventWriter<ItemPickup>,
     // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
@@ -161,9 +164,7 @@ fn debug(
     if keyboard_input.just_pressed(KeyCode::Digit7) {
         player_weapons.weapons.push(WeaponsTypes::BouncingBall);
     }
-    
 
-    
     if keyboard_input.just_pressed(KeyCode::KeyP) {
         spawn_enemy.send(SpawnEnemy {
             enemy_types: EnemyTypes::Bat,
@@ -208,6 +209,13 @@ fn debug(
         enemy_died.send(EnemyDied {
             position: get_random_position_in_screen().extend(0.0),
             experience: 1,
+        });
+    }
+
+    if keyboard_input.just_pressed(KeyCode::KeyZ) {
+        item_pickup.send(ItemPickup {
+            item_type: ItemsTypes::WipCurseDamage,
+            rarity: Rarity::Cursed,
         });
     }
 
