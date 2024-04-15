@@ -13,6 +13,7 @@ impl Plugin for ItemsPlugin {
                 trigger_item_move_speed,
                 trigger_item_power,
                 trigger_item_curse_damage,
+                trigger_item_unique_damage,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -149,14 +150,22 @@ fn trigger_item_curse_damage(
             continue;
         }
 
-        match event.rarity {
-            Rarity::Cursed => {
-                // double damage
-                player_stats.power += BASE_POWER * 1.0;
-                // but make you slow
-                player_stats.move_speed -= BASE_MOVE_SPEED * 0.5;
-            }
-            _ => {}
+        // double damage
+        player_stats.power += BASE_POWER * 1.0;
+        // but make you slow
+        player_stats.move_speed -= BASE_MOVE_SPEED * 0.5;
+    }
+}
+
+fn trigger_item_unique_damage(
+    mut item_pickup: EventReader<ItemPickup>,
+    mut player_stats: ResMut<PlayerInGameStats>,
+) {
+    for event in item_pickup.read() {
+        if event.item_type != ItemsTypes::WipUniqueDamage {
+            continue;
         }
+
+        player_stats.power += BASE_POWER * 1.0;
     }
 }

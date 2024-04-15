@@ -10,6 +10,7 @@ use bevy_rapier2d::prelude::*;
 use yet_another_vampire_survivor_clone::animations::animation::AnimationSimplePlugin;
 use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
 use yet_another_vampire_survivor_clone::components::*;
+use yet_another_vampire_survivor_clone::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::items::item::ItemsPlugin;
@@ -34,7 +35,19 @@ use yet_another_vampire_survivor_clone::weapons::slow_dome::SlowDomePlugin;
 fn main() {
     App::new()
         // bevy plugin
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_plugins(
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "yet another vampire".into(),
+                        resolution: (SCREEN_WIDTH as f32 * 3.0, SCREEN_HEIGHT as f32 * 3.0).into(),
+                        resizable: false,
+                        ..default()
+                    }),
+                    ..default()
+                }),
+        )
         // States
         .init_state::<GameState>()
         // Events
@@ -141,6 +154,7 @@ fn debug(
     mut enemy_died: EventWriter<EnemyDied>,
     mut spawn_enemy: EventWriter<SpawnEnemy>,
     mut item_pickup: EventWriter<ItemPickup>,
+    mut next_state: ResMut<NextState<GameState>>,
     // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
@@ -217,6 +231,10 @@ fn debug(
             item_type: ItemsTypes::WipCurseDamage,
             rarity: Rarity::Cursed,
         });
+    }
+
+    if keyboard_input.just_pressed(KeyCode::KeyQ) {
+        next_state.set(GameState::PlayerLevelUp);
     }
 
     // gizmos.rect_2d(

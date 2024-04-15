@@ -1,5 +1,4 @@
 use bevy::{app::MainScheduleOrder, ecs::schedule::*, prelude::*};
-use bevy_inspector_egui::egui::debug_text::print;
 
 /// Independent [`Schedule`] for stepping systems.
 ///

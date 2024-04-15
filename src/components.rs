@@ -7,10 +7,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
-    #[default]
     Gameplay,
     MainMenu,
     GameOver,
+    #[default]
     PlayerLevelUp,
 }
 
@@ -77,6 +77,8 @@ pub const BASE_MAGNET: f32 = 20.0;
 // percentage.
 // Default value is 1.0 for 100% damage by default.
 pub const BASE_POWER: f32 = 1.0; // percentage
+
+pub const BASE_LUCK: f32 = 1.0; // To be used later
 
 // Default value for all character before multiplication
 impl Default for PlayerInGameStats {
@@ -315,7 +317,10 @@ pub struct PlayerExperienceUI;
 pub struct LevelUpUI;
 
 #[derive(Component)]
-pub struct ButtonLevelUpUI;
+pub struct ButtonUpgrade {
+    pub item_type: ItemsTypes,
+    pub rarity: Rarity,
+}
 
 #[derive(Component)]
 pub struct WorldTextUI {
@@ -485,8 +490,89 @@ pub enum Rarity {
     Rare,
     Epic,
     Legendary,
-    Unique, // TODO: Check how to have unique item boost
     Cursed,
+    Unique, // TODO: Check how to have unique item boost
+}
+
+impl Rarity {
+    pub fn array() -> [Rarity; 7] {
+        [
+            Rarity::Common,
+            Rarity::Uncommon,
+            Rarity::Rare,
+            Rarity::Epic,
+            Rarity::Legendary,
+            Rarity::Cursed,
+            Rarity::Unique,
+        ]
+    }
+    pub fn name(&self) -> &str {
+        match self {
+            Rarity::Common => "Common",
+            Rarity::Uncommon => "Uncommon",
+            Rarity::Rare => "Rare",
+            Rarity::Epic => "Epic",
+            Rarity::Legendary => "Legendary",
+            Rarity::Cursed => "Cursed",
+            Rarity::Unique => "Unique",
+        }
+    }
+
+    pub fn get_items(&self) -> Vec<ItemsTypes> {
+        match self {
+            Rarity::Common => {
+                vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]
+            }
+            Rarity::Uncommon => {
+                vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]
+            }
+            Rarity::Rare => {
+                vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]
+            }
+            Rarity::Epic => {
+                vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]
+            }
+            Rarity::Legendary => {
+                vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]
+            }
+            Rarity::Cursed => {
+                vec![ItemsTypes::WipCurseDamage]
+            }
+            Rarity::Unique => {
+                vec![ItemsTypes::WipUniqueDamage]
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -496,4 +582,38 @@ pub enum ItemsTypes {
     Magnet,
     Power,
     WipCurseDamage,
+    WipUniqueDamage,
+}
+
+impl ItemsTypes {
+    pub fn array() -> [ItemsTypes; 6] {
+        [
+            ItemsTypes::MaxHealth,
+            ItemsTypes::MoveSpeed,
+            ItemsTypes::Magnet,
+            ItemsTypes::Power,
+            ItemsTypes::WipCurseDamage,
+            ItemsTypes::WipUniqueDamage,
+        ]
+    }
+    pub fn name(&self) -> &str {
+        match self {
+            ItemsTypes::MaxHealth => "Max health",
+            ItemsTypes::MoveSpeed => "Move speed!",
+            ItemsTypes::Magnet => "Pickup radius",
+            ItemsTypes::Power => "More power",
+            ItemsTypes::WipCurseDamage => "The turret",
+            ItemsTypes::WipUniqueDamage => "Mighty sword",
+        }
+    }
+    pub fn description(&self) -> &str {
+        match self {
+            ItemsTypes::MaxHealth => "Increase health by XXXX",
+            ItemsTypes::MoveSpeed => "Increase move speed by XXXX",
+            ItemsTypes::Magnet => "Increase pickup radius by XXXX",
+            ItemsTypes::Power => "Increase damage by XXXX",
+            ItemsTypes::WipCurseDamage => "Increase damage by XXXX but reduce speed by YYYY",
+            ItemsTypes::WipUniqueDamage => "Increase damage by XXXX",
+        }
+    }
 }
