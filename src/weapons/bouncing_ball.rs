@@ -66,7 +66,7 @@ fn spawn_bouncing_ball_attack(
 
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
             let closed_enemy: Option<Entity> =
-                find_closest(player_transform.translation, enemies_lens.query());
+                find_closest(player_transform.translation, enemies_lens.query(), None);
 
             if let Some(closed_enemy) = closed_enemy {
                 if let Ok((_enemy, enemy_transform)) = enemies.get(closed_enemy) {

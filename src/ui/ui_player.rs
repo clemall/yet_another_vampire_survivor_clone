@@ -1,6 +1,7 @@
 use crate::components::*;
 use crate::constants::{MAP_LEVEL_EXPERIENCE, SCREEN_HEIGHT, SCREEN_WIDTH};
 use bevy::prelude::*;
+use crate::cameras::camera::setup_camera;
 
 pub struct UiPlayerPlugin;
 
@@ -18,46 +19,82 @@ impl Plugin for UiPlayerPlugin {
 }
 
 fn setup_player_health_ui(mut commands: Commands) {
-    let parent_node = (
+    let parent_node = commands
+        .spawn((
         NodeBundle {
             style: Style {
-                width: Val::Px(80.),
-                height: Val::Px(5.),
-                // WTF, should be SCREEN_WIDTH / 2... but the screen UI seems to be 1200px,
-                left: Val::Px(SCREEN_WIDTH as f32 - 40.0),
-                right: Val::Auto,
-                top: Val::Px(SCREEN_HEIGHT as f32 + 20.0),
-                bottom: Val::Auto,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::FlexStart,
-                flex_direction: FlexDirection::Row,
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
                 position_type: PositionType::Absolute,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
-            background_color: BackgroundColor(Color::BLACK),
+            ..default()
+        },
+        Name::new("Player UI "),
+    )).id();
+    
+    let health_container = commands
+        .spawn((
+        NodeBundle {
+            style: Style {
+                width: Val::Px(100.0),
+                height: Val::Px(10.0),
+                margin: UiRect::vertical(Val::Px(10.0)),
+                ..default()
+            },
             ..default()
         },
         PlayerHealthUIParent,
-        Name::new("Player UI"),
-    );
-
-    let health_node = (
+        Name::new("Health UI background"))).id();
+    
+    let health_background = commands
+        .spawn((
         NodeBundle {
             style: Style {
-                width: Val::Px(80.),
-                height: Val::Px(5.),
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
                 ..default()
             },
             background_color: BackgroundColor(Color::RED),
             ..default()
         },
-        PlayerHealthUI,
-        Name::new("Health UI"),
-    );
+        PlayerHealthUIParent,
+        Name::new("Health UI background"))).id();
+    
+    let health_front = commands
+        .spawn((
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                ..default()
+            },
+            background_color: BackgroundColor(Color::RED),
+            ..default()
+        },
+            PlayerHealthUI,
+        Name::new("Health UI"))).id();
 
-    commands.spawn(parent_node).with_children(|commands| {
-        commands.spawn(health_node);
-    });
+    
+    commands
+        .entity(parent_node)
+        .push_children(&[health_background]);
+    
+    commands
+        .entity(parent_node)
+        .push_children(&[health_container]);
+    
+    commands
+        .entity(health_container)
+        .push_children(&[health_background]);
+    
+    commands
+        .entity(health_container)
+        .push_children(&[health_front]);
+
+
 }
 
 fn player_health_ui_sync(

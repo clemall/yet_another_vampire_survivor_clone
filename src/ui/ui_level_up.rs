@@ -58,7 +58,6 @@ fn spawn_level_up_ui(
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Row,
                 justify_content: JustifyContent::SpaceAround,
-                row_gap: Val::Px(10.0),
                 ..default()
             },
             background_color: POPUP_BG_COLOR.into(),

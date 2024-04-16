@@ -80,14 +80,17 @@ fn spawn_chain_lightning_attack(
         let mut seen_enemies: Vec<Entity> = Vec::new();
         // Start at player
         let mut position_lightning: Vec3 = player_transform.translation;
-
+        
+        
+        
         while attack_ammo.amount > 0 {
             attack_ammo.amount -= 1;
-
-            // get closed enemy
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
+            // get closed enemy
             let closed_enemy: Option<Entity> =
-                find_closest(player_transform.translation, enemies_lens.query());
+                find_closest(position_lightning, enemies_lens.query(),Some(&seen_enemies));
+            
+            println!("{:?}", closed_enemy);
 
             if let Some(closed_enemy) = closed_enemy {
                 if let Ok((enemy, enemy_transform)) = enemies.get(closed_enemy) {

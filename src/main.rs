@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*};
 
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
@@ -42,7 +42,7 @@ fn main() {
                     primary_window: Some(Window {
                         title: "yet another vampire".into(),
                         resolution: (SCREEN_WIDTH as f32 * 3.0, SCREEN_HEIGHT as f32 * 3.0).into(),
-                        resizable: false,
+                        // resizable: false,
                         ..default()
                     }),
                     ..default()
@@ -155,6 +155,7 @@ fn debug(
     mut spawn_enemy: EventWriter<SpawnEnemy>,
     mut item_pickup: EventWriter<ItemPickup>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut ui_scale: ResMut<UiScale>,
     // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
@@ -236,6 +237,13 @@ fn debug(
     if keyboard_input.just_pressed(KeyCode::KeyQ) {
         next_state.set(GameState::PlayerLevelUp);
     }
+    // check how to make it work with our resolution
+    if keyboard_input.just_pressed(KeyCode::KeyS) {
+        println!("{}", ui_scale.0);
+        ui_scale.0 = 1.0;
+    }
+    
+    
 
     // gizmos.rect_2d(
     //     Vec2::new(0.0, (-SCREEN_HEIGHT - 50 + 100) as f32),

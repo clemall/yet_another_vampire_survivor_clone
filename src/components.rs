@@ -7,10 +7,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
+    #[default]
     Gameplay,
     MainMenu,
     GameOver,
-    #[default]
     PlayerLevelUp,
 }
 

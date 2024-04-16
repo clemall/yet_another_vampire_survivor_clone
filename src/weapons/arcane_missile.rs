@@ -79,7 +79,7 @@ fn spawn_arcane_missile_attack(
             // get closed enemy
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
             let closed_enemy: Option<Entity> =
-                find_closest(player_transform.translation, enemies_lens.query());
+                find_closest(player_transform.translation, enemies_lens.query(), None);
 
             if let Some(closed_enemy) = closed_enemy {
                 let texture = asset_server.load("arcane_missile.png");
