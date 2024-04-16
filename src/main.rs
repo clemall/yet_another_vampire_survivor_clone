@@ -1,4 +1,4 @@
-use bevy::{prelude::*};
+use bevy::prelude::*;
 
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
@@ -238,12 +238,10 @@ fn debug(
         next_state.set(GameState::PlayerLevelUp);
     }
     // check how to make it work with our resolution
-    if keyboard_input.just_pressed(KeyCode::KeyS) {
-        println!("{}", ui_scale.0);
-        ui_scale.0 = 1.0;
-    }
-    
-    
+    // if keyboard_input.just_pressed(KeyCode::KeyS) {
+    //     println!("{}", ui_scale.0);
+    //     ui_scale.0 = 1.0;
+    // }
 
     // gizmos.rect_2d(
     //     Vec2::new(0.0, (-SCREEN_HEIGHT - 50 + 100) as f32),

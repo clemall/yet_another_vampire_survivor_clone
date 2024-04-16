@@ -1,5 +1,5 @@
 use crate::components::*;
-use crate::constants::SCREEN_WIDTH;
+use crate::constants::{FONT, FONT_BOLD, SCREEN_WIDTH};
 use bevy::prelude::*;
 use rand::seq::SliceRandom;
 
@@ -118,7 +118,8 @@ fn spawn_level_up_ui(
                 TextBundle::from_section(
                     item.name(),
                     TextStyle {
-                        font_size: 16.0,
+                        font: asset_server.load(FONT_BOLD),
+                        font_size: 22.0,
                         color: Color::BLACK,
                         ..default()
                     },
@@ -126,6 +127,7 @@ fn spawn_level_up_ui(
                 .with_style(Style {
                     position_type: PositionType::Absolute,
                     top: Val::Percent(61.0),
+
                     ..default()
                 }),
             )
@@ -136,7 +138,8 @@ fn spawn_level_up_ui(
                 TextBundle::from_section(
                     item.description(),
                     TextStyle {
-                        font_size: 12.0,
+                        font: asset_server.load(FONT),
+                        font_size: 16.0,
                         color: Color::BLACK,
                         ..default()
                     },
@@ -145,6 +148,7 @@ fn spawn_level_up_ui(
                     position_type: PositionType::Absolute,
                     top: Val::Percent(70.0),
                     left: Val::Percent(5.0),
+                    width: Val::Percent(90.0),
                     ..default()
                 }),
             )
@@ -155,6 +159,7 @@ fn spawn_level_up_ui(
                 TextBundle::from_section(
                     rarity.name(),
                     TextStyle {
+                        font: asset_server.load(FONT_BOLD),
                         font_size: 16.0,
                         color: Color::BLACK,
                         ..default()

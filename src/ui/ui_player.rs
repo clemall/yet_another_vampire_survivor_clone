@@ -1,7 +1,7 @@
+use crate::cameras::camera::setup_camera;
 use crate::components::*;
 use crate::constants::{MAP_LEVEL_EXPERIENCE, SCREEN_HEIGHT, SCREEN_WIDTH};
 use bevy::prelude::*;
-use crate::cameras::camera::setup_camera;
 
 pub struct UiPlayerPlugin;
 
@@ -21,80 +21,82 @@ impl Plugin for UiPlayerPlugin {
 fn setup_player_health_ui(mut commands: Commands) {
     let parent_node = commands
         .spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                position_type: PositionType::Absolute,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    position_type: PositionType::Absolute,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },
-        Name::new("Player UI "),
-    )).id();
-    
+            Name::new("Player UI "),
+        ))
+        .id();
+
     let health_container = commands
         .spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Px(100.0),
-                height: Val::Px(10.0),
-                margin: UiRect::vertical(Val::Px(10.0)),
+            NodeBundle {
+                style: Style {
+                    width: Val::Px(100.0),
+                    height: Val::Px(8.0),
+                    margin: UiRect::top(Val::Px(65.0)),
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },
-        PlayerHealthUIParent,
-        Name::new("Health UI background"))).id();
-    
+            PlayerHealthUIParent,
+            Name::new("Health UI background"),
+        ))
+        .id();
+
     let health_background = commands
         .spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    left: Val::Px(0.0),
+                    ..default()
+                },
+                background_color: BackgroundColor(Color::BLACK),
                 ..default()
             },
-            background_color: BackgroundColor(Color::RED),
-            ..default()
-        },
-        PlayerHealthUIParent,
-        Name::new("Health UI background"))).id();
-    
+            PlayerHealthUIParent,
+            Name::new("Health UI background"),
+        ))
+        .id();
+
     let health_front = commands
         .spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(0.0),
+                    height: Val::Percent(100.0),
+                    left: Val::Px(0.0),
+                    ..default()
+                },
+                background_color: BackgroundColor(Color::RED),
                 ..default()
             },
-            background_color: BackgroundColor(Color::RED),
-            ..default()
-        },
             PlayerHealthUI,
-        Name::new("Health UI"))).id();
+            Name::new("Health UI"),
+        ))
+        .id();
 
-    
-    commands
-        .entity(parent_node)
-        .push_children(&[health_background]);
-    
     commands
         .entity(parent_node)
         .push_children(&[health_container]);
-    
+
     commands
         .entity(health_container)
         .push_children(&[health_background]);
-    
+
     commands
-        .entity(health_container)
+        .entity(health_background)
         .push_children(&[health_front]);
-
-
 }
 
 fn player_health_ui_sync(

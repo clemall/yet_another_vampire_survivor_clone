@@ -19,12 +19,13 @@ impl Plugin for PlayerCameraPlugin {
 pub fn setup_camera(mut commands: Commands) {
     commands.spawn((
         Camera2dBundle::default(),
-        PixelZoom::FitSize {
-            width: SCREEN_WIDTH,
-            height: SCREEN_HEIGHT,
-        },
-        // PixelZoom::Fixed(1),
-        PixelViewport,
+        // PixelZoom::FitSize {
+        //     width: SCREEN_WIDTH,
+        //     height: SCREEN_HEIGHT,
+        //     // width: 4000,
+        //     // height: 3000,
+        // },
+        // PixelViewport,
     ));
 }
 

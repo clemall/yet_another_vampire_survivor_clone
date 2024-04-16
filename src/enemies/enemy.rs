@@ -19,7 +19,6 @@ impl Plugin for EnemyPlugin {
             (
                 enemy_death_check,
                 enemy_applied_impulse,
-                enemy_applied_received_damage,
                 compute_enemy_velocity,
                 apply_aura_on_enemy_velocity,
                 apply_enemy_velocity,
@@ -30,7 +29,13 @@ impl Plugin for EnemyPlugin {
 
         app.add_systems(
             Update,
-            (enemy_damage_player, spawn_enemy).run_if(in_state(GameState::Gameplay)),
+            (
+                enemy_applied_received_damage,
+                enemy_damage_player,
+                spawn_enemy,
+                check_enemy_too_far,
+            )
+                .run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -151,12 +156,26 @@ fn apply_aura_on_enemy_velocity(
 }
 
 fn apply_enemy_velocity(mut enemies: Query<(&mut Transform, &EnemyVelocity)>) {
-    // let mut counter = 1;
     for (mut transform, velocity) in &mut enemies {
         transform.translation -= velocity.extend(0.0);
-        // counter += 1;
     }
-    // println!("{}", counter);
+}
+
+fn check_enemy_too_far(
+    mut commands: Commands,
+    player: Query<&Transform, (With<Player>, Without<Enemy>)>,
+    enemies: Query<(Entity, &Transform), With<Enemy>>,
+) {
+    let player = player.single();
+    for (enemy, transform) in &enemies {
+        if Vec2::distance(
+            player.translation.truncate(),
+            transform.translation.truncate(),
+        ) > 750.0
+        {
+            commands.entity(enemy).despawn_recursive();
+        }
+    }
 }
 
 fn enemy_damage_player(

@@ -7,10 +7,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
-    #[default]
     Gameplay,
     MainMenu,
     GameOver,
+    #[default]
     PlayerLevelUp,
 }
 
@@ -508,13 +508,13 @@ impl Rarity {
     }
     pub fn name(&self) -> &str {
         match self {
-            Rarity::Common => "Common",
-            Rarity::Uncommon => "Uncommon",
-            Rarity::Rare => "Rare",
-            Rarity::Epic => "Epic",
-            Rarity::Legendary => "Legendary",
-            Rarity::Cursed => "Cursed",
-            Rarity::Unique => "Unique",
+            Rarity::Common => "COMMON",
+            Rarity::Uncommon => "UNCOMMON",
+            Rarity::Rare => "RARE",
+            Rarity::Epic => "EPIC",
+            Rarity::Legendary => "LEGENDARY",
+            Rarity::Cursed => "CURSED",
+            Rarity::Unique => "UNIQUE",
         }
     }
 
@@ -598,12 +598,12 @@ impl ItemsTypes {
     }
     pub fn name(&self) -> &str {
         match self {
-            ItemsTypes::MaxHealth => "Max health",
-            ItemsTypes::MoveSpeed => "Move speed!",
-            ItemsTypes::Magnet => "Pickup radius",
-            ItemsTypes::Power => "More power",
-            ItemsTypes::WipCurseDamage => "The turret",
-            ItemsTypes::WipUniqueDamage => "Mighty sword",
+            ItemsTypes::MaxHealth => "GEM STONE",
+            ItemsTypes::MoveSpeed => "HERMES BOOTS",
+            ItemsTypes::Magnet => "MAGNET",
+            ItemsTypes::Power => "ALL MIGHT",
+            ItemsTypes::WipCurseDamage => "THE DESTROYER",
+            ItemsTypes::WipUniqueDamage => "MIGHTY SWORD",
         }
     }
     pub fn description(&self) -> &str {
