@@ -1,6 +1,5 @@
-use crate::cameras::camera::setup_camera;
 use crate::components::*;
-use crate::constants::{MAP_LEVEL_EXPERIENCE, SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::constants::{MAP_LEVEL_EXPERIENCE};
 use bevy::prelude::*;
 
 pub struct UiPlayerPlugin;

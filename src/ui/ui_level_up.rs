@@ -2,6 +2,7 @@ use crate::components::*;
 use crate::constants::{FONT, FONT_BOLD, SCREEN_WIDTH};
 use bevy::prelude::*;
 use rand::seq::SliceRandom;
+use rand::distributions::{Distribution, WeightedIndex};
 
 pub struct UiLevelUpPlugin;
 
@@ -29,7 +30,8 @@ fn despawn_level_up_ui(mut commands: Commands, ui: Query<Entity, With<LevelUpUI>
 fn spawn_level_up_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    camera: Query<&Camera>,
+    camera: Query<&Camera>, 
+    loot_table: Res<LootTable>,
 ) {
     let level_up_parent = commands
         .spawn((
@@ -74,11 +76,13 @@ fn spawn_level_up_ui(
     let ratio = view_dimensions.x / SCREEN_WIDTH as f32;
 
     // read this: https://stackoverflow.com/questions/34215280/how-can-i-randomly-select-one-element-from-a-vector-or-array
-    let rarity: [Rarity; 7] = Rarity::array();
-
+    // let rarity: [Rarity; 7] = Rarity::array();
+    let dist = WeightedIndex::new(loot_table.weighted_rarity.iter().map(|item| item.1)).unwrap();
+    
     for _ in 0..5 {
-        let rarity = *rarity.choose(&mut rand::thread_rng()).unwrap();
-        let item = *rarity.get_items().choose(&mut rand::thread_rng()).unwrap();
+        let rarity = loot_table.weighted_rarity[dist.sample(&mut rand::thread_rng())].0;
+        let item = loot_table.item_by_rarity.get(&rarity).unwrap().choose(&mut rand::thread_rng()).unwrap();
+        
 
         let texture = match rarity {
             Rarity::Common => asset_server.load("item_ui_background_common.png"),
@@ -107,7 +111,7 @@ fn spawn_level_up_ui(
                     ..default()
                 },
                 ButtonUpgrade {
-                    item_type: item,
+                    item_type: *item,
                     rarity: rarity,
                 },
             ))
@@ -136,7 +140,7 @@ fn spawn_level_up_ui(
         let item_description = commands
             .spawn(
                 TextBundle::from_section(
-                    item.description(),
+                    item.desc(),
                     TextStyle {
                         font: asset_server.load(FONT),
                         font_size: 16.0,

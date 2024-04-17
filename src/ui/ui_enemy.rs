@@ -1,5 +1,5 @@
 use crate::components::*;
-use crate::constants::{DAMAGE_FONT, DAMAGE_FONT_COLOR, DAMAGE_FONT_SIZE, FONT};
+use crate::constants::{DAMAGE_FONT, DAMAGE_FONT_COLOR, DAMAGE_FONT_SIZE};
 use bevy::prelude::*;
 
 pub struct UiEnemyPlugin;

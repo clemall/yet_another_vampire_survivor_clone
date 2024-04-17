@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::constants::*;
 use bevy::math::Vec2;
 use bevy::prelude::*;
@@ -482,8 +483,13 @@ pub struct WaveManagerGlobalTime {
 }
 
 // items
+#[derive(Resource)]
+pub struct LootTable {
+    pub weighted_rarity: [(Rarity,u32); 7],
+    pub item_by_rarity: HashMap<Rarity,Vec<ItemsTypes>>,
+}
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -495,17 +501,6 @@ pub enum Rarity {
 }
 
 impl Rarity {
-    pub fn array() -> [Rarity; 7] {
-        [
-            Rarity::Common,
-            Rarity::Uncommon,
-            Rarity::Rare,
-            Rarity::Epic,
-            Rarity::Legendary,
-            Rarity::Cursed,
-            Rarity::Unique,
-        ]
-    }
     pub fn name(&self) -> &str {
         match self {
             Rarity::Common => "COMMON",
@@ -515,62 +510,6 @@ impl Rarity {
             Rarity::Legendary => "LEGENDARY",
             Rarity::Cursed => "CURSED",
             Rarity::Unique => "UNIQUE",
-        }
-    }
-
-    pub fn get_items(&self) -> Vec<ItemsTypes> {
-        match self {
-            Rarity::Common => {
-                vec![
-                    ItemsTypes::MaxHealth,
-                    ItemsTypes::MoveSpeed,
-                    ItemsTypes::Magnet,
-                    ItemsTypes::Power,
-                    ItemsTypes::Magnet,
-                ]
-            }
-            Rarity::Uncommon => {
-                vec![
-                    ItemsTypes::MaxHealth,
-                    ItemsTypes::MoveSpeed,
-                    ItemsTypes::Magnet,
-                    ItemsTypes::Power,
-                    ItemsTypes::Magnet,
-                ]
-            }
-            Rarity::Rare => {
-                vec![
-                    ItemsTypes::MaxHealth,
-                    ItemsTypes::MoveSpeed,
-                    ItemsTypes::Magnet,
-                    ItemsTypes::Power,
-                    ItemsTypes::Magnet,
-                ]
-            }
-            Rarity::Epic => {
-                vec![
-                    ItemsTypes::MaxHealth,
-                    ItemsTypes::MoveSpeed,
-                    ItemsTypes::Magnet,
-                    ItemsTypes::Power,
-                    ItemsTypes::Magnet,
-                ]
-            }
-            Rarity::Legendary => {
-                vec![
-                    ItemsTypes::MaxHealth,
-                    ItemsTypes::MoveSpeed,
-                    ItemsTypes::Magnet,
-                    ItemsTypes::Power,
-                    ItemsTypes::Magnet,
-                ]
-            }
-            Rarity::Cursed => {
-                vec![ItemsTypes::WipCurseDamage]
-            }
-            Rarity::Unique => {
-                vec![ItemsTypes::WipUniqueDamage]
-            }
         }
     }
 }
@@ -586,16 +525,6 @@ pub enum ItemsTypes {
 }
 
 impl ItemsTypes {
-    pub fn array() -> [ItemsTypes; 6] {
-        [
-            ItemsTypes::MaxHealth,
-            ItemsTypes::MoveSpeed,
-            ItemsTypes::Magnet,
-            ItemsTypes::Power,
-            ItemsTypes::WipCurseDamage,
-            ItemsTypes::WipUniqueDamage,
-        ]
-    }
     pub fn name(&self) -> &str {
         match self {
             ItemsTypes::MaxHealth => "GEM STONE",
@@ -606,7 +535,7 @@ impl ItemsTypes {
             ItemsTypes::WipUniqueDamage => "MIGHTY SWORD",
         }
     }
-    pub fn description(&self) -> &str {
+    pub fn desc(&self) -> &str {
         match self {
             ItemsTypes::MaxHealth => "Increase health by XXXX",
             ItemsTypes::MoveSpeed => "Increase move speed by XXXX",

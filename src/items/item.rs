@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::components::*;
 use bevy::prelude::*;
 
@@ -5,6 +6,56 @@ pub struct ItemsPlugin;
 
 impl Plugin for ItemsPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(LootTable{
+            weighted_rarity: [
+                (Rarity::Common,300),
+                (Rarity::Uncommon,100),
+                (Rarity::Rare,30),
+                (Rarity::Epic,10),
+                (Rarity::Legendary,2),
+                (Rarity::Cursed,0), // Always offered once
+                (Rarity::Unique,1),
+            ],
+            item_by_rarity: HashMap::from([
+                (Rarity::Common, vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]),
+                (Rarity::Uncommon, vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]),
+                (Rarity::Rare, vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]),
+                (Rarity::Epic, vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]),
+                (Rarity::Legendary, vec![
+                    ItemsTypes::MaxHealth,
+                    ItemsTypes::MoveSpeed,
+                    ItemsTypes::Magnet,
+                    ItemsTypes::Power,
+                    ItemsTypes::Magnet,
+                ]),
+                (Rarity::Cursed, vec![ItemsTypes::WipCurseDamage]),
+                (Rarity::Unique, vec![ItemsTypes::WipUniqueDamage]),
+            ]),
+        });
         app.add_systems(
             Update,
             (
