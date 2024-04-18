@@ -24,6 +24,7 @@ impl Plugin for GenericWeaponPlugin {
                 projectile_move_spiral,
                 // projectile_move_boomerang,
                 projectile_rotate_on_self,
+                projectile_scale,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -39,7 +40,6 @@ fn projectile_delete(
         commands.entity(projectile_entity).despawn_recursive();
     }
 }
-
 
 fn projectile_apply_damage(
     mut commands: Commands,
@@ -195,6 +195,16 @@ fn projectile_move_toward_direction(
     for (mut transform, speed, direction) in &mut projectiles {
         transform.translation.x -= direction.x * time.delta_seconds() * speed.0;
         transform.translation.y -= direction.y * time.delta_seconds() * speed.0;
+    }
+}
+
+// not the smartest in terms of performance, but it does the job.
+fn projectile_scale(
+    mut projectiles: Query<&mut Transform, (With<Projectile>, Without<ProjectileFixedScale>)>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    for mut transform in &mut projectiles {
+        transform.scale = Vec3::splat(player_stats.area);
     }
 }
 

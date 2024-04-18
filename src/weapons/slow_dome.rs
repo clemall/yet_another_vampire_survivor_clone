@@ -82,19 +82,18 @@ fn spawn_slow_dome_attack(
                 if let Ok((_enemy, enemy_transform)) = enemies.get(closed_enemy) {
                     attack_ammo.amount -= 1;
 
-                    let texture = asset_server.load("shuriken_temp.png");
+                    let texture = asset_server.load("slow-dome.png");
                     commands.spawn((
                         SpriteBundle {
                             texture,
                             transform: Transform {
                                 translation: enemy_transform.translation,
-                                scale: Vec3::new(4.0, 4.0, 4.0),
                                 ..default()
                             },
                             ..default()
                         },
                         Sensor,
-                        Collider::ball(32.0 / 2.0),
+                        Collider::ball(95.0 / 2.0),
                         ProjectileBundleCollider::default(),
                         ProjectileLifetime {
                             timer: Timer::from_seconds(8.0, TimerMode::Once),

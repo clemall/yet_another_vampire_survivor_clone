@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use crate::constants::*;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
 use bevy_rapier2d::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
@@ -26,10 +26,10 @@ pub struct Player {
 pub struct PlayerStats {
     pub mul_max_health: f32,
     pub mul_move_speed: f32,
-    // pub mul_recovery: u32,
+    pub add_recovery: f32,
     // pub mul_resistance: f32,
     pub mul_power: f32,
-    // pub mul_area: f32,
+    pub mul_area: f32,
     // pub mul_attack_speed: f32,
     // pub mul_attack_duration: f32,
     // pub mul_attack_amount: u32,
@@ -56,10 +56,10 @@ pub struct CharacterStats {
 pub struct PlayerInGameStats {
     pub max_health: f32,
     pub move_speed: f32,
-    // pub recovery: u32,
+    pub recovery: f32,
     // pub resistance: f32,
     pub power: f32,
-    // pub area: f32,
+    pub area: f32,
     // pub attack_speed: f32,
     // pub attack_duration: f32,
     // pub attack_amount: u32,
@@ -72,12 +72,14 @@ pub struct PlayerInGameStats {
     // pub extra_life: f32,
 }
 pub const BASE_MAX_HEALTH: f32 = 100.0;
+pub const BASE_RECOVERY: f32 = 0.2; // 0.2 health/s
 pub const BASE_MOVE_SPEED: f32 = 60.0;
 pub const BASE_MAGNET: f32 = 20.0;
 // The power is a percentage so multiplying facteur will be the base percentage multiply by another
 // percentage.
 // Default value is 1.0 for 100% damage by default.
 pub const BASE_POWER: f32 = 1.0; // percentage
+pub const BASE_AREA: f32 = 1.0; // percentage (Will be use to multiply scales)
 
 pub const BASE_LUCK: f32 = 1.0; // To be used later
 
@@ -87,7 +89,9 @@ impl Default for PlayerInGameStats {
         Self {
             max_health: BASE_MAX_HEALTH,
             move_speed: BASE_MOVE_SPEED,
+            recovery: BASE_RECOVERY,
             power: BASE_POWER,
+            area: BASE_AREA,
             magnet: BASE_MAGNET,
         }
     }
@@ -109,6 +113,9 @@ pub struct Health(pub f32);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct MaxHealth(pub f32);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct HealthRecovery(pub f32);
 
 // Enemy
 
@@ -356,6 +363,9 @@ impl Default for ProjectileBundleCollider {
 pub struct Projectile;
 
 #[derive(Component)]
+pub struct ProjectileFixedScale;
+
+#[derive(Component)]
 pub struct ProjectileType(pub WeaponsTypes);
 
 #[derive(Component)]
@@ -485,8 +495,8 @@ pub struct WaveManagerGlobalTime {
 // items
 #[derive(Resource)]
 pub struct LootTable {
-    pub weighted_rarity: [(Rarity,u32); 7],
-    pub item_by_rarity: HashMap<Rarity,Vec<ItemsTypes>>,
+    pub weighted_rarity: [(Rarity, u32); 7],
+    pub item_by_rarity: HashMap<Rarity, Vec<ItemsTypes>>,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
@@ -517,9 +527,11 @@ impl Rarity {
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ItemsTypes {
     MaxHealth,
+    Recovery,
     MoveSpeed,
     Magnet,
     Power,
+    Area,
     WipCurseDamage,
     WipUniqueDamage,
 }
@@ -528,9 +540,11 @@ impl ItemsTypes {
     pub fn name(&self) -> &str {
         match self {
             ItemsTypes::MaxHealth => "GEM STONE",
+            ItemsTypes::Recovery => "PUMMAROLA",
             ItemsTypes::MoveSpeed => "HERMES BOOTS",
             ItemsTypes::Magnet => "MAGNET",
             ItemsTypes::Power => "ALL MIGHT",
+            ItemsTypes::Area => "AREA",
             ItemsTypes::WipCurseDamage => "THE DESTROYER",
             ItemsTypes::WipUniqueDamage => "MIGHTY SWORD",
         }
@@ -538,9 +552,11 @@ impl ItemsTypes {
     pub fn desc(&self) -> &str {
         match self {
             ItemsTypes::MaxHealth => "Increase health by XXXX",
+            ItemsTypes::Recovery => "Increase max health by 0.2",
             ItemsTypes::MoveSpeed => "Increase move speed by XXXX",
             ItemsTypes::Magnet => "Increase pickup radius by XXXX",
             ItemsTypes::Power => "Increase damage by XXXX",
+            ItemsTypes::Area => "Increase area by XXXX",
             ItemsTypes::WipCurseDamage => "Increase damage by XXXX but reduce speed by YYYY",
             ItemsTypes::WipUniqueDamage => "Increase damage by XXXX",
         }

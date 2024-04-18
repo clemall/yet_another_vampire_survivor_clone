@@ -12,7 +12,9 @@ impl Plugin for PlayerPlugin {
             data: PlayerStats {
                 mul_max_health: 0.1,
                 mul_move_speed: 0.1,
+                add_recovery: 0.0,
                 mul_power: 0.0,
+                mul_area: 0.0,
                 mul_magnet: 1.0,
             },
         });
@@ -22,7 +24,9 @@ impl Plugin for PlayerPlugin {
             data: PlayerStats {
                 mul_max_health: 0.1,
                 mul_move_speed: 0.1,
+                add_recovery: 0.0,
                 mul_power: 0.0,
+                mul_area: 0.0,
                 mul_magnet: 0.0,
             },
         });
@@ -38,7 +42,10 @@ impl Plugin for PlayerPlugin {
             weapons: Vec::new(),
         });
 
-        app.add_systems(Startup, (setup_player_stats, setup_player_plugin).chain());
+        app.add_systems(
+            Startup,
+            (setup_player_in_game_stats, setup_player_plugin).chain(),
+        );
 
         app.add_systems(
             Update,
@@ -52,48 +59,11 @@ impl Plugin for PlayerPlugin {
                 player_received_damage,
                 player_game_over,
                 compute_experience,
+                player_health_recovery,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
     }
-}
-
-fn setup_player_stats(
-    meta_stats: Res<PlayerMetaStats>,
-    character_stats: Res<CharacterStats>,
-    mut player_stats: ResMut<PlayerInGameStats>,
-) {
-    player_stats.max_health += (BASE_MAX_HEALTH * meta_stats.data.mul_max_health)
-        + (BASE_MAX_HEALTH * character_stats.data.mul_max_health);
-
-    player_stats.move_speed += (BASE_MOVE_SPEED * meta_stats.data.mul_move_speed)
-        + (BASE_MOVE_SPEED * character_stats.data.mul_move_speed);
-
-    player_stats.magnet += (BASE_MAGNET * meta_stats.data.mul_magnet)
-        + (BASE_MAGNET * character_stats.data.mul_magnet);
-
-    println!("setup_player_stats");
-}
-
-fn update_player_stats(
-    mut commands: Commands,
-    player_stats: Res<PlayerInGameStats>,
-    mut max_health: Query<&mut MaxHealth, With<Player>>,
-    pickup_radius_entity: Query<Entity, With<PlayerPickupRadius>>,
-) {
-    let mut max_health = max_health.single_mut();
-    max_health.0 = player_stats.max_health;
-
-    let pickup_radius_entity = pickup_radius_entity.single();
-    commands
-        .entity(pickup_radius_entity)
-        .insert(Collider::ball(player_stats.magnet));
-
-    println!("Debug player stats:");
-    println!("max_health: {}", player_stats.max_health);
-    println!("move_speed: {}", player_stats.move_speed);
-    println!("magnet: {}", player_stats.magnet);
-    println!("power: {}", player_stats.power);
 }
 
 fn setup_player_plugin(
@@ -140,6 +110,7 @@ fn setup_player_plugin(
         ActiveCollisionTypes::default() | ActiveCollisionTypes::STATIC_STATIC,
         Health(player_stats.max_health),
         MaxHealth(player_stats.max_health),
+        HealthRecovery(player_stats.recovery),
         Player {
             facing: Facing::Right,
         },
@@ -160,6 +131,54 @@ fn setup_player_plugin(
     commands.spawn(player).with_children(|commands| {
         commands.spawn(player_pickup_collider);
     });
+}
+
+fn setup_player_in_game_stats(
+    meta_stats: Res<PlayerMetaStats>,
+    character_stats: Res<CharacterStats>,
+    mut player_stats: ResMut<PlayerInGameStats>,
+) {
+    player_stats.max_health += (BASE_MAX_HEALTH * meta_stats.data.mul_max_health)
+        + (BASE_MAX_HEALTH * character_stats.data.mul_max_health);
+
+    player_stats.move_speed += (BASE_MOVE_SPEED * meta_stats.data.mul_move_speed)
+        + (BASE_MOVE_SPEED * character_stats.data.mul_move_speed);
+
+    player_stats.magnet += (BASE_MAGNET * meta_stats.data.mul_magnet)
+        + (BASE_MAGNET * character_stats.data.mul_magnet);
+
+    player_stats.area +=
+        (BASE_AREA * meta_stats.data.mul_area) + (BASE_AREA * character_stats.data.mul_area);
+
+    // Additive
+    player_stats.recovery += meta_stats.data.add_recovery + character_stats.data.add_recovery;
+
+    println!("setup_player_stats");
+}
+
+fn update_player_stats(
+    mut commands: Commands,
+    player_stats: Res<PlayerInGameStats>,
+    mut player: Query<(&mut MaxHealth, &mut HealthRecovery), With<Player>>,
+    pickup_radius_entity: Query<Entity, With<PlayerPickupRadius>>,
+) {
+    let (mut player_max_health, mut player_recovery) = player.single_mut();
+    player_max_health.0 = player_stats.max_health;
+    player_recovery.0 = player_stats.recovery;
+
+    let pickup_radius_entity = pickup_radius_entity.single();
+    commands
+        .entity(pickup_radius_entity)
+        .insert(Collider::ball(player_stats.magnet));
+
+    // Debug stuff
+    println!("Debug player stats:");
+    println!("max_health: {}", player_stats.max_health);
+    println!("recovery: {}", player_stats.recovery);
+    println!("move_speed: {}", player_stats.move_speed);
+    println!("magnet: {}", player_stats.magnet);
+    println!("power: {}", player_stats.power);
+    println!("area: {}", player_stats.area);
 }
 
 // public because of the camera, see camera.rs
@@ -251,4 +270,12 @@ fn player_received_damage(
     for event in received_damage.read() {
         player_health.0 -= event.damage;
     }
+}
+
+fn player_health_recovery(
+    mut player: Query<(&mut Health, &HealthRecovery), With<Player>>,
+    time: Res<Time>,
+) {
+    let (mut player_health, player_recovery) = player.single_mut();
+    player_health.0 += player_recovery.0 * time.delta_seconds();
 }

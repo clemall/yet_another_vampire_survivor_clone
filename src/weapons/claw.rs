@@ -17,7 +17,7 @@ impl Plugin for WeaponClawPlugin {
             Update,
             (
                 spawn_claw_attack.after(start_reload_attack_spawner),
-                claw_attack_animation_and_collider,
+                // claw_attack_animation_and_collider,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -143,12 +143,12 @@ fn spawn_claw_attack(
     }
 }
 
-fn claw_attack_animation_and_collider(
-    mut claws: Query<(&mut Transform, &ProjectileLifetime), With<Claw>>,
-) {
-    for (mut tranform, attack_duration) in &mut claws {
-        // transform claw attack
-        tranform.scale.x = (attack_duration.timer.fraction() * 0.2) + 0.8;
-        tranform.scale.y = (attack_duration.timer.fraction() * 0.2) + 0.8;
-    }
-}
+// fn claw_attack_animation_and_collider(
+//     mut claws: Query<(&mut Transform, &ProjectileLifetime), With<Claw>>,
+// ) {
+//     for (mut tranform, attack_duration) in &mut claws {
+//         // transform claw attack
+//         tranform.scale.x = (attack_duration.timer.fraction() * 0.2) + 0.8;
+//         tranform.scale.y = (attack_duration.timer.fraction() * 0.2) + 0.8;
+//     }
+// }
