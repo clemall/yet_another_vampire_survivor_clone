@@ -79,10 +79,14 @@ fn spawn_level_up_ui(
     // let rarity: [Rarity; 7] = Rarity::array();
     let dist = WeightedIndex::new(loot_table.weighted_rarity.iter().map(|item| item.1)).unwrap();
     
-    for _ in 0..5 {
-        let rarity = loot_table.weighted_rarity[dist.sample(&mut rand::thread_rng())].0;
-        let item = loot_table.item_by_rarity.get(&rarity).unwrap().choose(&mut rand::thread_rng()).unwrap();
+    for index in 0..5 {
+        let mut rarity = loot_table.weighted_rarity[dist.sample(&mut rand::thread_rng())].0;
         
+        // always offer a cursed item
+        if index == 4 {
+            rarity = loot_table.weighted_rarity[5].0;
+        }
+        let item = loot_table.item_by_rarity.get(&rarity).unwrap().choose(&mut rand::thread_rng()).unwrap();
 
         let texture = match rarity {
             Rarity::Common => asset_server.load("item_ui_background_common.png"),
