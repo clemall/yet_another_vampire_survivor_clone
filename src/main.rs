@@ -78,7 +78,7 @@ fn main() {
         // Player plugin
         .add_plugins(PlayerPlugin)
         // items
-        // .add_plugins(ItemsPlugin)
+        .add_plugins(ItemsPlugin)
         // Waves
         .add_plugins(WavesPlugin)
         .add_plugins(WavesMap1Plugin) // Temp
@@ -87,7 +87,7 @@ fn main() {
         // UI
         .add_plugins(UiEnemyPlugin)
         .add_plugins(UiPlayerPlugin)
-        // .add_plugins(UiLevelUpPlugin)
+        .add_plugins(UiLevelUpPlugin)
         // animation
         .add_plugins(AnimationSimplePlugin)
         // gems
@@ -236,6 +236,4 @@ fn debug(
     if keyboard_input.just_pressed(KeyCode::KeyQ) {
         next_state.set(GameState::PlayerLevelUp);
     }
-
-
 }

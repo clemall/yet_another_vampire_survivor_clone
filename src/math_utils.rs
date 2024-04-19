@@ -101,12 +101,16 @@ pub fn get_random_position_outside_screen(camera_position: Vec2) -> Vec2 {
     camera_position + position
 }
 
-pub fn find_closest(origin: Vec3, entities: Query<(Entity, &Transform)>, seen_enemies:Option<&Vec<Entity>>) -> Option<Entity> {
+pub fn find_closest(
+    origin: Vec3,
+    entities: Query<(Entity, &Transform)>,
+    seen_enemies: Option<&Vec<Entity>>,
+) -> Option<Entity> {
     let mut closed_enemy: Option<Entity> = None;
     let mut closed_enemy_distance: f32 = 999999.0;
     for (entity, enemy_transform) in entities.iter() {
-        if let Some(seen_enemies) = seen_enemies{
-            if seen_enemies.contains(&entity){
+        if let Some(seen_enemies) = seen_enemies {
+            if seen_enemies.contains(&entity) {
                 continue;
             }
         }

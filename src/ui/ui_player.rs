@@ -1,5 +1,5 @@
 use crate::components::*;
-use crate::constants::{MAP_LEVEL_EXPERIENCE};
+use crate::constants::MAP_LEVEL_EXPERIENCE;
 use bevy::prelude::*;
 
 pub struct UiPlayerPlugin;

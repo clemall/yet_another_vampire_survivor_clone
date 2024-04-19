@@ -152,7 +152,6 @@ fn setup_player_in_game_stats(
 
     // Additive
     player_stats.recovery += meta_stats.data.add_recovery + character_stats.data.add_recovery;
-
 }
 
 fn update_player_stats(
@@ -187,7 +186,6 @@ pub fn player_movement(
     player_stats: Res<PlayerInGameStats>,
     time: Res<Time>,
 ) {
-    println!("je passe");
     let (mut avatar_transform, mut avatar_sprite, mut player) = query.single_mut();
     let mut direction = Vec2::new(0., 0.);
 

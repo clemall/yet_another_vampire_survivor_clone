@@ -8,10 +8,10 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
+    #[default]
     Gameplay,
     MainMenu,
     GameOver,
-    #[default]
     PlayerLevelUp,
 }
 
@@ -106,8 +106,6 @@ pub enum PlayerBaseStatsType {
     Area,
     Luck,
 }
-
-
 
 #[derive(Resource, Debug)]
 pub struct PlayerExperience {
@@ -506,7 +504,7 @@ pub struct WaveManagerGlobalTime {
 
 // items
 
-#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash,Deserialize,Serialize )]
+#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash, Deserialize, Serialize)]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -532,27 +530,30 @@ impl Rarity {
 }
 #[derive(Resource, Debug)]
 pub struct LootTable {
-    pub weighted_rarity: Vec<(Rarity, u32)>,// [(Rarity, u32); 7],
+    pub weighted_rarity: Vec<(Rarity, u32)>, // [(Rarity, u32); 7],
     pub item_by_rarity: HashMap<Rarity, Vec<String>>, // String as hashmap key to ItemsResource.items
 }
 
 #[derive(Resource, Debug, Clone, Deserialize, Serialize)]
 pub struct ItemsResource {
     pub weighted_rarity: Vec<(Rarity, u32)>,
-    pub items: HashMap<String,ItemData>,
+    pub items: HashMap<String, ItemData>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ItemData {
     pub name: String,
-    pub base_stat: PlayerBaseStatsType,
-    pub rarity_variations: HashMap<Rarity,ItemRarityVariation>,
+    pub rarity_to_effects: HashMap<Rarity, ItemEffects>,
 }
 
-
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
-pub struct ItemRarityVariation {
-    pub value: f32,
+pub struct ItemEffects {
+    pub effects: Vec<ItemEffect>,
     pub description: String,
 }
 
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub struct ItemEffect {
+    pub base_stat: PlayerBaseStatsType,
+    pub value: f32,
+}
