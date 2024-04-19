@@ -78,7 +78,7 @@ fn main() {
         // Player plugin
         .add_plugins(PlayerPlugin)
         // items
-        .add_plugins(ItemsPlugin)
+        // .add_plugins(ItemsPlugin)
         // Waves
         .add_plugins(WavesPlugin)
         .add_plugins(WavesMap1Plugin) // Temp
@@ -87,7 +87,7 @@ fn main() {
         // UI
         .add_plugins(UiEnemyPlugin)
         .add_plugins(UiPlayerPlugin)
-        .add_plugins(UiLevelUpPlugin)
+        // .add_plugins(UiLevelUpPlugin)
         // animation
         .add_plugins(AnimationSimplePlugin)
         // gems
@@ -107,12 +107,12 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(64.0))
         .add_systems(Startup, background)
         .add_systems(Update, debug)
-        .add_plugins(
-            SteppingPlugin::default()
-                .add_schedule(Update)
-                .add_schedule(FixedUpdate)
-                .at(Val::Percent(35.0), Val::Percent(50.0)),
-        )
+        // .add_plugins(
+        //     SteppingPlugin::default()
+        //         .add_schedule(Update)
+        //         .add_schedule(FixedUpdate)
+        //         .at(Val::Percent(35.0), Val::Percent(50.0)),
+        // )
         .run();
 }
 
@@ -155,7 +155,6 @@ fn debug(
     mut spawn_enemy: EventWriter<SpawnEnemy>,
     mut item_pickup: EventWriter<ItemPickup>,
     mut next_state: ResMut<NextState<GameState>>,
-    mut ui_scale: ResMut<UiScale>,
     // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
@@ -227,57 +226,16 @@ fn debug(
         });
     }
 
-    if keyboard_input.just_pressed(KeyCode::KeyZ) {
+    if keyboard_input.just_pressed(KeyCode::KeyX) {
         item_pickup.send(ItemPickup {
-            item_type: ItemsTypes::WipCurseDamage,
-            rarity: Rarity::Cursed,
+            item_key: "HEALTHY_GEM_STONE".to_string(),
+            rarity: Rarity::Legendary,
         });
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyQ) {
         next_state.set(GameState::PlayerLevelUp);
     }
-    // check how to make it work with our resolution
-    // if keyboard_input.just_pressed(KeyCode::KeyS) {
-    //     println!("{}", ui_scale.0);
-    //     ui_scale.0 = 1.0;
-    // }
 
-    // gizmos.rect_2d(
-    //     Vec2::new(0.0, (-SCREEN_HEIGHT - 50 + 100) as f32),
-    //     0.0,
-    //     Vec2::new(
-    //         (-SCREEN_WIDTH / 2 - 100 - SCREEN_WIDTH / 2 + 100) as f32,
-    //         (SCREEN_HEIGHT / 2 - 50 - SCREEN_HEIGHT / 2 - 100) as f32,
-    //     ),
-    //     Color::BLUE,
-    // );
-    //
-    // gizmos.rect_2d(
-    //     Vec2::new(0.0, (SCREEN_HEIGHT + 50 - 200) as f32),
-    //     0.0,
-    //     Vec2::new(
-    //         (-SCREEN_WIDTH / 2 - 100 - SCREEN_WIDTH / 2 + 100) as f32,
-    //         (SCREEN_HEIGHT / 2 + 200 - SCREEN_HEIGHT / 2 + 50) as f32,
-    //     ),
-    //     Color::PURPLE,
-    // )
 
-    //     2 => {
-    //         // bottom
-    //         position.x = rng.gen_range(-SCREEN_WIDTH / 2 - 100..SCREEN_WIDTH / 2 + 100) as f32;
-    //         position.y = rng.gen_range(SCREEN_HEIGHT / 2 + 50..SCREEN_HEIGHT / 2 + 200) as f32;
-    //     }
-    //     3 => {
-    //         // left
-    //         position.x = rng.gen_range(-SCREEN_WIDTH / 2 - 200..-SCREEN_WIDTH / 2 - 50) as f32;
-    //         position.y = rng.gen_range(-SCREEN_HEIGHT / 2 - 100..SCREEN_HEIGHT / 2 + 100) as f32;
-    //     }
-    //     4 => {
-    //         // right
-    //         position.x = rng.gen_range(SCREEN_WIDTH / 2 + 50..SCREEN_WIDTH / 2 + 200) as f32;
-    //         position.y = rng.gen_range(-SCREEN_HEIGHT / 2 - 100..SCREEN_HEIGHT / 2 + 100) as f32;
-    //     }
-    //     _ => {} // never used
-    // }
 }

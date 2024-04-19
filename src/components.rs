@@ -71,18 +71,6 @@ pub struct PlayerInGameStats {
     pub magnet: f32,
     // pub extra_life: f32,
 }
-pub const BASE_MAX_HEALTH: f32 = 100.0;
-pub const BASE_RECOVERY: f32 = 0.2; // 0.2 health/s
-pub const BASE_MOVE_SPEED: f32 = 60.0;
-pub const BASE_MAGNET: f32 = 20.0;
-// The power is a percentage so multiplying facteur will be the base percentage multiply by another
-// percentage.
-// Default value is 1.0 for 100% damage by default.
-pub const BASE_POWER: f32 = 1.0; // percentage
-pub const BASE_AREA: f32 = 1.0; // percentage (Will be use to multiply scales)
-
-pub const BASE_LUCK: f32 = 1.0; // To be used later
-
 // Default value for all character before multiplication
 impl Default for PlayerInGameStats {
     fn default() -> Self {
@@ -96,6 +84,30 @@ impl Default for PlayerInGameStats {
         }
     }
 }
+pub const BASE_MAX_HEALTH: f32 = 100.0;
+pub const BASE_RECOVERY: f32 = 0.2; // 0.2 health/s
+pub const BASE_MOVE_SPEED: f32 = 60.0;
+pub const BASE_MAGNET: f32 = 20.0;
+// The power is a percentage so multiplying facteur will be the base percentage multiply by another
+// percentage.
+// Default value is 1.0 for 100% damage by default.
+pub const BASE_POWER: f32 = 1.0; // percentage
+pub const BASE_AREA: f32 = 1.0; // percentage (Will be use to multiply scales)
+
+pub const BASE_LUCK: f32 = 1.0; // To be used later
+
+#[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
+pub enum PlayerBaseStatsType {
+    MaxHealth,
+    Recovery,
+    MoveSpeed,
+    Magnet,
+    Power,
+    Area,
+    Luck,
+}
+
+
 
 #[derive(Resource, Debug)]
 pub struct PlayerExperience {
@@ -269,7 +281,7 @@ pub struct GemIsAttracted;
 
 #[derive(Event)]
 pub struct ItemPickup {
-    pub item_type: ItemsTypes,
+    pub item_key: String,
     pub rarity: Rarity,
 }
 
@@ -326,7 +338,7 @@ pub struct LevelUpUI;
 
 #[derive(Component)]
 pub struct ButtonUpgrade {
-    pub item_type: ItemsTypes,
+    pub item_key: String,
     pub rarity: Rarity,
 }
 
@@ -493,13 +505,8 @@ pub struct WaveManagerGlobalTime {
 }
 
 // items
-#[derive(Resource)]
-pub struct LootTable {
-    pub weighted_rarity: [(Rarity, u32); 7],
-    pub item_by_rarity: HashMap<Rarity, Vec<ItemsTypes>>,
-}
 
-#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash)]
+#[derive(Debug, PartialEq, Clone, Copy, Eq, Hash,Deserialize,Serialize )]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -523,42 +530,29 @@ impl Rarity {
         }
     }
 }
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum ItemsTypes {
-    MaxHealth,
-    Recovery,
-    MoveSpeed,
-    Magnet,
-    Power,
-    Area,
-    WipCurseDamage,
-    WipUniqueDamage,
+#[derive(Resource, Debug)]
+pub struct LootTable {
+    pub weighted_rarity: Vec<(Rarity, u32)>,// [(Rarity, u32); 7],
+    pub item_by_rarity: HashMap<Rarity, Vec<String>>, // String as hashmap key to ItemsResource.items
 }
 
-impl ItemsTypes {
-    pub fn name(&self) -> &str {
-        match self {
-            ItemsTypes::MaxHealth => "GEM STONE",
-            ItemsTypes::Recovery => "PUMMAROLA",
-            ItemsTypes::MoveSpeed => "HERMES BOOTS",
-            ItemsTypes::Magnet => "MAGNET",
-            ItemsTypes::Power => "ALL MIGHT",
-            ItemsTypes::Area => "AREA",
-            ItemsTypes::WipCurseDamage => "THE DESTROYER",
-            ItemsTypes::WipUniqueDamage => "MIGHTY SWORD",
-        }
-    }
-    pub fn desc(&self) -> &str {
-        match self {
-            ItemsTypes::MaxHealth => "Increase health by XXXX",
-            ItemsTypes::Recovery => "Increase max health by 0.2",
-            ItemsTypes::MoveSpeed => "Increase move speed by XXXX",
-            ItemsTypes::Magnet => "Increase pickup radius by XXXX",
-            ItemsTypes::Power => "Increase damage by XXXX",
-            ItemsTypes::Area => "Increase area by XXXX",
-            ItemsTypes::WipCurseDamage => "Increase damage by XXXX but reduce speed by YYYY",
-            ItemsTypes::WipUniqueDamage => "Increase damage by XXXX",
-        }
-    }
+#[derive(Resource, Debug, Clone, Deserialize, Serialize)]
+pub struct ItemsResource {
+    pub weighted_rarity: Vec<(Rarity, u32)>,
+    pub items: HashMap<String,ItemData>,
 }
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ItemData {
+    pub name: String,
+    pub base_stat: PlayerBaseStatsType,
+    pub rarity_variations: HashMap<Rarity,ItemRarityVariation>,
+}
+
+
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub struct ItemRarityVariation {
+    pub value: f32,
+    pub description: String,
+}
+
