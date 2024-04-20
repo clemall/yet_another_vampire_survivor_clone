@@ -2,6 +2,11 @@ use crate::components::*;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+#[derive(Component)]
+pub struct FireAreaSpawner;
+
+#[derive(Component)]
+pub struct FireArea;
 pub struct WeaponFireAreaPlugin;
 
 impl Plugin for WeaponFireAreaPlugin {
@@ -27,6 +32,7 @@ pub fn setup_fire_area(
     asset_server: Res<AssetServer>,
     player_transform: Query<&Transform, With<Player>>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player_transform.single();
     let texture = asset_server.load("fire-area.png");
@@ -49,6 +55,7 @@ pub fn setup_fire_area(
                         player_transform.translation.y,
                         1.0,
                     ),
+                    scale: Vec3::splat(player_stats.area),
                     ..default()
                 },
                 ..default()

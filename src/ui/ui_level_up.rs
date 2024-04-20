@@ -3,6 +3,7 @@ use crate::constants::{FONT, FONT_BOLD, SCREEN_WIDTH};
 use bevy::prelude::*;
 use rand::distributions::{Distribution, WeightedIndex};
 use rand::seq::SliceRandom;
+use rand::Rng;
 
 pub struct UiLevelUpPlugin;
 
@@ -81,8 +82,8 @@ fn spawn_level_up_ui(
     for index in 0..5 {
         let mut rarity = loot_table.weighted_rarity[dist.sample(&mut rand::thread_rng())].0;
 
-        // always offer a cursed item
-        if index == 4 {
+        // has a small chance to be a cursed item
+        if rand::thread_rng().gen_range(0.0..100.0) < 1.0 {
             rarity = loot_table.weighted_rarity[5].0;
         }
         let item_key = loot_table

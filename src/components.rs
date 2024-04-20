@@ -27,14 +27,14 @@ pub struct PlayerStats {
     pub mul_max_health: f32,
     pub mul_move_speed: f32,
     pub add_recovery: f32,
-    // pub mul_resistance: f32,
+    pub mul_resistance: f32,
     pub mul_power: f32,
     pub mul_area: f32,
-    // pub mul_attack_speed: f32,
+    pub mul_attack_speed: f32,
     // pub mul_attack_duration: f32,
     // pub mul_attack_amount: u32,
-    // pub mul_attack_reload_duration: f32,
-    // pub mul_luck: f32,
+    pub mul_attack_reload_duration: f32,
+    pub mul_luck: f32,
     // pub mul_experience: f32,
     // pub mul_greed: f32,
     // pub mul_curse: f32,
@@ -57,14 +57,14 @@ pub struct PlayerInGameStats {
     pub max_health: f32,
     pub move_speed: f32,
     pub recovery: f32,
-    // pub resistance: f32,
+    pub resistance: f32,
     pub power: f32,
     pub area: f32,
-    // pub attack_speed: f32,
+    pub attack_speed: f32,
     // pub attack_duration: f32,
     // pub attack_amount: u32,
-    // pub attack_reload_duration: f32,
-    // pub luck: f32,
+    pub attack_reload_duration: f32,
+    pub luck: f32,
     // pub experience: f32,
     // pub greed: f32,
     // pub curse: f32,
@@ -78,23 +78,35 @@ impl Default for PlayerInGameStats {
             max_health: BASE_MAX_HEALTH,
             move_speed: BASE_MOVE_SPEED,
             recovery: BASE_RECOVERY,
+            resistance: BASE_RESISTANCE,
             power: BASE_POWER,
             area: BASE_AREA,
+            attack_speed: BASE_ATTACK_SPEED,
+            attack_reload_duration: BASE_ATTACK_RELOAD_DURATION,
+            luck: BASE_LUCK,
             magnet: BASE_MAGNET,
         }
     }
 }
 pub const BASE_MAX_HEALTH: f32 = 100.0;
 pub const BASE_RECOVERY: f32 = 0.2; // 0.2 health/s
+
 pub const BASE_MOVE_SPEED: f32 = 60.0;
+pub const BASE_RESISTANCE: f32 = 1.0; // formula: damage * 1/resistance
+
 pub const BASE_MAGNET: f32 = 20.0;
+
 // The power is a percentage so multiplying facteur will be the base percentage multiply by another
 // percentage.
 // Default value is 1.0 for 100% damage by default.
-pub const BASE_POWER: f32 = 1.0; // percentage
+pub const BASE_POWER: f32 = 1.0;
+
 pub const BASE_AREA: f32 = 1.0; // percentage (Will be use to multiply scales)
 
-pub const BASE_LUCK: f32 = 1.0; // To be used later
+pub const BASE_LUCK: f32 = 1.0; // give you more chance for good perks and reduce common/uncommon
+
+pub const BASE_ATTACK_SPEED: f32 = 1.0;
+pub const BASE_ATTACK_RELOAD_DURATION: f32 = 1.0; // should go lower
 
 #[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum PlayerBaseStatsType {
@@ -105,6 +117,9 @@ pub enum PlayerBaseStatsType {
     Power,
     Area,
     Luck,
+    Resistance,
+    AttackSpeed,
+    AttackReloadDuration,
 }
 
 #[derive(Resource, Debug)]
@@ -204,51 +219,6 @@ pub enum Facing {
 
 // WEAPONS
 
-#[derive(Component)]
-pub struct ClawSpawner;
-#[derive(Component)]
-pub struct ArcaneMissileSpawner;
-#[derive(Component)]
-pub struct ShurikenSpawner;
-#[derive(Component)]
-pub struct ChainLightningSpawner;
-#[derive(Component)]
-pub struct FireAreaSpawner;
-#[derive(Component)]
-pub struct SlowDomeSpawner;
-#[derive(Component)]
-pub struct BouncingBallSpawner;
-#[derive(Component)]
-pub struct Claw;
-#[derive(Component)]
-pub struct ArcaneMissile;
-#[derive(Component)]
-pub struct FireArea;
-#[derive(Component)]
-pub struct Shuriken;
-#[derive(Component)]
-pub struct ChainLightning;
-#[derive(Component)]
-pub struct SlowDome;
-#[derive(Component)]
-pub struct BouncingBall;
-
-// pub struct PayloadOnHit{
-//     pub target: Entity,
-//     pub target_position: Option<Vec3>,
-// }
-
-// #[derive(Resource, Debug)]
-// pub struct SlowDomeOnHitSystems {
-//     // entity ID
-//     pub slow_enemy:SystemId<PayloadOnHit>,
-// }
-#[derive(Component)]
-pub struct VelocityAura {
-    pub value: f32,
-    pub lifetime: Timer,
-}
-
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum WeaponsTypes {
     Claw,
@@ -264,6 +234,12 @@ pub enum WeaponsTypes {
 pub struct PlayerWeapons {
     // entity ID
     pub weapons: Vec<WeaponsTypes>,
+}
+
+#[derive(Component)]
+pub struct VelocityAura {
+    pub value: f32,
+    pub lifetime: Timer,
 }
 
 // GEM

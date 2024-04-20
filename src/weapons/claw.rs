@@ -4,6 +4,12 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 const CLAWS_POSITION_X: f32 = 28.0;
+
+#[derive(Component)]
+pub struct ClawSpawner;
+
+#[derive(Component)]
+pub struct Claw;
 pub struct WeaponClawPlugin;
 
 impl Plugin for WeaponClawPlugin {
@@ -17,7 +23,7 @@ impl Plugin for WeaponClawPlugin {
             Update,
             (
                 spawn_claw_attack.after(start_reload_attack_spawner),
-                // claw_attack_animation_and_collider,
+                claw_update_stats,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -31,7 +37,7 @@ fn run_if_claw_present(
     player_weapons.weapons.contains(&WeaponsTypes::Claw) && weapon.is_empty()
 }
 
-fn setup_claw_spawner(mut commands: Commands) {
+fn setup_claw_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         ClawSpawner,
         DelayBetweenAttacks {
@@ -40,11 +46,23 @@ fn setup_claw_spawner(mut commands: Commands) {
         AttackAmmo {
             size: 2,
             amount: 2,
-            reload_time: 2.0,
+            reload_time: 2.0 * player_stats.attack_reload_duration,
         },
         ProjectileBendLeftOrRight(true),
         Name::new("Claw Spawner"),
     ));
+}
+
+fn claw_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo, With<ClawSpawner>>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = 2.0 * player_stats.attack_reload_duration;
+    }
 }
 
 fn spawn_claw_attack(
@@ -61,6 +79,7 @@ fn spawn_claw_attack(
     mut player: Query<&Transform, With<Player>>,
     time: Res<Time>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
@@ -104,7 +123,7 @@ fn spawn_claw_attack(
                         // transform: Transform::from_xyz(pos_x, player_transform.translation.y, 1.0),
                         transform: Transform {
                             translation: Vec3::new(pos_x, player_transform.translation.y, 1.0),
-                            // scale: Vec3::new(0.0, 0.0, 0.0),
+                            scale: Vec3::splat(player_stats.area),
                             ..default()
                         },
                         sprite: Sprite {

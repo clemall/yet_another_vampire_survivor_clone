@@ -3,6 +3,12 @@ use crate::math_utils::find_closest;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+#[derive(Component)]
+pub struct BouncingBallSpawner;
+
+#[derive(Component)]
+pub struct BouncingBall;
+
 pub struct BouncingBallPlugin;
 
 impl Plugin for BouncingBallPlugin {
@@ -15,7 +21,11 @@ impl Plugin for BouncingBallPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_bouncing_ball_attack, duplicate_ball_on_hit)
+            (
+                spawn_bouncing_ball_attack,
+                duplicate_ball_on_hit,
+                bouncing_ball_update_stats,
+            )
                 .run_if(in_state(GameState::Gameplay)),
         );
     }
@@ -28,7 +38,7 @@ fn run_if_bouncing_ball_present(
     player_weapons.weapons.contains(&WeaponsTypes::BouncingBall) && weapon.is_empty()
 }
 
-fn setup_bouncing_ball_spawner(mut commands: Commands) {
+fn setup_bouncing_ball_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         BouncingBallSpawner,
         DelayBetweenAttacks {
@@ -37,10 +47,22 @@ fn setup_bouncing_ball_spawner(mut commands: Commands) {
         AttackAmmo {
             size: 1,
             amount: 1,
-            reload_time: 2.0,
+            reload_time: 2.0 * player_stats.attack_reload_duration,
         },
         Name::new("Bouncing ball Spawner"),
     ));
+}
+
+fn bouncing_ball_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo, With<BouncingBallSpawner>>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = 2.0 * player_stats.attack_reload_duration;
+    }
 }
 
 fn spawn_bouncing_ball_attack(
@@ -53,6 +75,7 @@ fn spawn_bouncing_ball_attack(
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     time: Res<Time>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
@@ -82,6 +105,7 @@ fn spawn_bouncing_ball_attack(
                                 texture,
                                 transform: Transform {
                                     translation: player_transform.translation,
+                                    scale: Vec3::splat(player_stats.area),
                                     ..default()
                                 },
                                 ..default()

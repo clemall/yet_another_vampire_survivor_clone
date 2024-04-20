@@ -24,7 +24,7 @@ impl Plugin for GenericWeaponPlugin {
                 projectile_move_spiral,
                 // projectile_move_boomerang,
                 projectile_rotate_on_self,
-                projectile_scale,
+                weapon_update_area,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -174,7 +174,7 @@ fn projectile_despawn_after_lifetime(
 }
 
 fn projectile_follow_player(
-    player: Query<&mut Transform, (With<Player>, Without<FireArea>)>,
+    player: Query<&mut Transform, With<Player>>,
     mut projectiles: Query<&mut Transform, (With<ProjectileFollowPlayer>, Without<Player>)>,
 ) {
     for mut transform in &mut projectiles {
@@ -198,11 +198,15 @@ fn projectile_move_toward_direction(
     }
 }
 
-// not the smartest in terms of performance, but it does the job.
-fn projectile_scale(
+// update area of weapons that doesn't spawn projectile.
+fn weapon_update_area(
     mut projectiles: Query<&mut Transform, (With<Projectile>, Without<ProjectileFixedScale>)>,
     player_stats: Res<PlayerInGameStats>,
 ) {
+    if !player_stats.is_changed() {
+        return;
+    }
+
     for mut transform in &mut projectiles {
         transform.scale = Vec3::splat(player_stats.area);
     }

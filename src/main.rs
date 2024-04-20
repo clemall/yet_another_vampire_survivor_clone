@@ -16,7 +16,6 @@ use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::items::item::ItemsPlugin;
 use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
-use yet_another_vampire_survivor_clone::stepping::SteppingPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;

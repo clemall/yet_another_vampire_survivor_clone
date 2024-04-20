@@ -3,6 +3,12 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::f32::consts::TAU;
 
+#[derive(Component)]
+pub struct ShurikenSpawner;
+
+#[derive(Component)]
+pub struct Shuriken;
+
 pub struct ShurikenPlugin;
 
 impl Plugin for ShurikenPlugin {
@@ -15,7 +21,7 @@ impl Plugin for ShurikenPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_shuriken_attack,).run_if(in_state(GameState::Gameplay)),
+            (spawn_shuriken_attack, shuriken_update_stats).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -27,16 +33,28 @@ fn run_if_shuriken_present(
     player_weapons.weapons.contains(&WeaponsTypes::Shuriken) && weapon.is_empty()
 }
 
-fn setup_shuriken_spawner(mut commands: Commands) {
+fn setup_shuriken_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         ShurikenSpawner,
         AttackAmmo {
             size: 8,
             amount: 8,
-            reload_time: 22.0,
+            reload_time: 10.0 * player_stats.attack_reload_duration,
         },
         Name::new("Shuriken Spawner"),
     ));
+}
+
+fn shuriken_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo, With<ShurikenSpawner>>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = 10.0 * player_stats.attack_reload_duration;
+    }
 }
 
 fn spawn_shuriken_attack(
@@ -44,6 +62,7 @@ fn spawn_shuriken_attack(
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<&mut AttackAmmo, (With<ShurikenSpawner>, Without<AttackReloadDuration>)>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
@@ -73,6 +92,7 @@ fn spawn_shuriken_attack(
                                 player_transform.translation.y,
                                 1.0,
                             ),
+                            scale: Vec3::splat(player_stats.area),
                             ..default()
                         },
                         ..default()
@@ -80,7 +100,6 @@ fn spawn_shuriken_attack(
                     Sensor,
                     Collider::ball(32.0 / 2.0),
                     ProjectileBundleCollider::default(),
-                    ArcaneMissile,
                 ))
                 .insert((
                     Projectile,

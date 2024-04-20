@@ -1,8 +1,14 @@
 use crate::components::*;
 use crate::math_utils::find_closest;
+use crate::weapons::bouncing_ball::BouncingBallSpawner;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use std::f32::consts::PI;
+
+#[derive(Component)]
+pub struct ChainLightningSpawner;
+#[derive(Component)]
+pub struct ChainLightning;
 
 pub struct ChainLightningPlugin;
 
@@ -32,17 +38,29 @@ fn run_if_chain_lightning_present(
         && weapon.is_empty()
 }
 
-fn setup_chain_lightning_spawner(mut commands: Commands) {
+fn setup_chain_lightning_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         ChainLightningSpawner,
         ChainLightning,
         AttackAmmo {
             size: 100,
             amount: 100,
-            reload_time: 5.0,
+            reload_time: 5.0 * player_stats.attack_reload_duration,
         },
         Name::new("Chain Lightning Spawner"),
     ));
+}
+
+fn chain_lightningl_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo, With<ChainLightningSpawner>>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = 5.0 * player_stats.attack_reload_duration;
+    }
 }
 
 fn spawn_chain_lightning_attack(

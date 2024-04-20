@@ -3,6 +3,11 @@ use crate::math_utils::find_closest;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+#[derive(Component)]
+pub struct SlowDomeSpawner;
+
+#[derive(Component)]
+pub struct SlowDome;
 pub struct SlowDomePlugin;
 
 impl Plugin for SlowDomePlugin {
@@ -18,7 +23,12 @@ impl Plugin for SlowDomePlugin {
         );
         app.add_systems(
             Update,
-            (spawn_slow_dome_attack, apply_slow_aura_on_hit).run_if(in_state(GameState::Gameplay)),
+            (
+                spawn_slow_dome_attack,
+                apply_slow_aura_on_hit,
+                slow_dome_update_stats,
+            )
+                .run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -30,14 +40,7 @@ fn run_if_slow_dome_present(
     player_weapons.weapons.contains(&WeaponsTypes::SlowDome) && weapon.is_empty()
 }
 
-// fn setup_on_hit(world: &mut World){
-//     let id = world.register_system(apply_slow_on_hit);
-//     world.insert_resource(SlowDomeOnHitSystems {
-//         slow_enemy: id
-//     })
-//
-// }
-fn setup_slow_dome_spawner(mut commands: Commands) {
+fn setup_slow_dome_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         SlowDomeSpawner,
         DelayBetweenAttacks {
@@ -46,10 +49,22 @@ fn setup_slow_dome_spawner(mut commands: Commands) {
         AttackAmmo {
             size: 1,
             amount: 1,
-            reload_time: 10.0,
+            reload_time: 10.0 * player_stats.attack_reload_duration,
         },
         Name::new("Slow Dome Spawner"),
     ));
+}
+
+fn slow_dome_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo, With<SlowDomeSpawner>>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = 10.0 * player_stats.attack_reload_duration;
+    }
 }
 
 fn spawn_slow_dome_attack(
@@ -62,7 +77,7 @@ fn spawn_slow_dome_attack(
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     time: Res<Time>,
-    // systems: Res<SlowDomeOnHitSystems>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
@@ -88,6 +103,7 @@ fn spawn_slow_dome_attack(
                             texture,
                             transform: Transform {
                                 translation: enemy_transform.translation,
+                                scale: Vec3::splat(player_stats.area),
                                 ..default()
                             },
                             ..default()

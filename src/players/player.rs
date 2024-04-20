@@ -10,23 +10,31 @@ impl Plugin for PlayerPlugin {
         // TODO: META value, load from file, maybe ron file or bin?
         app.insert_resource(PlayerMetaStats {
             data: PlayerStats {
-                mul_max_health: 0.1,
-                mul_move_speed: 0.1,
+                mul_max_health: 0.0,
+                mul_move_speed: 0.0,
                 add_recovery: 0.0,
+                mul_resistance: 0.0,
                 mul_power: 0.0,
                 mul_area: 0.0,
-                mul_magnet: 1.0,
+                mul_attack_speed: 0.0,
+                mul_attack_reload_duration: -0.0,
+                mul_luck: 0.0,
+                mul_magnet: 0.0,
             },
         });
 
         // TODO: add more characters loaded from ron file
         app.insert_resource(CharacterStats {
             data: PlayerStats {
-                mul_max_health: 0.1,
-                mul_move_speed: 0.1,
+                mul_max_health: 0.0,
+                mul_move_speed: 0.0,
                 add_recovery: 0.0,
+                mul_resistance: 0.0,
                 mul_power: 0.0,
                 mul_area: 0.0,
+                mul_attack_speed: 0.0,
+                mul_attack_reload_duration: -0.0,
+                mul_luck: 0.0,
                 mul_magnet: 0.0,
             },
         });
@@ -150,6 +158,19 @@ fn setup_player_in_game_stats(
     player_stats.area +=
         (BASE_AREA * meta_stats.data.mul_area) + (BASE_AREA * character_stats.data.mul_area);
 
+    player_stats.luck +=
+        (BASE_LUCK * meta_stats.data.mul_luck) + (BASE_LUCK * character_stats.data.mul_luck);
+
+    player_stats.resistance += (BASE_RESISTANCE * meta_stats.data.mul_resistance)
+        + (BASE_RESISTANCE * character_stats.data.mul_resistance);
+
+    player_stats.attack_speed += (BASE_ATTACK_SPEED * meta_stats.data.mul_attack_speed)
+        + (BASE_ATTACK_SPEED * character_stats.data.mul_attack_speed);
+
+    player_stats.attack_reload_duration += (BASE_ATTACK_RELOAD_DURATION
+        * meta_stats.data.mul_attack_reload_duration)
+        + (BASE_ATTACK_RELOAD_DURATION * character_stats.data.mul_attack_reload_duration);
+
     // Additive
     player_stats.recovery += meta_stats.data.add_recovery + character_stats.data.add_recovery;
 }
@@ -177,6 +198,13 @@ fn update_player_stats(
     println!("magnet: {}", player_stats.magnet);
     println!("power: {}", player_stats.power);
     println!("area: {}", player_stats.area);
+    println!("luck: {}", player_stats.luck);
+    println!("resistance: {}", player_stats.resistance);
+    println!("attack_speed: {}", player_stats.attack_speed);
+    println!(
+        "attack_reload_duration: {}",
+        player_stats.attack_reload_duration
+    );
 }
 
 // public because of the camera, see camera.rs
@@ -263,10 +291,11 @@ fn compute_experience(
 fn player_received_damage(
     mut received_damage: EventReader<PlayerReceivedDamage>,
     mut player: Query<&mut Health, With<Player>>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let mut player_health = player.single_mut();
     for event in received_damage.read() {
-        player_health.0 -= event.damage;
+        player_health.0 -= (event.damage * 1.0 / player_stats.resistance).max(0.1);
     }
 }
 

@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::weapons::claw::ClawSpawner;
 use bevy::prelude::*;
 use std::collections::HashMap;
 use std::fs;
@@ -8,7 +9,10 @@ pub struct ItemsPlugin;
 impl Plugin for ItemsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_loot_table);
-        app.add_systems(Update, (trigger_item).run_if(in_state(GameState::Gameplay)));
+        app.add_systems(
+            Update,
+            (trigger_item, apply_luck_to_loot_table).run_if(in_state(GameState::Gameplay)),
+        );
     }
 }
 
@@ -35,7 +39,7 @@ fn setup_loot_table(mut commands: Commands) {
     for (item_key, item_data) in item_resource.items.clone() {
         for (rarity, _variation) in item_data.rarity_to_effects {
             match loot_table.item_by_rarity.get_mut(&rarity) {
-                Some(mut item_list) => {
+                Some(item_list) => {
                     item_list.push(item_key.clone());
                 }
                 None => {
@@ -78,9 +82,55 @@ fn trigger_item(
                     player_stats.area += BASE_AREA * effect.value;
                 }
                 PlayerBaseStatsType::Luck => {
-                    // player_stats.luck += BASE_LUCK * item_variation.value;
+                    player_stats.luck += BASE_LUCK * effect.value;
+                }
+                PlayerBaseStatsType::Resistance => {
+                    player_stats.resistance += BASE_LUCK * effect.value;
+                }
+                PlayerBaseStatsType::AttackSpeed => {
+                    player_stats.attack_speed += BASE_ATTACK_SPEED * effect.value;
+                }
+                PlayerBaseStatsType::AttackReloadDuration => {
+                    // effect.value is negative
+                    player_stats.attack_reload_duration +=
+                        BASE_ATTACK_RELOAD_DURATION * effect.value;
+                    // weapon reload time should NOT be lower than 0s
+                    player_stats.attack_reload_duration =
+                        player_stats.attack_reload_duration.max(0.0);
                 }
             }
         }
     }
+}
+
+fn apply_luck_to_loot_table(
+    mut loot_table: ResMut<LootTable>,
+    player_stats: Res<PlayerInGameStats>,
+    item_resource: Res<ItemsResource>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+
+    for (index, (rarity, value)) in item_resource.weighted_rarity.iter().enumerate() {
+        let value_as_f32: f32 = *value as f32;
+        println!("wtf:::{}", value_as_f32);
+        match rarity {
+            Rarity::Common | Rarity::Uncommon => {
+                loot_table.weighted_rarity[index].1 = (value_as_f32
+                    + (value_as_f32 - value_as_f32 * player_stats.luck))
+                    .max(1.0) as u32;
+            }
+            Rarity::Rare => {
+                // Luck as no effect for rare
+            }
+            Rarity::Epic | Rarity::Legendary => {
+                loot_table.weighted_rarity[index].1 = (value_as_f32 * player_stats.luck) as u32;
+            }
+            _ => {}
+        }
+    }
+
+    println!("{:?}", loot_table.weighted_rarity);
+    println!(" ");
 }

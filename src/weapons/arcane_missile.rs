@@ -3,6 +3,11 @@ use crate::math_utils::{find_circle_circle_intersections, find_closest, simple_b
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+#[derive(Component)]
+pub struct ArcaneMissileSpawner;
+
+#[derive(Component)]
+pub struct ArcaneMissile;
 pub struct ArcaneMissilePlugin;
 
 impl Plugin for ArcaneMissilePlugin {
@@ -16,7 +21,11 @@ impl Plugin for ArcaneMissilePlugin {
         );
         app.add_systems(
             Update,
-            (spawn_arcane_missile_attack, move_arcane_missile)
+            (
+                spawn_arcane_missile_attack,
+                move_arcane_missile,
+                arcane_missile_update_stats,
+            )
                 .run_if(in_state(GameState::Gameplay)),
         );
     }
@@ -32,7 +41,7 @@ fn run_if_arcane_missile_present(
         && weapon.is_empty()
 }
 
-fn setup_arcane_missile_spawner(mut commands: Commands) {
+fn setup_arcane_missile_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         ArcaneMissileSpawner,
         DelayBetweenAttacks {
@@ -41,11 +50,23 @@ fn setup_arcane_missile_spawner(mut commands: Commands) {
         AttackAmmo {
             size: 3,
             amount: 3,
-            reload_time: 2.0,
+            reload_time: 2.0 * player_stats.attack_reload_duration,
         },
         ProjectileBendLeftOrRight(true),
         Name::new("Arcane missile Spawner"),
     ));
+}
+
+fn arcane_missile_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo, With<ArcaneMissileSpawner>>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = 2.0 * player_stats.attack_reload_duration;
+    }
 }
 
 fn spawn_arcane_missile_attack(
@@ -63,6 +84,7 @@ fn spawn_arcane_missile_attack(
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     time: Res<Time>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
@@ -124,7 +146,7 @@ fn spawn_arcane_missile_attack(
                                         player_transform.translation.y,
                                         1.0,
                                     ),
-                                    scale: Vec3::new(0.5, 0.5, 0.5),
+                                    scale: Vec3::splat(player_stats.area),
                                     ..default()
                                 },
                                 ..default()
