@@ -12,7 +12,7 @@ ItemsResource (
         "HEALTHY_GEM_STONE":
         ItemData(
             name: "HEALTHY GEM STONE",
-            texture_atlas_index: 0,
+            texture_atlas_index: 1,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -54,7 +54,7 @@ ItemsResource (
         "PUMMAROLA":
         ItemData(
             name: "PUMMAROLA",
-            texture_atlas_index: 1,
+            texture_atlas_index: 2,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -96,7 +96,7 @@ ItemsResource (
         "HERMES_BOOTS":
         ItemData(
             name: "HERMES BOOTS",
-            texture_atlas_index: 2,
+            texture_atlas_index: 3,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -138,7 +138,7 @@ ItemsResource (
         "MAGNET":
         ItemData(
             name: "MAGNET",
-            texture_atlas_index: 3,
+            texture_atlas_index: 4,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -180,7 +180,7 @@ ItemsResource (
         "ALL_MIGHT":
         ItemData(
             name: "ALL MIGHT",
-            texture_atlas_index: 4,
+            texture_atlas_index: 5,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -222,7 +222,7 @@ ItemsResource (
         "AREA":
         ItemData(
             name: "AREA",
-            texture_atlas_index: 5,
+            texture_atlas_index: 6,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -264,7 +264,7 @@ ItemsResource (
         "DICES":
         ItemData(
             name: "DICES",
-            texture_atlas_index: 8,
+            texture_atlas_index: 9,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -306,7 +306,7 @@ ItemsResource (
         "ARMOR":
         ItemData(
             name: "ARMOR",
-            texture_atlas_index: 7,
+            texture_atlas_index: 8,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -348,7 +348,7 @@ ItemsResource (
         "GLOVES":
         ItemData(
             name: "GLOVES OF SPEED",
-            texture_atlas_index: 6,
+            texture_atlas_index: 7,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -390,7 +390,7 @@ ItemsResource (
         "RELOAD":
         ItemData(
             name: "RELOAD",
-            texture_atlas_index: 9,
+            texture_atlas_index: 10,
             rarity_to_effects: {
                 Common: ItemEffects(
                     effects: [ItemEffect(
@@ -432,7 +432,7 @@ ItemsResource (
         "THE_DESTROYER":
         ItemData(
             name: "THE DESTROYER",
-            texture_atlas_index: 10,
+            texture_atlas_index: 11,
             rarity_to_effects: {
                 Cursed: ItemEffects(
                     effects: [
@@ -452,7 +452,7 @@ ItemsResource (
         "MIGHTY_SWORD":
         ItemData(
             name: "MIGHTY SWORD",
-            texture_atlas_index: 11,
+            texture_atlas_index: 12,
             rarity_to_effects: {
                 Unique: ItemEffects(
                     effects: [

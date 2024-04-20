@@ -128,8 +128,18 @@ fn spawn_level_up_ui(
             Rarity::Unique => asset_server.load("item_ui_background_unique.png"),
         };
 
+        let rarity_text_color = match rarity {
+            Rarity::Common => Color::MAROON,
+            Rarity::Uncommon => Color::YELLOW_GREEN,
+            Rarity::Rare => Color::MIDNIGHT_BLUE,
+            Rarity::Epic => Color::FUCHSIA,
+            Rarity::Legendary => Color::GOLD,
+            Rarity::Cursed => Color::CRIMSON,
+            Rarity::Unique => Color::BLACK,
+        };
+
         let texture_icons = asset_server.load("design_items_ui.png");
-        let layout = TextureAtlasLayout::from_grid(Vec2::new(74.0, 61.0), 14, 1, None, None);
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(74.0, 61.0), 15, 1, None, None);
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
         let card_item = commands
@@ -146,6 +156,7 @@ fn spawn_level_up_ui(
                         ..default()
                     },
                     image: UiImage::new(texture),
+                    z_index: ZIndex::Global(10),
                     ..default()
                 },
                 ButtonUpgrade {
@@ -167,16 +178,17 @@ fn spawn_level_up_ui(
                         ..default()
                     },
                     image: UiImage::new(texture_icons),
+                    z_index: ZIndex::Global(1),
                     ..default()
                 },
                 TextureAtlas {
                     layout: texture_atlas_layout,
                     index: texture_atlas_index as usize,
                 },
-                ButtonUpgrade {
-                    item_key: item_key.clone().into(),
-                    rarity: rarity,
-                },
+                // ButtonUpgrade {
+                //     item_key: item_key.clone().into(),
+                //     rarity: rarity,
+                // },
             ))
             .id();
 
@@ -193,7 +205,7 @@ fn spawn_level_up_ui(
                 )
                 .with_style(Style {
                     position_type: PositionType::Absolute,
-                    top: Val::Percent(61.0),
+                    top: Val::Percent(62.0),
 
                     ..default()
                 }),
@@ -214,7 +226,7 @@ fn spawn_level_up_ui(
                 .with_style(Style {
                     position_type: PositionType::Absolute,
                     top: Val::Percent(70.0),
-                    left: Val::Percent(5.0),
+                    left: Val::Percent(7.0),
                     width: Val::Percent(90.0),
                     ..default()
                 }),
@@ -228,14 +240,14 @@ fn spawn_level_up_ui(
                     TextStyle {
                         font: asset_server.load(FONT_BOLD),
                         font_size: 16.0,
-                        color: Color::BLACK,
+                        color: rarity_text_color,
                         ..default()
                     },
                 )
                 .with_style(Style {
                     position_type: PositionType::Absolute,
                     top: Val::Percent(90.0),
-                    left: Val::Percent(5.0),
+                    left: Val::Percent(7.0),
                     ..default()
                 }),
             )
