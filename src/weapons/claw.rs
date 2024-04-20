@@ -46,7 +46,7 @@ fn setup_claw_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStat
         AttackAmmo {
             size: 2,
             amount: 2,
-            reload_time: 2.0 * player_stats.attack_reload_duration,
+            reload_time: 2.0 * player_stats.attack_reload,
         },
         ProjectileBendLeftOrRight(true),
         Name::new("Claw Spawner"),
@@ -61,7 +61,7 @@ fn claw_update_stats(
         return;
     }
     for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 2.0 * player_stats.attack_reload_duration;
+        attack_ammo.reload_time = 2.0 * player_stats.attack_reload;
     }
 }
 
@@ -148,7 +148,10 @@ fn spawn_claw_attack(
                     Collider::cuboid(48.0 / 2.0, 48.0 / 2.0),
                     ProjectileBundleCollider::default(),
                     ProjectileLifetime {
-                        timer: Timer::from_seconds(0.3, TimerMode::Once),
+                        timer: Timer::from_seconds(
+                            0.3 * player_stats.attack_duration,
+                            TimerMode::Once,
+                        ),
                     },
                     AlreadyHitEnemies { seen: Vec::new() },
                     ProjectileDamage(5.0),

@@ -1,5 +1,4 @@
 use crate::components::*;
-use crate::weapons::claw::ClawSpawner;
 use bevy::prelude::*;
 use std::collections::HashMap;
 use std::fs;
@@ -56,6 +55,7 @@ fn trigger_item(
     mut item_event: EventReader<ItemPickup>,
     mut player_stats: ResMut<PlayerInGameStats>,
     item_resource: Res<ItemsResource>,
+    mut loot_table: ResMut<LootTable>,
 ) {
     for event in item_event.read() {
         let item_data = item_resource.items.get(&event.item_key).unwrap();
@@ -92,13 +92,26 @@ fn trigger_item(
                 }
                 PlayerBaseStatsType::AttackReloadDuration => {
                     // effect.value is negative
-                    player_stats.attack_reload_duration +=
-                        BASE_ATTACK_RELOAD_DURATION * effect.value;
+                    player_stats.attack_reload += BASE_ATTACK_RELOAD * effect.value;
                     // weapon reload time should NOT be lower than 0s
-                    player_stats.attack_reload_duration =
-                        player_stats.attack_reload_duration.max(0.0);
+                    player_stats.attack_reload = player_stats.attack_reload.max(0.0);
+                }
+                PlayerBaseStatsType::AttackDuration => {
+                    player_stats.attack_duration += BASE_ATTACK_DURATION * effect.value;
+                }
+                PlayerBaseStatsType::AttackAmount => {
+                    player_stats.attack_amount += effect.value as u32;
                 }
             }
+        }
+
+        // handle unique, remove them from the poll after getting picked
+        if event.rarity == Rarity::Unique {
+            loot_table
+                .item_by_rarity
+                .get_mut(&event.rarity)
+                .unwrap()
+                .retain(|key| key.as_str() != event.item_key)
         }
     }
 }

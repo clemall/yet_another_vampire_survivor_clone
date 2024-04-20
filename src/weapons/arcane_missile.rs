@@ -50,7 +50,7 @@ fn setup_arcane_missile_spawner(mut commands: Commands, player_stats: Res<Player
         AttackAmmo {
             size: 3,
             amount: 3,
-            reload_time: 2.0 * player_stats.attack_reload_duration,
+            reload_time: 2.0 * player_stats.attack_reload,
         },
         ProjectileBendLeftOrRight(true),
         Name::new("Arcane missile Spawner"),
@@ -65,7 +65,7 @@ fn arcane_missile_update_stats(
         return;
     }
     for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 2.0 * player_stats.attack_reload_duration;
+        attack_ammo.reload_time = 2.0 * player_stats.attack_reload;
     }
 }
 

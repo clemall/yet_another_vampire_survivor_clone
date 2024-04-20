@@ -45,7 +45,7 @@ fn setup_chain_lightning_spawner(mut commands: Commands, player_stats: Res<Playe
         AttackAmmo {
             size: 100,
             amount: 100,
-            reload_time: 5.0 * player_stats.attack_reload_duration,
+            reload_time: 5.0 * player_stats.attack_reload,
         },
         Name::new("Chain Lightning Spawner"),
     ));
@@ -59,7 +59,7 @@ fn chain_lightningl_update_stats(
         return;
     }
     for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 5.0 * player_stats.attack_reload_duration;
+        attack_ammo.reload_time = 5.0 * player_stats.attack_reload;
     }
 }
 

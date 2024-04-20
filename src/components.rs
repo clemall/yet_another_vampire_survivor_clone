@@ -31,9 +31,9 @@ pub struct PlayerStats {
     pub mul_power: f32,
     pub mul_area: f32,
     pub mul_attack_speed: f32,
-    // pub mul_attack_duration: f32,
-    // pub mul_attack_amount: u32,
-    pub mul_attack_reload_duration: f32,
+    pub mul_attack_duration: f32,
+    pub add_attack_amount: u32,
+    pub mul_attack_reload: f32,
     pub mul_luck: f32,
     // pub mul_experience: f32,
     // pub mul_greed: f32,
@@ -61,9 +61,9 @@ pub struct PlayerInGameStats {
     pub power: f32,
     pub area: f32,
     pub attack_speed: f32,
-    // pub attack_duration: f32,
-    // pub attack_amount: u32,
-    pub attack_reload_duration: f32,
+    pub attack_duration: f32,
+    pub attack_amount: u32,
+    pub attack_reload: f32,
     pub luck: f32,
     // pub experience: f32,
     // pub greed: f32,
@@ -82,7 +82,9 @@ impl Default for PlayerInGameStats {
             power: BASE_POWER,
             area: BASE_AREA,
             attack_speed: BASE_ATTACK_SPEED,
-            attack_reload_duration: BASE_ATTACK_RELOAD_DURATION,
+            attack_duration: BASE_ATTACK_DURATION,
+            attack_reload: BASE_ATTACK_RELOAD,
+            attack_amount: BASE_ATTACK_AMOUNT,
             luck: BASE_LUCK,
             magnet: BASE_MAGNET,
         }
@@ -106,7 +108,10 @@ pub const BASE_AREA: f32 = 1.0; // percentage (Will be use to multiply scales)
 pub const BASE_LUCK: f32 = 1.0; // give you more chance for good perks and reduce common/uncommon
 
 pub const BASE_ATTACK_SPEED: f32 = 1.0;
-pub const BASE_ATTACK_RELOAD_DURATION: f32 = 1.0; // should go lower
+pub const BASE_ATTACK_RELOAD: f32 = 1.0; // should go lower
+
+pub const BASE_ATTACK_DURATION: f32 = 1.0;
+pub const BASE_ATTACK_AMOUNT: u32 = 0; // additive +1 +2 ect
 
 #[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum PlayerBaseStatsType {
@@ -120,6 +125,8 @@ pub enum PlayerBaseStatsType {
     Resistance,
     AttackSpeed,
     AttackReloadDuration,
+    AttackDuration,
+    AttackAmount,
 }
 
 #[derive(Resource, Debug)]

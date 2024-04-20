@@ -39,7 +39,7 @@ fn setup_shuriken_spawner(mut commands: Commands, player_stats: Res<PlayerInGame
         AttackAmmo {
             size: 8,
             amount: 8,
-            reload_time: 10.0 * player_stats.attack_reload_duration,
+            reload_time: 10.0 * player_stats.attack_reload,
         },
         Name::new("Shuriken Spawner"),
     ));
@@ -53,7 +53,7 @@ fn shuriken_update_stats(
         return;
     }
     for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 10.0 * player_stats.attack_reload_duration;
+        attack_ammo.reload_time = 10.0 * player_stats.attack_reload;
     }
 }
 
@@ -119,7 +119,10 @@ fn spawn_shuriken_attack(
                     ProjectileDamage(10.0),
                     ProjectileImpulse(200.0),
                     ProjectileLifetime {
-                        timer: Timer::from_seconds(10.0, TimerMode::Once),
+                        timer: Timer::from_seconds(
+                            10.0 * player_stats.attack_duration,
+                            TimerMode::Once,
+                        ),
                     },
                     AlreadyHitEnemies { seen: Vec::new() },
                     ProjectileRotateOnSelf,

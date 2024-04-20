@@ -6,7 +6,7 @@ ItemsResource (
         (Epic, 70),
         (Legendary, 10),
         (Cursed, 0), // has a chance to occur for each offered card
-        (Unique, 1), // same???
+        (Unique, 1000), // same???
     ],
     items: {
         "HEALTHY_GEM_STONE":
@@ -426,6 +426,69 @@ ItemsResource (
                         value: -0.3,
                     )],
                     description: "Reduce weapon reloading by 30%",
+                ),
+            },
+        ),
+        "DURATION":
+        ItemData(
+            name: "DURATION",
+            texture_atlas_index: 13,
+            rarity_to_effects: {
+                Common: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: AttackDuration,
+                        value: 0.05,
+                    )],
+                    description: "Increase projectile duration by 5%",
+                ),
+                Uncommon: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: AttackDuration,
+                        value: 0.1,
+                    )],
+                    description: "Increase projectile duration by 10%",
+                ),
+                Rare: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: AttackDuration,
+                        value: 0.15,
+                    )],
+                    description: "Increase projectile duration by 15%",
+                ),
+                Epic: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: AttackDuration,
+                        value: 0.2,
+                    )],
+                    description: "Increase projectile duration by 20%",
+                ),
+                Legendary: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: AttackDuration,
+                        value: 0.3,
+                    )],
+                    description: "Increase projectile duration byy 30%",
+                ),
+            },
+        ),
+        "AMOUNT":
+        ItemData(
+            name: "AMOUNT",
+            texture_atlas_index: 14,
+            rarity_to_effects: {
+                Epic: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: AttackAmount,
+                        value: 1.0,
+                    )],
+                    description: "Increase weapons ammo by 1",
+                ),
+                Legendary: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: AttackAmount,
+                        value: 2.0,
+                    )],
+                    description: "Increase weapons ammo by 2",
                 ),
             },
         ),

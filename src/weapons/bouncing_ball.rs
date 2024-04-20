@@ -47,7 +47,7 @@ fn setup_bouncing_ball_spawner(mut commands: Commands, player_stats: Res<PlayerI
         AttackAmmo {
             size: 1,
             amount: 1,
-            reload_time: 2.0 * player_stats.attack_reload_duration,
+            reload_time: 2.0 * player_stats.attack_reload,
         },
         Name::new("Bouncing ball Spawner"),
     ));
@@ -61,7 +61,7 @@ fn bouncing_ball_update_stats(
         return;
     }
     for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 2.0 * player_stats.attack_reload_duration;
+        attack_ammo.reload_time = 2.0 * player_stats.attack_reload;
     }
 }
 
@@ -114,7 +114,10 @@ fn spawn_bouncing_ball_attack(
                             Collider::ball(16.0 / 2.0),
                             ProjectileBundleCollider::default(),
                             ProjectileLifetime {
-                                timer: Timer::from_seconds(8.0, TimerMode::Once),
+                                timer: Timer::from_seconds(
+                                    8.0 * player_stats.attack_duration,
+                                    TimerMode::Once,
+                                ),
                             },
                             ProjectileDamage(1.0),
                             ProjectileDeleteOnHit,
@@ -139,6 +142,7 @@ fn duplicate_ball_on_hit(
     asset_server: Res<AssetServer>,
     enemies: Query<(Entity, &Transform), With<Enemy>>,
     mut eneny_hit_event: EventReader<EnemyReceivedDamage>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     for event in eneny_hit_event.read() {
         if event.weapon_projectile_type != WeaponsTypes::BouncingBall {
@@ -163,7 +167,10 @@ fn duplicate_ball_on_hit(
                         Collider::ball(16.0 / 2.0),
                         ProjectileBundleCollider::default(),
                         ProjectileLifetime {
-                            timer: Timer::from_seconds(8.0, TimerMode::Once),
+                            timer: Timer::from_seconds(
+                                8.0 * player_stats.attack_duration,
+                                TimerMode::Once,
+                            ),
                         },
                         ProjectileDamage(1.0),
                         ProjectileDeleteOnHit,

@@ -49,7 +49,7 @@ fn setup_slow_dome_spawner(mut commands: Commands, player_stats: Res<PlayerInGam
         AttackAmmo {
             size: 1,
             amount: 1,
-            reload_time: 10.0 * player_stats.attack_reload_duration,
+            reload_time: 10.0 * player_stats.attack_reload,
         },
         Name::new("Slow Dome Spawner"),
     ));
@@ -63,7 +63,7 @@ fn slow_dome_update_stats(
         return;
     }
     for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 10.0 * player_stats.attack_reload_duration;
+        attack_ammo.reload_time = 10.0 * player_stats.attack_reload;
     }
 }
 
@@ -112,7 +112,10 @@ fn spawn_slow_dome_attack(
                         Collider::ball(95.0 / 2.0),
                         ProjectileBundleCollider::default(),
                         ProjectileLifetime {
-                            timer: Timer::from_seconds(8.0, TimerMode::Once),
+                            timer: Timer::from_seconds(
+                                8.0 * player_stats.attack_duration,
+                                TimerMode::Once,
+                            ),
                         },
                         ProjectileDamage(1.0),
                         ProjectileTimeBetweenDamage {

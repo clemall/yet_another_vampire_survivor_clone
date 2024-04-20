@@ -17,7 +17,9 @@ impl Plugin for PlayerPlugin {
                 mul_power: 0.0,
                 mul_area: 0.0,
                 mul_attack_speed: 0.0,
-                mul_attack_reload_duration: -0.0,
+                mul_attack_duration: 0.0,
+                add_attack_amount: 0,
+                mul_attack_reload: -0.0,
                 mul_luck: 0.0,
                 mul_magnet: 0.0,
             },
@@ -33,7 +35,9 @@ impl Plugin for PlayerPlugin {
                 mul_power: 0.0,
                 mul_area: 0.0,
                 mul_attack_speed: 0.0,
-                mul_attack_reload_duration: -0.0,
+                mul_attack_duration: 0.0,
+                add_attack_amount: 0,
+                mul_attack_reload: -0.0,
                 mul_luck: 0.0,
                 mul_magnet: 0.0,
             },
@@ -149,6 +153,9 @@ fn setup_player_in_game_stats(
     player_stats.max_health += (BASE_MAX_HEALTH * meta_stats.data.mul_max_health)
         + (BASE_MAX_HEALTH * character_stats.data.mul_max_health);
 
+    // Additive
+    player_stats.recovery += meta_stats.data.add_recovery + character_stats.data.add_recovery;
+
     player_stats.move_speed += (BASE_MOVE_SPEED * meta_stats.data.mul_move_speed)
         + (BASE_MOVE_SPEED * character_stats.data.mul_move_speed);
 
@@ -167,12 +174,14 @@ fn setup_player_in_game_stats(
     player_stats.attack_speed += (BASE_ATTACK_SPEED * meta_stats.data.mul_attack_speed)
         + (BASE_ATTACK_SPEED * character_stats.data.mul_attack_speed);
 
-    player_stats.attack_reload_duration += (BASE_ATTACK_RELOAD_DURATION
-        * meta_stats.data.mul_attack_reload_duration)
-        + (BASE_ATTACK_RELOAD_DURATION * character_stats.data.mul_attack_reload_duration);
+    player_stats.attack_reload += (BASE_ATTACK_RELOAD * meta_stats.data.mul_attack_reload)
+        + (BASE_ATTACK_RELOAD * character_stats.data.mul_attack_reload);
 
-    // Additive
-    player_stats.recovery += meta_stats.data.add_recovery + character_stats.data.add_recovery;
+    player_stats.attack_duration += (BASE_ATTACK_DURATION * meta_stats.data.mul_attack_duration)
+        + (BASE_ATTACK_DURATION * character_stats.data.mul_attack_duration);
+
+    player_stats.attack_amount +=
+        meta_stats.data.add_attack_amount + character_stats.data.add_attack_amount;
 }
 
 fn update_player_stats(
@@ -201,10 +210,9 @@ fn update_player_stats(
     println!("luck: {}", player_stats.luck);
     println!("resistance: {}", player_stats.resistance);
     println!("attack_speed: {}", player_stats.attack_speed);
-    println!(
-        "attack_reload_duration: {}",
-        player_stats.attack_reload_duration
-    );
+    println!("attack_reload: {}", player_stats.attack_reload);
+    println!("attack_duration: {}", player_stats.attack_duration);
+    println!("attack_amount: {}", player_stats.attack_amount);
 }
 
 // public because of the camera, see camera.rs
