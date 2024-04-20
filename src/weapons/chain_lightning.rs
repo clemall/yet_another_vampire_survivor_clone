@@ -109,8 +109,6 @@ fn spawn_chain_lightning_attack(
                 Some(&seen_enemies),
             );
 
-            println!("{:?}", closed_enemy);
-
             if let Some(closed_enemy) = closed_enemy {
                 if let Ok((enemy, enemy_transform)) = enemies.get(closed_enemy) {
                     // add current enemy to the list

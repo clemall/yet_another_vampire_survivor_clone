@@ -31,6 +31,7 @@ fn despawn_level_up_ui(mut commands: Commands, ui: Query<Entity, With<LevelUpUI>
 fn spawn_level_up_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     camera: Query<&Camera>,
     loot_table: Res<LootTable>,
     items_resource: Res<ItemsResource>,
@@ -100,6 +101,13 @@ fn spawn_level_up_ui(
             .name
             .clone();
 
+        let texture_atlas_index = items_resource
+            .items
+            .get(&item_key.clone())
+            .unwrap()
+            .texture_atlas_index
+            .clone();
+
         let item_description = items_resource
             .items
             .get(&item_key.clone())
@@ -120,6 +128,10 @@ fn spawn_level_up_ui(
             Rarity::Unique => asset_server.load("item_ui_background_unique.png"),
         };
 
+        let texture_icons = asset_server.load("design_items_ui.png");
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(74.0, 61.0), 14, 1, None, None);
+        let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
         let card_item = commands
             .spawn((
                 ButtonBundle {
@@ -135,6 +147,31 @@ fn spawn_level_up_ui(
                     },
                     image: UiImage::new(texture),
                     ..default()
+                },
+                ButtonUpgrade {
+                    item_key: item_key.clone().into(),
+                    rarity: rarity,
+                },
+            ))
+            .id();
+
+        let card_icon = commands
+            .spawn((
+                ButtonBundle {
+                    style: Style {
+                        position_type: PositionType::Relative,
+                        width: Val::Px(74. * ratio),
+                        height: Val::Px(61. * ratio),
+                        align_self: AlignSelf::Start,
+                        margin: UiRect::top(Val::Px(11.0)),
+                        ..default()
+                    },
+                    image: UiImage::new(texture_icons),
+                    ..default()
+                },
+                TextureAtlas {
+                    layout: texture_atlas_layout,
+                    index: texture_atlas_index as usize,
                 },
                 ButtonUpgrade {
                     item_key: item_key.clone().into(),
@@ -204,6 +241,7 @@ fn spawn_level_up_ui(
             )
             .id();
 
+        commands.entity(card_item).push_children(&[card_icon]);
         commands.entity(card_item).push_children(&[item_name]);
         commands
             .entity(card_item)

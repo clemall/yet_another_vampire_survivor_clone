@@ -519,6 +519,7 @@ pub struct ItemsResource {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ItemData {
     pub name: String,
+    pub texture_atlas_index: u32,
     pub rarity_to_effects: HashMap<Rarity, ItemEffects>,
 }
 

@@ -114,7 +114,6 @@ fn apply_luck_to_loot_table(
 
     for (index, (rarity, value)) in item_resource.weighted_rarity.iter().enumerate() {
         let value_as_f32: f32 = *value as f32;
-        println!("wtf:::{}", value_as_f32);
         match rarity {
             Rarity::Common | Rarity::Uncommon => {
                 loot_table.weighted_rarity[index].1 = (value_as_f32
@@ -130,7 +129,4 @@ fn apply_luck_to_loot_table(
             _ => {}
         }
     }
-
-    println!("{:?}", loot_table.weighted_rarity);
-    println!(" ");
 }
