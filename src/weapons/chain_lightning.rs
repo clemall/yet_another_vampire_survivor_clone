@@ -23,7 +23,8 @@ impl Plugin for ChainLightningPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_chain_lightning_attack,).run_if(in_state(GameState::Gameplay)),
+            (spawn_chain_lightning_attack, chain_lightning_update_stats)
+                .run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -51,7 +52,7 @@ fn setup_chain_lightning_spawner(mut commands: Commands, player_stats: Res<Playe
     ));
 }
 
-fn chain_lightningl_update_stats(
+fn chain_lightning_update_stats(
     mut attack_ammos: Query<&mut AttackAmmo, With<ChainLightningSpawner>>,
     player_stats: Res<PlayerInGameStats>,
 ) {

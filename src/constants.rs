@@ -4,7 +4,10 @@ pub const SCREEN_WIDTH: i32 = 640;
 pub const SCREEN_HEIGHT: i32 = 360;
 
 // start at level 2 because player is already level 1
-pub const MAP_LEVEL_EXPERIENCE: [u32; 5] = [0, 150, 200, 300, 500000];
+pub const MAP_LEVEL_EXPERIENCE: [u32; 25] = [
+    5, 7, 10, 15, 20, 30, 40, 60, 80, 110, 140, 180, 220, 270, 320, 380, 460, 550, 660, 770, 880,
+    990, 1100, 1250, 1500,
+];
 
 pub const MAX_LEVEL: u32 = 5;
 

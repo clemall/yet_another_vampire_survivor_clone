@@ -9,7 +9,11 @@ impl Plugin for WavesPlugin {
         app.insert_resource(WaveManagerGlobalTime {
             global_time: Stopwatch::new(),
         });
-        app.add_systems(Update, (waves_manager_tick, waves_spawn));
+        app.add_systems(
+            Update,
+            (waves_manager_tick, waves_spawn, global_timer_tick)
+                .run_if(in_state(GameState::Gameplay)),
+        );
     }
 }
 
@@ -48,15 +52,9 @@ fn waves_spawn(
                 enemy_types: wave.enemy_type,
             });
         }
-
-        // match wave.enemy_type {
-        //     EnemyTypes::Bat => {
-        //
-        //     }
-        //     EnemyTypes::Bee => {}
-        //     EnemyTypes::Golem => {}
-        //     EnemyTypes::Rabbit => {}
-        //     EnemyTypes::Skull => {}
-        // }
     }
+}
+
+fn global_timer_tick(mut global_timer: ResMut<WaveManagerGlobalTime>, time: Res<Time>) {
+    global_timer.global_time.tick(time.delta());
 }

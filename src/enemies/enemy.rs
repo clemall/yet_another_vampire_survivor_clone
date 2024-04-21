@@ -48,6 +48,7 @@ fn spawn_enemy(
     player: Query<&Transform, With<Player>>,
     enemies_resource: Res<EnemiesResource>,
     enemies: Query<Entity, With<Enemy>>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player = player.single();
     for event in spawn_enemy.read() {
@@ -97,18 +98,18 @@ fn spawn_enemy(
                     last: enemy_data.animation_last_indice,
                     is_repeating: true,
                 },
-                health: Health(enemy_data.health),
-                enemy_speed: EnemySpeed(enemy_data.speed),
-                enemy_damage_overtime: EnemyDamageOverTime(enemy_data.damage),
+                health: Health(enemy_data.health * player_stats.curse),
+                enemy_speed: EnemySpeed(enemy_data.speed * player_stats.curse),
+                enemy_damage_overtime: EnemyDamageOverTime(enemy_data.damage * player_stats.curse),
                 collider: Collider::capsule_x(3.0, 12.0 / 2.0),
                 ..default()
             },))
             .id();
 
         if let Some(experience) = enemy_data.experience_drop {
-            commands
-                .entity(new_enemy)
-                .insert(EnemyExperienceDrop(experience));
+            commands.entity(new_enemy).insert(EnemyExperienceDrop(
+                (experience as f32 * player_stats.curse) as u32,
+            ));
         }
     }
 }

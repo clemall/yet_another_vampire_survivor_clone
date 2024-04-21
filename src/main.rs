@@ -18,6 +18,7 @@ use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_scree
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
+use yet_another_vampire_survivor_clone::ui::ui_global_timer::UiGlobalTimerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::waves::waves::WavesPlugin;
@@ -87,6 +88,7 @@ fn main() {
         .add_plugins(UiEnemyPlugin)
         .add_plugins(UiPlayerPlugin)
         .add_plugins(UiLevelUpPlugin)
+        .add_plugins(UiGlobalTimerPlugin)
         // animation
         .add_plugins(AnimationSimplePlugin)
         // gems

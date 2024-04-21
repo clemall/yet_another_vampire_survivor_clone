@@ -102,6 +102,18 @@ fn trigger_item(
                 PlayerBaseStatsType::AttackAmount => {
                     player_stats.attack_amount += effect.value as u32;
                 }
+                PlayerBaseStatsType::Experience => {
+                    player_stats.experience += BASE_EXPERIENCE * effect.value;
+                }
+                PlayerBaseStatsType::Greed => {
+                    player_stats.greed += BASE_GREED * effect.value;
+                }
+                PlayerBaseStatsType::Curse => {
+                    player_stats.curse += BASE_CURSE * effect.value;
+                }
+                PlayerBaseStatsType::ExtraLife => {
+                    player_stats.extra_life += effect.value as u32;
+                }
             }
         }
 

@@ -6,7 +6,7 @@ ItemsResource (
         (Epic, 70),
         (Legendary, 10),
         (Cursed, 0), // has a chance to occur for each offered card
-        (Unique, 1000), // same???
+        (Unique, 1), // same???
     ],
     items: {
         "HEALTHY_GEM_STONE":
@@ -467,7 +467,7 @@ ItemsResource (
                         base_stat: AttackDuration,
                         value: 0.3,
                     )],
-                    description: "Increase projectile duration byy 30%",
+                    description: "Increase projectile duration by 30%",
                 ),
             },
         ),
@@ -489,6 +489,146 @@ ItemsResource (
                         value: 2.0,
                     )],
                     description: "Increase weapons ammo by 2",
+                ),
+            },
+        ),
+        "EXPERIENCE":
+        ItemData(
+            name: "EXPERIENCE",
+            texture_atlas_index: 15,
+            rarity_to_effects: {
+                Common: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Experience,
+                        value: 0.05,
+                    )],
+                    description: "Increase experience received by 5%",
+                ),
+                Uncommon: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Experience,
+                        value: 0.1,
+                    )],
+                    description: "Increase experience received by 10%",
+                ),
+                Rare: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Experience,
+                        value: 0.15,
+                    )],
+                    description: "Increase experience received by 15%",
+                ),
+                Epic: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Experience,
+                        value: 0.2,
+                    )],
+                    description: "Increase experience received by 20%",
+                ),
+                Legendary: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Experience,
+                        value: 0.3,
+                    )],
+                    description: "Increase experience received by 30%",
+                ),
+            },
+        ),
+        "GREED":
+        ItemData(
+            name: "GREED",
+            texture_atlas_index: 16,
+            rarity_to_effects: {
+                Common: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Greed,
+                        value: 0.05,
+                    )],
+                    description: "Increase gold received by 5%",
+                ),
+                Uncommon: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Greed,
+                        value: 0.1,
+                    )],
+                    description: "Increase gold received by 10%",
+                ),
+                Rare: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Greed,
+                        value: 0.15,
+                    )],
+                    description: "Increase gold received by 15%",
+                ),
+                Epic: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Greed,
+                        value: 0.2,
+                    )],
+                    description: "Increase gold received by 20%",
+                ),
+                Legendary: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Greed,
+                        value: 0.3,
+                    )],
+                    description: "Increase gold received by 30%",
+                ),
+            },
+        ),
+        "CURSE":
+        ItemData(
+            name: "CURSE",
+            texture_atlas_index: 17,
+            rarity_to_effects: {
+                Common: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Curse,
+                        value: 0.05,
+                    )],
+                    description: "Enemy health, speed, damage and experience given increased by 5%",
+                ),
+                Uncommon: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Curse,
+                        value: 0.1,
+                    )],
+                    description: "Enemy health, speed, damage and experience given increased by 10%",
+                ),
+                Rare: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Curse,
+                        value: 0.15,
+                    )],
+                    description: "Enemy health, speed, damage and experience given increased by 15%",
+                ),
+                Epic: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Curse,
+                        value: 0.2,
+                    )],
+                    description: "Enemy health, speed, damage and experience given increased by 20%",
+                ),
+                Legendary: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: Curse,
+                        value: 0.3,
+                    )],
+                    description: "Enemy health, speed, damage and experience given increased by 30%",
+                ),
+            },
+        ),
+        "EXTRA_LIFE":
+        ItemData(
+            name: "EXTRA LIFE",
+            texture_atlas_index: 18,
+            rarity_to_effects: {
+                Unique: ItemEffects(
+                    effects: [ItemEffect(
+                        base_stat: ExtraLife,
+                        value: 1,
+                    )],
+                    description: "Received an extra life. Revive with 20% health.",
                 ),
             },
         ),

@@ -21,8 +21,13 @@ impl Plugin for PlayerPlugin {
                 add_attack_amount: 0,
                 mul_attack_reload: -0.0,
                 mul_luck: 0.0,
+                mul_experience: 0.0,
+                mul_greed: 0.0,
+                mul_curse: 0.0,
                 mul_magnet: 0.0,
+                add_extra_life: 1,
             },
+            gold: 0,
         });
 
         // TODO: add more characters loaded from ron file
@@ -39,7 +44,11 @@ impl Plugin for PlayerPlugin {
                 add_attack_amount: 0,
                 mul_attack_reload: -0.0,
                 mul_luck: 0.0,
+                mul_experience: 0.0,
+                mul_greed: 0.0,
+                mul_curse: 0.0,
                 mul_magnet: 0.0,
+                add_extra_life: 0,
             },
         });
 
@@ -182,6 +191,17 @@ fn setup_player_in_game_stats(
 
     player_stats.attack_amount +=
         meta_stats.data.add_attack_amount + character_stats.data.add_attack_amount;
+
+    player_stats.experience += (BASE_EXPERIENCE * meta_stats.data.mul_experience)
+        + (BASE_EXPERIENCE * character_stats.data.mul_experience);
+
+    player_stats.greed +=
+        (BASE_GREED * meta_stats.data.mul_greed) + (BASE_GREED * character_stats.data.mul_greed);
+
+    player_stats.curse +=
+        (BASE_CURSE * meta_stats.data.mul_curse) + (BASE_CURSE * character_stats.data.mul_curse);
+
+    player_stats.extra_life += meta_stats.data.add_extra_life + character_stats.data.add_extra_life;
 }
 
 fn update_player_stats(
@@ -213,6 +233,10 @@ fn update_player_stats(
     println!("attack_reload: {}", player_stats.attack_reload);
     println!("attack_duration: {}", player_stats.attack_duration);
     println!("attack_amount: {}", player_stats.attack_amount);
+    println!("experience: {}", player_stats.experience);
+    println!("greed: {}", player_stats.greed);
+    println!("curse: {}", player_stats.curse);
+    println!("extra life: {}", player_stats.extra_life);
 }
 
 // public because of the camera, see camera.rs
@@ -253,14 +277,22 @@ pub fn player_movement(
 }
 
 fn player_game_over(
-    health: Query<&Health, With<Player>>,
+    mut health: Query<(&mut Health, &MaxHealth), With<Player>>,
     mut _game_state: ResMut<NextState<GameState>>,
+    mut player_stats: ResMut<PlayerInGameStats>,
     // audio: Res<Audio>,
     // assets: Res<AssetServer>,
 ) {
-    let health = health.single();
+    let (mut health, max_health) = health.single_mut();
 
     if health.0 <= 0.0 {
+        if player_stats.extra_life > 0 {
+            player_stats.extra_life -= 1;
+
+            // TODO: make a state with animation ect instead of just give back health
+            //       like a nice revive animation, enemies ect frozen and nice sound
+            health.0 = max_health.0 * 0.2;
+        }
         // audio.play_with_settings(
         //     assets.load("death.wav"),
         //     PlaybackSettings {
@@ -277,9 +309,12 @@ fn compute_experience(
     mut collect_experience: EventReader<CollectExperience>,
     mut player_experience: ResMut<PlayerExperience>,
     mut next_state: ResMut<NextState<GameState>>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     for event in collect_experience.read() {
-        player_experience.amount_experience += event.experience;
+        // value will be round up from f32 to u32
+        player_experience.amount_experience +=
+            (event.experience as f32 * player_stats.experience) as u32;
     }
 
     let amount_of_experience_before_leveling =
@@ -303,7 +338,9 @@ fn player_received_damage(
 ) {
     let mut player_health = player.single_mut();
     for event in received_damage.read() {
-        player_health.0 -= (event.damage * 1.0 / player_stats.resistance).max(0.1);
+        // Max is small because we calculate damage over a duration, damage/s
+        // The value applied is, therefor, quite small
+        player_health.0 -= (event.damage * 1.0 / player_stats.resistance).max(0.000000001);
     }
 }
 

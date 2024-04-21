@@ -35,16 +35,17 @@ pub struct PlayerStats {
     pub add_attack_amount: u32,
     pub mul_attack_reload: f32,
     pub mul_luck: f32,
-    // pub mul_experience: f32,
-    // pub mul_greed: f32,
-    // pub mul_curse: f32,
+    pub mul_experience: f32,
+    pub mul_greed: f32, // TODO use value
+    pub mul_curse: f32,
     pub mul_magnet: f32,
-    // pub mul_extra_life: f32,
+    pub add_extra_life: u32, // TODO use value
 }
 
 #[derive(Resource, Debug, Deserialize, Serialize)]
 pub struct PlayerMetaStats {
     pub data: PlayerStats,
+    pub gold: u32,
 }
 
 // Will be set by a ron file for each character
@@ -65,11 +66,11 @@ pub struct PlayerInGameStats {
     pub attack_amount: u32,
     pub attack_reload: f32,
     pub luck: f32,
-    // pub experience: f32,
-    // pub greed: f32,
-    // pub curse: f32,
+    pub experience: f32,
+    pub greed: f32,
+    pub curse: f32,
     pub magnet: f32,
-    // pub extra_life: f32,
+    pub extra_life: u32,
 }
 // Default value for all character before multiplication
 impl Default for PlayerInGameStats {
@@ -86,7 +87,11 @@ impl Default for PlayerInGameStats {
             attack_reload: BASE_ATTACK_RELOAD,
             attack_amount: BASE_ATTACK_AMOUNT,
             luck: BASE_LUCK,
+            experience: BASE_EXPERIENCE,
+            greed: BASE_GREED,
+            curse: BASE_CURSE,
             magnet: BASE_MAGNET,
+            extra_life: BASE_EXTRA_LIFE,
         }
     }
 }
@@ -113,6 +118,13 @@ pub const BASE_ATTACK_RELOAD: f32 = 1.0; // should go lower
 pub const BASE_ATTACK_DURATION: f32 = 1.0;
 pub const BASE_ATTACK_AMOUNT: u32 = 0; // additive +1 +2 ect
 
+pub const BASE_EXPERIENCE: f32 = 1.0;
+pub const BASE_GREED: f32 = 1.0;
+
+pub const BASE_CURSE: f32 = 1.0;
+
+pub const BASE_EXTRA_LIFE: u32 = 0;
+
 #[derive(Debug, PartialEq, Clone, Copy, Deserialize, Serialize)]
 pub enum PlayerBaseStatsType {
     MaxHealth,
@@ -127,6 +139,10 @@ pub enum PlayerBaseStatsType {
     AttackReloadDuration,
     AttackDuration,
     AttackAmount,
+    Experience,
+    Greed,
+    Curse,
+    ExtraLife,
 }
 
 #[derive(Resource, Debug)]
@@ -316,6 +332,12 @@ pub struct PlayerExperienceBarUIParent;
 pub struct PlayerExperienceUI;
 #[derive(Component)]
 pub struct LevelUpUI;
+
+#[derive(Component)]
+pub struct GlobalTimerUI;
+
+#[derive(Component)]
+pub struct PlayerLevelUI;
 
 #[derive(Component)]
 pub struct ButtonUpgrade {

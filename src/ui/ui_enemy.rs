@@ -8,11 +8,7 @@ impl Plugin for UiEnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (
-                enemy_received_damage_ui,
-                update_world_text,
-                update_world_text,
-            ),
+            (enemy_received_damage_ui, update_enemy_received_damage_ui),
         );
     }
 }
@@ -96,7 +92,7 @@ pub fn enemy_received_damage_ui(
     }
 }
 
-fn update_world_text(
+fn update_enemy_received_damage_ui(
     mut commands: Commands,
     mut text: Query<(Entity, &mut Style, &mut WorldTextUI)>,
     main_camera: Query<(&Camera, &GlobalTransform)>,

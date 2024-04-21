@@ -1,5 +1,5 @@
 use crate::components::*;
-use crate::constants::MAP_LEVEL_EXPERIENCE;
+use crate::constants::{DAMAGE_FONT, FONT, FONT_BOLD, MAP_LEVEL_EXPERIENCE};
 use bevy::prelude::*;
 
 pub struct UiPlayerPlugin;
@@ -8,11 +8,19 @@ impl Plugin for UiPlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
-            (setup_player_health_ui, setup_player_experience_bar_ui),
+            (
+                setup_player_health_ui,
+                setup_player_experience_bar_ui,
+                setup_player_level_ui,
+            ),
         );
         app.add_systems(
             Update,
-            (player_health_ui_sync, player_experience_bar_ui_sync),
+            (
+                player_health_ui_sync,
+                player_experience_bar_ui_sync,
+                player_level_ui_sync,
+            ),
         );
     }
 }
@@ -113,9 +121,9 @@ fn setup_player_experience_bar_ui(mut commands: Commands) {
     let parent_node = (
         NodeBundle {
             style: Style {
-                width: Val::Vw(80.0),
-                height: Val::Px(20.),
-                left: Val::Vw(10.0),
+                width: Val::Vw(96.0),
+                height: Val::Px(30.),
+                left: Val::Vw(2.0),
                 right: Val::Auto,
                 top: Val::Auto,
                 bottom: Val::Px(20.),
@@ -125,7 +133,7 @@ fn setup_player_experience_bar_ui(mut commands: Commands) {
                 position_type: PositionType::Absolute,
                 ..default()
             },
-            background_color: BackgroundColor(Color::WHITE),
+            background_color: BackgroundColor(Color::ALICE_BLUE),
             ..default()
         },
         PlayerExperienceBarUIParent,
@@ -140,7 +148,7 @@ fn setup_player_experience_bar_ui(mut commands: Commands) {
                 position_type: PositionType::Relative,
                 ..default()
             },
-            background_color: BackgroundColor(Color::BLUE),
+            background_color: BackgroundColor(Color::rgb(0.3137, 0.6470, 0.9215)),
             ..default()
         },
         PlayerExperienceUI,
@@ -168,4 +176,58 @@ fn player_experience_bar_ui_sync(
 
     let percent = player_experience.amount_experience as f32 / total as f32;
     style.width = Val::Percent(percent * 100.0);
+}
+
+fn setup_player_level_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let parent_node = commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    height: Val::Px(20.),
+                    width: Val::Vw(100.0),
+                    bottom: Val::Px(22.),
+                    right: Val::Vw(3.0),
+                    align_items: AlignItems::End,
+                    justify_content: JustifyContent::End,
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
+                z_index: ZIndex::Global(20),
+                ..default()
+            },
+            Name::new("Current player Level UI "),
+        ))
+        .id();
+
+    let level_text = commands
+        .spawn((
+            TextBundle {
+                text: Text {
+                    sections: vec![TextSection::new(
+                        &format!("Level: 1"),
+                        TextStyle {
+                            font: asset_server.load(FONT_BOLD),
+                            font_size: 26.0,
+                            color: Color::BLACK,
+                        },
+                    )],
+                    ..default()
+                },
+                z_index: ZIndex::Local(1),
+                ..default()
+            },
+            PlayerLevelUI,
+        ))
+        .id();
+
+    commands.entity(parent_node).push_children(&[level_text]);
+}
+
+fn player_level_ui_sync(
+    mut ui: Query<&mut Text, With<PlayerLevelUI>>,
+    player_experience: Res<PlayerExperience>,
+) {
+    for mut text in &mut ui {
+        text.sections[0].value = format!("Level:{}", player_experience.level);
+    }
 }
