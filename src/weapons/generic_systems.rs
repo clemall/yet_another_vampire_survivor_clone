@@ -49,7 +49,7 @@ fn projectile_apply_damage(
             &Transform,
             &CollidingEntities,
             &ProjectileDamage,
-            &ProjectileType,
+            &ProjectileFromWeapon,
             Option<&mut ProjectileTimeBetweenDamage>,
             Option<&mut AlreadyHitEnemies>,
             Option<&ProjectileDeleteOnHit>,

@@ -103,7 +103,7 @@ fn spawn_shuriken_attack(
                 ))
                 .insert((
                     Projectile,
-                    ProjectileType(WeaponsTypes::Shuriken),
+                    ProjectileFromWeapon(WeaponsTypes::Shuriken),
                     Shuriken,
                     ProjectileSpeed(2.0),
                     // ProjectileDirection(direction),

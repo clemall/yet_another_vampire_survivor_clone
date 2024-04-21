@@ -157,7 +157,7 @@ fn spawn_claw_attack(
                     ProjectileDamage(5.0),
                     ProjectileImpulse(2000.0),
                     Claw,
-                    ProjectileType(WeaponsTypes::Claw),
+                    ProjectileFromWeapon(WeaponsTypes::Claw),
                     Projectile,
                     Name::new("Claw Attack"),
                 ));

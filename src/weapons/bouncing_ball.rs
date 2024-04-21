@@ -128,7 +128,7 @@ fn spawn_bouncing_ball_attack(
                             ProjectileSpeed(100.0),
                             ProjectileDirection(direction),
                             ProjectileImpulse(700.0),
-                            ProjectileType(WeaponsTypes::BouncingBall),
+                            ProjectileFromWeapon(WeaponsTypes::BouncingBall),
                             Name::new("Bouncing ball Attack"),
                         ));
                 }
@@ -181,7 +181,7 @@ fn duplicate_ball_on_hit(
                         ProjectileSpeed(100.0),
                         ProjectileDirection(direction),
                         ProjectileImpulse(700.0),
-                        ProjectileType(WeaponsTypes::BouncingBallSplit),
+                        ProjectileFromWeapon(WeaponsTypes::BouncingBallSplit),
                         Name::new("Bouncing ball duplicate Attack"),
                     ));
             }

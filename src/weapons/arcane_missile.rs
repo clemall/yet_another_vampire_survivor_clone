@@ -167,7 +167,7 @@ fn spawn_arcane_missile_attack(
                         ))
                         .insert((
                             Projectile,
-                            ProjectileType(WeaponsTypes::ArcaneMissile),
+                            ProjectileFromWeapon(WeaponsTypes::ArcaneMissile),
                             ProjectileDeleteOnHit,
                             ProjectileDamage(1.0),
                             ProjectileTarget(entity),

@@ -253,6 +253,7 @@ pub enum WeaponsTypes {
     SlowDome,
     BouncingBall,
     BouncingBallSplit,
+    FireBoots,
 }
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
@@ -385,7 +386,7 @@ pub struct Projectile;
 pub struct ProjectileFixedScale;
 
 #[derive(Component)]
-pub struct ProjectileType(pub WeaponsTypes);
+pub struct ProjectileFromWeapon(pub WeaponsTypes);
 
 #[derive(Component)]
 pub struct ProjectileDamage(pub f32);

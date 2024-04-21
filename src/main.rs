@@ -30,6 +30,7 @@ use yet_another_vampire_survivor_clone::weapons::bouncing_ball::BouncingBallPlug
 use yet_another_vampire_survivor_clone::weapons::chain_lightning::ChainLightningPlugin;
 use yet_another_vampire_survivor_clone::weapons::claw::WeaponClawPlugin;
 use yet_another_vampire_survivor_clone::weapons::fire_area::WeaponFireAreaPlugin;
+use yet_another_vampire_survivor_clone::weapons::fire_boots::FireBootsPlugin;
 use yet_another_vampire_survivor_clone::weapons::generic_systems::GenericWeaponPlugin;
 use yet_another_vampire_survivor_clone::weapons::shuriken::ShurikenPlugin;
 use yet_another_vampire_survivor_clone::weapons::slow_dome::SlowDomePlugin;
@@ -83,7 +84,7 @@ fn main() {
         .add_plugins(ItemsPlugin)
         // Waves
         .add_plugins(WavesPlugin)
-        // .add_plugins(WavesMap1Plugin) // Temp
+        .add_plugins(WavesMap1Plugin) // Temp
         // Enemies plugin
         .add_plugins(EnemyPlugin)
         // UI
@@ -106,6 +107,7 @@ fn main() {
         .add_plugins(ChainLightningPlugin)
         .add_plugins(SlowDomePlugin)
         .add_plugins(BouncingBallPlugin)
+        .add_plugins(FireBootsPlugin)
         // Setup
         // .add_systems(Startup, setup)
         // test
@@ -182,6 +184,9 @@ fn debug(
     }
     if keyboard_input.just_pressed(KeyCode::Digit7) {
         player_weapons.weapons.push(WeaponsTypes::BouncingBall);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit8) {
+        player_weapons.weapons.push(WeaponsTypes::FireBoots);
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyP) {

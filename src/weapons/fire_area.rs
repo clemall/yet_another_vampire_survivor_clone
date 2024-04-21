@@ -78,7 +78,7 @@ pub fn setup_fire_area(
             FireAreaSpawner,
             FireArea,
             Projectile,
-            ProjectileType(WeaponsTypes::FireArea),
+            ProjectileFromWeapon(WeaponsTypes::FireArea),
             ProjectileImpulse(150.0),
             ProjectileDamage(10.0),
             ProjectileFollowPlayer,
