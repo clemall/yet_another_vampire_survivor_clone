@@ -52,12 +52,6 @@ fn spawn_enemy(
 ) {
     let player = player.single();
     for event in spawn_enemy.read() {
-        // Do not spawn more enemies if we already have more than 400
-        if enemies.iter().count() > 600 {
-            println!("Too many enemies, no more !");
-            return;
-        }
-
         let enemy_data = match event.enemy_types {
             EnemyTypes::Bat => &enemies_resource.bat,
             EnemyTypes::Bee => &enemies_resource.bee,
@@ -66,6 +60,15 @@ fn spawn_enemy(
             EnemyTypes::Skull => &enemies_resource.skull,
             EnemyTypes::BossWolf => &enemies_resource.boss_wolf,
         };
+
+        // Do not spawn more enemies if we already have more than 400
+        // except bosses
+        if !enemy_data.is_boss && !enemy_data.is_semi_boss {
+            if enemies.iter().count() > 600 {
+                println!("Too many enemies, no more !");
+                return;
+            }
+        }
 
         let texture = asset_server.load(&enemy_data.texture_patch);
         let layout = TextureAtlasLayout::from_grid(
@@ -106,10 +109,14 @@ fn spawn_enemy(
             },))
             .id();
 
-        if let Some(experience) = enemy_data.experience_drop {
+        if !enemy_data.is_boss && !enemy_data.is_semi_boss {
             commands.entity(new_enemy).insert(EnemyExperienceDrop(
-                (experience as f32 * player_stats.curse) as u32,
+                (enemy_data.experience_drop as f32 * player_stats.curse) as u32,
             ));
+        }
+
+        if enemy_data.is_boss {
+            commands.entity(new_enemy).insert(EnemyBossDrop);
         }
     }
 }

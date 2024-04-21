@@ -12,6 +12,7 @@ use yet_another_vampire_survivor_clone::cameras::camera::PlayerCameraPlugin;
 use yet_another_vampire_survivor_clone::components::*;
 use yet_another_vampire_survivor_clone::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use yet_another_vampire_survivor_clone::enemies::enemy::EnemyPlugin;
+use yet_another_vampire_survivor_clone::gems::boss_gem::GemsBossPlugin;
 use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::items::item::ItemsPlugin;
 use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
@@ -21,6 +22,7 @@ use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_global_timer::UiGlobalTimerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
+use yet_another_vampire_survivor_clone::ui::ui_update_weapon_up::UiUpdateWeaponPlugin;
 use yet_another_vampire_survivor_clone::waves::waves::WavesPlugin;
 use yet_another_vampire_survivor_clone::waves::waves_map_1::WavesMap1Plugin;
 use yet_another_vampire_survivor_clone::weapons::arcane_missile::ArcaneMissilePlugin;
@@ -81,7 +83,7 @@ fn main() {
         .add_plugins(ItemsPlugin)
         // Waves
         .add_plugins(WavesPlugin)
-        .add_plugins(WavesMap1Plugin) // Temp
+        // .add_plugins(WavesMap1Plugin) // Temp
         // Enemies plugin
         .add_plugins(EnemyPlugin)
         // UI
@@ -89,10 +91,12 @@ fn main() {
         .add_plugins(UiPlayerPlugin)
         .add_plugins(UiLevelUpPlugin)
         .add_plugins(UiGlobalTimerPlugin)
+        .add_plugins(UiUpdateWeaponPlugin)
         // animation
         .add_plugins(AnimationSimplePlugin)
         // gems
         .add_plugins(GemsPlugin)
+        .add_plugins(GemsBossPlugin)
         // Weapons
         .add_plugins(GenericWeaponPlugin)
         .add_plugins(WeaponClawPlugin)

@@ -5,15 +5,21 @@ use rand::distributions::{Distribution, WeightedIndex};
 use rand::seq::SliceRandom;
 use rand::Rng;
 
-pub struct UiLevelUpPlugin;
+pub struct UiUpdateWeaponPlugin;
 
-impl Plugin for UiLevelUpPlugin {
+impl Plugin for UiUpdateWeaponPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::PlayerLevelUp), spawn_level_up_ui);
-        app.add_systems(OnExit(GameState::PlayerLevelUp), despawn_level_up_ui);
+        app.add_systems(
+            OnEnter(GameState::PlayerUpdateWeapon),
+            spawn_update_weapon_ui,
+        );
+        app.add_systems(
+            OnExit(GameState::PlayerUpdateWeapon),
+            despawn_update_weapon_ui,
+        );
         app.add_systems(
             Update,
-            level_up_button_interaction.run_if(in_state(GameState::PlayerLevelUp)),
+            update_weapon_button_interaction.run_if(in_state(GameState::PlayerUpdateWeapon)),
         );
     }
 }
@@ -22,13 +28,13 @@ const HOVERED_BUTTON: Color = Color::rgb(0.80, 0.80, 0.80);
 const NORMAL_BUTTON: Color = Color::rgb(1., 1., 1.);
 const POPUP_BG_COLOR: Color = Color::rgba(0.0, 0.0, 0.0, 0.95);
 
-fn despawn_level_up_ui(mut commands: Commands, ui: Query<Entity, With<LevelUpUI>>) {
+fn despawn_update_weapon_ui(mut commands: Commands, ui: Query<Entity, With<LevelUpUI>>) {
     for ui in &ui {
         commands.entity(ui).despawn_recursive();
     }
 }
 
-fn spawn_level_up_ui(
+fn spawn_update_weapon_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
@@ -144,7 +150,7 @@ fn spawn_level_up_ui(
     }
 }
 
-fn level_up_button_interaction(
+fn update_weapon_button_interaction(
     mut next_state: ResMut<NextState<GameState>>,
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &ButtonUpgrade), // UiImage

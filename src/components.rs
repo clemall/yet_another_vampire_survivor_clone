@@ -13,6 +13,7 @@ pub enum GameState {
     MainMenu,
     GameOver,
     PlayerLevelUp,
+    PlayerUpdateWeapon,
 }
 
 // PLAYER
@@ -190,7 +191,7 @@ pub struct EnemyData {
     pub collider_height: f32,
     pub collider_radius: f32,
     pub mass: f32,
-    pub experience_drop: Option<u32>,
+    pub experience_drop: u32, // bosses has an experience drop of 0
     pub is_boss: bool,
     pub is_semi_boss: bool,
 }
@@ -270,6 +271,9 @@ pub struct VelocityAura {
 pub struct Gem {
     pub experience: u32,
 }
+
+#[derive(Component)]
+pub struct GemBoss;
 
 #[derive(Component)]
 pub struct GemIsAttracted;
