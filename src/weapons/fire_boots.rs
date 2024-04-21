@@ -1,7 +1,6 @@
 use crate::components::*;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use std::f32::consts::TAU;
 
 #[derive(Component)]
 pub struct FireBootSpawner;

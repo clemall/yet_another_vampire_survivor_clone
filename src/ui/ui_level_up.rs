@@ -173,9 +173,9 @@ fn level_up_button_interaction(
 }
 
 fn card_ui_factory(
-    mut commands: &mut Commands,
+    commands: &mut Commands,
     asset_server: &AssetServer,
-    mut texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
+    texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
     ratio: f32,
     rarity: &Rarity,
     item_key: &str,
@@ -225,7 +225,7 @@ fn card_ui_factory(
                 ..default()
             },
             ButtonUpgrade {
-                item_key: item_key.clone().into(),
+                item_key: item_key.into(),
                 rarity: *rarity,
             },
         ))

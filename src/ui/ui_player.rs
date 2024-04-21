@@ -1,5 +1,5 @@
 use crate::components::*;
-use crate::constants::{DAMAGE_FONT, FONT, FONT_BOLD, MAP_LEVEL_EXPERIENCE};
+use crate::constants::{FONT_BOLD, MAP_LEVEL_EXPERIENCE};
 use bevy::prelude::*;
 
 pub struct UiPlayerPlugin;

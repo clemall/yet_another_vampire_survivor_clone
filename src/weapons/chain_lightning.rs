@@ -1,6 +1,5 @@
 use crate::components::*;
 use crate::math_utils::find_closest;
-use crate::weapons::bouncing_ball::BouncingBallSpawner;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use std::f32::consts::PI;

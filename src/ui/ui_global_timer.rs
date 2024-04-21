@@ -1,7 +1,5 @@
 use crate::components::*;
-use crate::constants::{
-    DAMAGE_FONT, DAMAGE_FONT_COLOR, DAMAGE_FONT_SIZE, FONT_BOLD, MAP_LEVEL_EXPERIENCE,
-};
+use crate::constants::DAMAGE_FONT;
 use bevy::prelude::*;
 
 pub struct UiGlobalTimerPlugin;

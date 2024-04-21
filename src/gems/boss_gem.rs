@@ -43,12 +43,12 @@ fn spawn_boss_gem_on_enemy_death(
 
 fn gem_boss_retrieve_by_user(
     mut commands: Commands,
-    mut gems: Query<(Entity, &GemBoss, &CollidingEntities), Without<ColliderDisabled>>,
+    mut gems: Query<(Entity, &CollidingEntities), (With<GemBoss>, Without<ColliderDisabled>)>,
     player: Query<Entity, With<Player>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     let player = player.single();
-    for (gem_entity, gem, colliding_entities) in &mut gems {
+    for (gem_entity, colliding_entities) in &mut gems {
         if colliding_entities.contains(player) {
             next_state.set(GameState::PlayerUpdateWeapon);
 
