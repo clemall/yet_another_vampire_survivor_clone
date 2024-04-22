@@ -5,5 +5,6 @@ pub mod claw;
 pub mod fire_area;
 pub mod fire_boots;
 pub mod generic_systems;
+pub mod light_sword;
 pub mod shuriken;
 pub mod slow_dome;

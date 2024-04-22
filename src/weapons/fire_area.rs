@@ -81,7 +81,7 @@ pub fn setup_fire_area(
             ProjectileFromWeapon(WeaponsTypes::FireArea),
             ProjectileImpulse(150.0),
             ProjectileDamage(10.0),
-            ProjectileFollowPlayer,
+            ProjectilePositionOnPlayer,
             ProjectileTimeBetweenDamage {
                 timer: Timer::from_seconds(0.33, TimerMode::Repeating),
             },

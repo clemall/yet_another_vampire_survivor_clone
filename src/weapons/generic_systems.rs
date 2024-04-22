@@ -18,6 +18,7 @@ impl Plugin for GenericWeaponPlugin {
                 reloading_attack_spawner,
                 projectile_lifetime_tick,
                 projectile_despawn_after_lifetime,
+                projectile_position_on_player,
                 projectile_follow_player,
                 projectile_move_toward_direction,
                 projectile_move_around_player,
@@ -173,15 +174,38 @@ fn projectile_despawn_after_lifetime(
     }
 }
 
-fn projectile_follow_player(
+fn projectile_position_on_player(
     player: Query<&mut Transform, With<Player>>,
-    mut projectiles: Query<&mut Transform, (With<ProjectileFollowPlayer>, Without<Player>)>,
+    mut projectiles: Query<&mut Transform, (With<ProjectilePositionOnPlayer>, Without<Player>)>,
 ) {
     for mut transform in &mut projectiles {
         if let Ok(player) = player.get_single() {
             transform.translation.x = player.translation.x;
             transform.translation.y = player.translation.y;
         }
+    }
+}
+
+fn projectile_follow_player(
+    player: Query<&mut Transform, With<Player>>,
+    mut projectiles: Query<
+        (&mut Transform, &ProjectileSpeed),
+        (With<ProjectileFollowPlayer>, Without<Player>),
+    >,
+    time: Res<Time>,
+) {
+    let player_transform = player.single();
+    for (mut transform, speed) in &mut projectiles {
+        let direction = (transform.translation.truncate()
+            - player_transform.translation.truncate())
+        .normalize();
+
+        let mut velocity = Vec2::ZERO;
+
+        velocity.x = direction.x * time.delta_seconds() * speed.0;
+        velocity.y = direction.y * time.delta_seconds() * speed.0;
+
+        transform.translation -= velocity.extend(0.0);
     }
 }
 

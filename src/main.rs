@@ -32,6 +32,7 @@ use yet_another_vampire_survivor_clone::weapons::claw::WeaponClawPlugin;
 use yet_another_vampire_survivor_clone::weapons::fire_area::WeaponFireAreaPlugin;
 use yet_another_vampire_survivor_clone::weapons::fire_boots::FireBootsPlugin;
 use yet_another_vampire_survivor_clone::weapons::generic_systems::GenericWeaponPlugin;
+use yet_another_vampire_survivor_clone::weapons::light_sword::LightSwordsPlugin;
 use yet_another_vampire_survivor_clone::weapons::shuriken::ShurikenPlugin;
 use yet_another_vampire_survivor_clone::weapons::slow_dome::SlowDomePlugin;
 
@@ -108,6 +109,7 @@ fn main() {
         .add_plugins(SlowDomePlugin)
         .add_plugins(BouncingBallPlugin)
         .add_plugins(FireBootsPlugin)
+        .add_plugins(LightSwordsPlugin)
         // Setup
         // .add_systems(Startup, setup)
         // test
@@ -187,6 +189,9 @@ fn debug(
     }
     if keyboard_input.just_pressed(KeyCode::Digit8) {
         player_weapons.weapons.push(WeaponsTypes::FireBoots);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit9) {
+        player_weapons.weapons.push(WeaponsTypes::LightSwords);
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyP) {
