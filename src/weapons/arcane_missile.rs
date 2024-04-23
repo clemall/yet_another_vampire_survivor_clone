@@ -2,6 +2,7 @@ use crate::components::*;
 use crate::math_utils::{find_circle_circle_intersections, find_closest, simple_bezier};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use std::f32::consts::PI;
 
 #[derive(Component)]
 pub struct ArcaneMissileSpawner;
@@ -21,11 +22,7 @@ impl Plugin for ArcaneMissilePlugin {
         );
         app.add_systems(
             Update,
-            (
-                spawn_arcane_missile_attack,
-                move_arcane_missile,
-                arcane_missile_update_stats,
-            )
+            (spawn_arcane_missile_attack, move_arcane_missile)
                 .run_if(in_state(GameState::Gameplay)),
         );
     }
@@ -48,25 +45,15 @@ fn setup_arcane_missile_spawner(mut commands: Commands, player_stats: Res<Player
             timer: Timer::from_seconds(0.3, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 3,
+            size: 3 + player_stats.attack_amount,
             amount: 3,
+            default_size: 3,
             reload_time: 2.0 * player_stats.attack_reload,
+            default_reload_time: 2.0,
         },
         ProjectileBendLeftOrRight(true),
         Name::new("Arcane missile Spawner"),
     ));
-}
-
-fn arcane_missile_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<ArcaneMissileSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 2.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_arcane_missile_attack(
@@ -100,18 +87,17 @@ fn spawn_arcane_missile_attack(
 
             // get closed enemy
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
-            let closed_enemy: Option<Entity> =
-                find_closest(player_transform.translation, enemies_lens.query(), None);
+            let closed_enemy: Option<Entity> = find_closest(
+                player_transform.translation,
+                enemies_lens.query(),
+                300.0,
+                None,
+            );
 
             if let Some(closed_enemy) = closed_enemy {
-                let texture = asset_server.load("arcane_missile.png");
-                let layout = TextureAtlasLayout::from_grid(
-                    Vec2::new(32.0, 19.0),
-                    2,
-                    1,
-                    Option::from(Vec2::new(1.0, 0.0)),
-                    None,
-                );
+                let texture = asset_server.load("arcane-missile.png");
+                let layout =
+                    TextureAtlasLayout::from_grid(Vec2::new(100.0, 100.0), 30, 1, None, None);
                 let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
                 if let Ok((entity, enemy_transform)) = enemies.get(closed_enemy) {
@@ -146,7 +132,6 @@ fn spawn_arcane_missile_attack(
                                         player_transform.translation.y,
                                         1.0,
                                     ),
-                                    scale: Vec3::splat(player_stats.area),
                                     ..default()
                                 },
                                 ..default()
@@ -160,16 +145,16 @@ fn spawn_arcane_missile_attack(
                                 last: 1,
                                 is_repeating: true,
                             },
-                            AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
+                            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
                             Sensor,
-                            Collider::ball(32.0 / 2.0),
+                            Collider::ball(18.0 / 2.0),
                             ArcaneMissile,
                         ))
                         .insert((
                             Projectile,
                             ProjectileFromWeapon(WeaponsTypes::ArcaneMissile),
                             ProjectileDeleteOnHit,
-                            ProjectileDamage(1.0),
+                            ProjectileDamage(50.0),
                             ProjectileTarget(entity),
                             ProjectileOrigin(player_transform.translation),
                             ProjectileControlPoint(control_point),
@@ -181,6 +166,7 @@ fn spawn_arcane_missile_attack(
                             //     timer:Timer::from_seconds(0.31, TimerMode::Once),
                             // },
                             ProjectileBundleCollider::default(),
+                            ProjectileFixedScale,
                             Name::new("Arcane missile Attack"),
                         ));
                 }
@@ -230,7 +216,7 @@ fn move_arcane_missile(
             let direction = (transform.translation.truncate()
                 - enemy_transform.translation.truncate())
             .normalize();
-            sprite.flip_x = direction.x < 0.0;
+            // sprite.flip_x = direction.x < 0.0;
 
             transform.translation = simple_bezier(
                 projectile_origin.0,
@@ -238,6 +224,8 @@ fn move_arcane_missile(
                 enemy_transform.translation,
                 projectile_speed_as_duration.timer.fraction(),
             );
+            // rotate the projectile toward the enemy
+            transform.rotation = Quat::from_rotation_z(direction.to_angle() - PI)
         } else {
             // delete projectile
             commands.entity(arcane_missile_entity).despawn_recursive();

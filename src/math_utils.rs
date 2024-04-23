@@ -104,6 +104,7 @@ pub fn get_random_position_outside_screen(camera_position: Vec2) -> Vec2 {
 pub fn find_closest(
     origin: Vec3,
     entities: Query<(Entity, &Transform)>,
+    range: f32,
     seen_enemies: Option<&Vec<Entity>>,
 ) -> Option<Entity> {
     let mut closed_enemy: Option<Entity> = None;
@@ -115,6 +116,10 @@ pub fn find_closest(
             }
         }
         let distance = origin.distance(enemy_transform.translation);
+        // enemy is further away from our range, continue to the next one
+        if distance > range {
+            continue;
+        }
         if distance < closed_enemy_distance {
             closed_enemy_distance = distance;
             closed_enemy = Some(entity);

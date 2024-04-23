@@ -21,7 +21,7 @@ impl Plugin for ShurikenPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_shuriken_attack, shuriken_update_stats).run_if(in_state(GameState::Gameplay)),
+            (spawn_shuriken_attack,).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -37,24 +37,14 @@ fn setup_shuriken_spawner(mut commands: Commands, player_stats: Res<PlayerInGame
     commands.spawn((
         ShurikenSpawner,
         AttackAmmo {
-            size: 8,
+            size: 8 + player_stats.attack_amount,
             amount: 8,
-            reload_time: 10.0 * player_stats.attack_reload,
+            default_size: 8,
+            reload_time: 7.0 * player_stats.attack_reload,
+            default_reload_time: 7.0,
         },
         Name::new("Shuriken Spawner"),
     ));
-}
-
-fn shuriken_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<ShurikenSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 10.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_shuriken_attack(

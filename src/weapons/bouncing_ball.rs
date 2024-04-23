@@ -21,11 +21,7 @@ impl Plugin for BouncingBallPlugin {
         );
         app.add_systems(
             Update,
-            (
-                spawn_bouncing_ball_attack,
-                duplicate_ball_on_hit,
-                bouncing_ball_update_stats,
-            )
+            (spawn_bouncing_ball_attack, duplicate_ball_on_hit)
                 .run_if(in_state(GameState::Gameplay)),
         );
     }
@@ -45,24 +41,14 @@ fn setup_bouncing_ball_spawner(mut commands: Commands, player_stats: Res<PlayerI
             timer: Timer::from_seconds(0.3, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 1,
+            size: 1 + player_stats.attack_amount,
             amount: 1,
+            default_size: 1,
             reload_time: 2.0 * player_stats.attack_reload,
+            default_reload_time: 2.0,
         },
         Name::new("Bouncing ball Spawner"),
     ));
-}
-
-fn bouncing_ball_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<BouncingBallSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 2.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_bouncing_ball_attack(
@@ -88,8 +74,12 @@ fn spawn_bouncing_ball_attack(
             }
 
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
-            let closed_enemy: Option<Entity> =
-                find_closest(player_transform.translation, enemies_lens.query(), None);
+            let closed_enemy: Option<Entity> = find_closest(
+                player_transform.translation,
+                enemies_lens.query(),
+                300.0,
+                None,
+            );
 
             if let Some(closed_enemy) = closed_enemy {
                 if let Ok((_enemy, enemy_transform)) = enemies.get(closed_enemy) {

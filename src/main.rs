@@ -85,7 +85,7 @@ fn main() {
         .add_plugins(ItemsPlugin)
         // Waves
         .add_plugins(WavesPlugin)
-        .add_plugins(WavesMap1Plugin) // Temp
+        // .add_plugins(WavesMap1Plugin) // Temp
         // Enemies plugin
         .add_plugins(EnemyPlugin)
         // UI

@@ -20,8 +20,7 @@ impl Plugin for FireBootsPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_fire_boots_attack, fire_boots_update_stats)
-                .run_if(in_state(GameState::Gameplay)),
+            (spawn_fire_boots_attack,).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -40,24 +39,14 @@ fn setup_fire_boot_spawner(mut commands: Commands, player_stats: Res<PlayerInGam
             timer: Timer::from_seconds(0.3, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 12,
+            size: 12 + player_stats.attack_amount,
             amount: 12,
+            default_size: 12,
             reload_time: 5.0 * player_stats.attack_reload,
+            default_reload_time: 5.0,
         },
         Name::new("Fire boots Spawner"),
     ));
-}
-
-fn fire_boots_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<FireBootSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 5.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_fire_boots_attack(

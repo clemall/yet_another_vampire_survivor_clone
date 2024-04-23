@@ -22,8 +22,7 @@ impl Plugin for ChainLightningPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_chain_lightning_attack, chain_lightning_update_stats)
-                .run_if(in_state(GameState::Gameplay)),
+            (spawn_chain_lightning_attack,).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -43,24 +42,14 @@ fn setup_chain_lightning_spawner(mut commands: Commands, player_stats: Res<Playe
         ChainLightningSpawner,
         ChainLightning,
         AttackAmmo {
-            size: 100,
-            amount: 100,
+            size: 10 + player_stats.attack_amount,
+            amount: 10,
+            default_size: 10,
             reload_time: 5.0 * player_stats.attack_reload,
+            default_reload_time: 5.0,
         },
         Name::new("Chain Lightning Spawner"),
     ));
-}
-
-fn chain_lightning_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<ChainLightningSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 5.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_chain_lightning_attack(
@@ -106,6 +95,7 @@ fn spawn_chain_lightning_attack(
             let closed_enemy: Option<Entity> = find_closest(
                 position_lightning,
                 enemies_lens.query(),
+                300.0,
                 Some(&seen_enemies),
             );
 

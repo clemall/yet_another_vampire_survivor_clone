@@ -23,12 +23,7 @@ impl Plugin for SlowDomePlugin {
         );
         app.add_systems(
             Update,
-            (
-                spawn_slow_dome_attack,
-                apply_slow_aura_on_hit,
-                slow_dome_update_stats,
-            )
-                .run_if(in_state(GameState::Gameplay)),
+            (spawn_slow_dome_attack, apply_slow_aura_on_hit).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -47,24 +42,14 @@ fn setup_slow_dome_spawner(mut commands: Commands, player_stats: Res<PlayerInGam
             timer: Timer::from_seconds(2.0, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 1,
+            size: 1 + player_stats.attack_amount,
+            default_size: 1,
             amount: 1,
             reload_time: 10.0 * player_stats.attack_reload,
+            default_reload_time: 10.0,
         },
         Name::new("Slow Dome Spawner"),
     ));
-}
-
-fn slow_dome_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<SlowDomeSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 10.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_slow_dome_attack(
@@ -90,8 +75,12 @@ fn spawn_slow_dome_attack(
             }
 
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
-            let closed_enemy: Option<Entity> =
-                find_closest(player_transform.translation, enemies_lens.query(), None);
+            let closed_enemy: Option<Entity> = find_closest(
+                player_transform.translation,
+                enemies_lens.query(),
+                300.0,
+                None,
+            );
 
             if let Some(closed_enemy) = closed_enemy {
                 if let Ok((_enemy, enemy_transform)) = enemies.get(closed_enemy) {

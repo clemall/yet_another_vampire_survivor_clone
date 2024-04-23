@@ -1,5 +1,4 @@
 use crate::components::*;
-use crate::weapons::generic_systems::start_reload_attack_spawner;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -21,11 +20,7 @@ impl Plugin for WeaponClawPlugin {
         );
         app.add_systems(
             Update,
-            (
-                spawn_claw_attack.after(start_reload_attack_spawner),
-                claw_update_stats,
-            )
-                .run_if(in_state(GameState::Gameplay)),
+            (spawn_claw_attack,).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -44,25 +39,15 @@ fn setup_claw_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStat
             timer: Timer::from_seconds(0.6, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 2,
+            size: 2 + player_stats.attack_amount,
+            default_size: 2,
             amount: 2,
             reload_time: 2.0 * player_stats.attack_reload,
+            default_reload_time: 2.0,
         },
         ProjectileBendLeftOrRight(true),
         Name::new("Claw Spawner"),
     ));
-}
-
-fn claw_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<ClawSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 2.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_claw_attack(
@@ -89,6 +74,10 @@ fn spawn_claw_attack(
         attack_timer.timer.tick(time.delta());
 
         if attack_timer.timer.just_finished() {
+            if attack_ammo.amount == 0 {
+                return;
+            }
+
             let texture = asset_server.load("claw.png");
             let layout = TextureAtlasLayout::from_grid(
                 Vec2::new(48.0, 48.0),

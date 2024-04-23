@@ -25,13 +25,21 @@ impl Plugin for GenericWeaponPlugin {
                 projectile_move_spiral,
                 // projectile_move_boomerang,
                 projectile_rotate_on_self,
-                weapon_update_area,
+                projectile_update_area,
+                weapons_update_stats,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
         app.add_systems(PostUpdate, projectile_delete);
     }
 }
+
+// fn run_if_weapon_not_already_equipped(
+//     player_weapons: Res<PlayerWeapons>,
+//     weapon: Query<&Spawner>,
+// ) -> bool {
+//     player_weapons.weapons.contains(&WeaponsTypes::Y) && weapon.is_empty()
+// }
 
 fn projectile_delete(
     mut commands: Commands,
@@ -223,7 +231,7 @@ fn projectile_move_toward_direction(
 }
 
 // update area of weapons that doesn't spawn projectile.
-fn weapon_update_area(
+fn projectile_update_area(
     mut projectiles: Query<&mut Transform, (With<Projectile>, Without<ProjectileFixedScale>)>,
     player_stats: Res<PlayerInGameStats>,
 ) {
@@ -233,6 +241,19 @@ fn weapon_update_area(
 
     for mut transform in &mut projectiles {
         transform.scale = Vec3::splat(player_stats.area);
+    }
+}
+
+fn weapons_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = attack_ammo.default_reload_time * player_stats.attack_reload;
+        attack_ammo.size = attack_ammo.default_size + player_stats.attack_amount;
     }
 }
 

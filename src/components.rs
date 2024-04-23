@@ -243,7 +243,7 @@ pub enum Facing {
 
 // WEAPONS
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum WeaponsTypes {
     Claw,
     FireArea,
@@ -484,8 +484,10 @@ pub struct DelayBetweenAttacks {
 #[derive(Component)]
 pub struct AttackAmmo {
     pub size: u32,
+    pub default_size: u32,
     pub amount: u32,
-    pub reload_time: f32, //seconds
+    pub reload_time: f32,         //seconds
+    pub default_reload_time: f32, //seconds
 }
 
 // works with AttackAmmo.reload_time that is used to set

@@ -21,8 +21,7 @@ impl Plugin for LightSwordsPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_light_swords_attack, light_swords_update_stats)
-                .run_if(in_state(GameState::Gameplay)),
+            (spawn_light_swords_attack,).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -41,24 +40,14 @@ fn setup_light_swords_spawner(mut commands: Commands, player_stats: Res<PlayerIn
             timer: Timer::from_seconds(0.3, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 3,
+            size: 3 + player_stats.attack_amount,
             amount: 3,
+            default_size: 3,
             reload_time: 5.0 * player_stats.attack_reload,
+            default_reload_time: 5.0,
         },
         Name::new("Light Sword Spawner"),
     ));
-}
-
-fn light_swords_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo, With<LightSwordsSpawner>>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = 5.0 * player_stats.attack_reload;
-    }
 }
 
 fn spawn_light_swords_attack(
