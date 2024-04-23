@@ -58,7 +58,7 @@ fn spawn_slow_dome_attack(
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<
         (&mut DelayBetweenAttacks, &mut AttackAmmo),
-        (With<SlowDomeSpawner>, Without<AttackReloadDuration>),
+        (With<SlowDomeSpawner>, Without<AttackSpawnerIsReloading>),
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     time: Res<Time>,
@@ -70,9 +70,9 @@ fn spawn_slow_dome_attack(
         attack_timer.timer.tick(time.delta());
 
         if attack_timer.timer.just_finished() {
-            if attack_ammo.amount == 0 {
-                return;
-            }
+            // if attack_ammo.amount == 0 {
+            //     return;
+            // }
 
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
             let closed_enemy: Option<Entity> = find_closest(

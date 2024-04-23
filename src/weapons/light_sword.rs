@@ -56,7 +56,7 @@ fn spawn_light_swords_attack(
     mut player: Query<(&Transform, &Player)>,
     mut spawner: Query<
         (&mut DelayBetweenAttacks, &mut AttackAmmo),
-        (With<LightSwordsSpawner>, Without<AttackReloadDuration>),
+        (With<LightSwordsSpawner>, Without<AttackSpawnerIsReloading>),
     >,
     time: Res<Time>,
     player_stats: Res<PlayerInGameStats>,
@@ -66,9 +66,9 @@ fn spawn_light_swords_attack(
     if let Ok((mut attack_timer, mut attack_ammo)) = spawner.get_single_mut() {
         attack_timer.timer.tick(time.delta());
         if attack_timer.timer.just_finished() {
-            if attack_ammo.amount == 0 {
-                return;
-            }
+            // if attack_ammo.amount == 0 {
+            //     return;
+            // }
 
             let texture = asset_server.load("sword-of-light.png");
             attack_ammo.amount -= 1;

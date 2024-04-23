@@ -27,6 +27,7 @@ impl Plugin for GenericWeaponPlugin {
                 projectile_rotate_on_self,
                 projectile_update_area,
                 weapons_update_stats,
+                delay_between_attack_timer_tick,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -47,6 +48,19 @@ fn projectile_delete(
 ) {
     for projectile_entity in &projectiles {
         commands.entity(projectile_entity).despawn_recursive();
+    }
+}
+
+fn delay_between_attack_timer_tick(
+    mut commands: Commands,
+    mut attack_timers: Query<(Entity, &mut DelayBetweenAttacks)>,
+    time: Res<Time>,
+) {
+    for (entity, mut attack_timer) in &mut attack_timers {
+        attack_timer.timer.tick(time.delta());
+        if attack_timer.timer.just_finished() {
+            commands.entity(entity).insert(CanAttack);
+        }
     }
 }
 
@@ -131,11 +145,11 @@ fn projectile_apply_damage(
 
 pub fn start_reload_attack_spawner(
     mut commands: Commands,
-    mut attack_spawners: Query<(Entity, &AttackAmmo), Without<AttackReloadDuration>>,
+    mut attack_spawners: Query<(Entity, &AttackAmmo), Without<AttackSpawnerIsReloading>>,
 ) {
     for (entity, attack_ammo) in &mut attack_spawners {
         if attack_ammo.amount == 0 {
-            commands.entity(entity).insert(AttackReloadDuration {
+            commands.entity(entity).insert(AttackSpawnerIsReloading {
                 timer: Timer::from_seconds(attack_ammo.reload_time, TimerMode::Once),
             });
         }
@@ -145,8 +159,8 @@ pub fn start_reload_attack_spawner(
 fn reloading_attack_spawner(
     mut commands: Commands,
     mut attack_spawners: Query<
-        (Entity, &mut AttackReloadDuration, &mut AttackAmmo),
-        With<AttackReloadDuration>,
+        (Entity, &mut AttackSpawnerIsReloading, &mut AttackAmmo),
+        With<AttackSpawnerIsReloading>,
     >,
     time: Res<Time>,
 ) {
@@ -156,7 +170,7 @@ fn reloading_attack_spawner(
         if attack_reload.timer.just_finished() {
             attack_ammo.amount = attack_ammo.size;
 
-            commands.entity(entity).remove::<AttackReloadDuration>();
+            commands.entity(entity).remove::<AttackSpawnerIsReloading>();
         }
     }
 }

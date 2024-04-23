@@ -51,7 +51,7 @@ fn spawn_shuriken_attack(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
-    mut spawner: Query<&mut AttackAmmo, (With<ShurikenSpawner>, Without<AttackReloadDuration>)>,
+    mut spawner: Query<&mut AttackAmmo, (With<ShurikenSpawner>, Without<AttackSpawnerIsReloading>)>,
     player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
@@ -60,9 +60,9 @@ fn spawn_shuriken_attack(
         // Protection from going below 0.
         // AttackReloadDuration can take 1 frame too much before being added to
         // the current spawner
-        if attack_ammo.amount == 0 {
-            return;
-        }
+        // if attack_ammo.amount == 0 {
+        //     return;
+        // }
 
         let texture = asset_server.load("shuriken_temp.png");
 

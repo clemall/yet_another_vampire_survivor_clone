@@ -59,7 +59,10 @@ fn spawn_chain_lightning_attack(
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<
         &mut AttackAmmo,
-        (With<ChainLightningSpawner>, Without<AttackReloadDuration>),
+        (
+            With<ChainLightningSpawner>,
+            Without<AttackSpawnerIsReloading>,
+        ),
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
@@ -70,9 +73,9 @@ fn spawn_chain_lightning_attack(
         // Protection from going below 0.
         // AttackReloadDuration can take 1 frame too much before being added to
         // the current spawner
-        if attack_ammo.amount == 0 {
-            return;
-        }
+        // if attack_ammo.amount == 0 {
+        //     return;
+        // }
 
         let texture = asset_server.load("lightning_strike.png");
         let layout = TextureAtlasLayout::from_grid(

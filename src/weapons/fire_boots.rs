@@ -56,7 +56,7 @@ fn spawn_fire_boots_attack(
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<
         (&mut DelayBetweenAttacks, &mut AttackAmmo),
-        (With<FireBootSpawner>, Without<AttackReloadDuration>),
+        (With<FireBootSpawner>, Without<AttackSpawnerIsReloading>),
     >,
     time: Res<Time>,
     player_stats: Res<PlayerInGameStats>,
@@ -66,9 +66,9 @@ fn spawn_fire_boots_attack(
     if let Ok((mut attack_timer, mut attack_ammo)) = spawner.get_single_mut() {
         attack_timer.timer.tick(time.delta());
         if attack_timer.timer.just_finished() {
-            if attack_ammo.amount == 0 {
-                return;
-            }
+            // if attack_ammo.amount == 0 {
+            //     return;
+            // }
 
             let texture = asset_server.load("fire-boots.png");
             let layout = TextureAtlasLayout::from_grid(Vec2::new(24.0, 24.0), 8, 1, None, None);

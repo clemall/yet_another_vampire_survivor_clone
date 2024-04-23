@@ -54,103 +54,90 @@ fn spawn_claw_attack(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut spawner: Query<
+        (Entity, &mut AttackAmmo, &mut ProjectileBendLeftOrRight),
         (
-            &mut DelayBetweenAttacks,
-            &mut AttackAmmo,
-            &mut ProjectileBendLeftOrRight,
+            With<ClawSpawner>,
+            With<CanAttack>,
+            Without<AttackSpawnerIsReloading>,
         ),
-        (With<ClawSpawner>, Without<AttackReloadDuration>),
     >,
     mut player: Query<&Transform, With<Player>>,
-    time: Res<Time>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
-    if let Ok((mut attack_timer, mut attack_ammo, mut projectile_orientation)) =
-        spawner.get_single_mut()
-    {
-        attack_timer.timer.tick(time.delta());
+    if let Ok((entity, mut attack_ammo, mut projectile_orientation)) = spawner.get_single_mut() {
+        let texture = asset_server.load("claw.png");
+        let layout = TextureAtlasLayout::from_grid(
+            Vec2::new(48.0, 48.0),
+            2,
+            1,
+            Option::from(Vec2::new(1.0, 1.0)),
+            None,
+        );
+        let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-        if attack_timer.timer.just_finished() {
-            if attack_ammo.amount == 0 {
-                return;
+        let mut pos_x = player_transform.translation.x;
+
+        let is_flip = match projectile_orientation.0 {
+            true => {
+                pos_x -= CLAWS_POSITION_X;
+                true
             }
+            false => {
+                pos_x += CLAWS_POSITION_X;
+                false
+            }
+        };
 
-            let texture = asset_server.load("claw.png");
-            let layout = TextureAtlasLayout::from_grid(
-                Vec2::new(48.0, 48.0),
-                2,
-                1,
-                Option::from(Vec2::new(1.0, 1.0)),
-                None,
-            );
-            let texture_atlas_layout = texture_atlas_layouts.add(layout);
+        **projectile_orientation = !projectile_orientation.0;
 
-            let mut pos_x = player_transform.translation.x;
+        attack_ammo.amount -= 1;
+        commands.entity(entity).remove::<CanAttack>();
 
-            let is_flip = match projectile_orientation.0 {
-                true => {
-                    pos_x -= CLAWS_POSITION_X;
-                    true
-                }
-                false => {
-                    pos_x += CLAWS_POSITION_X;
-                    false
-                }
-            };
-
-            **projectile_orientation = !projectile_orientation.0;
-
-            attack_ammo.amount -= 1;
-
-            commands
-                .spawn((
-                    SpriteBundle {
-                        texture,
-                        // transform: Transform::from_xyz(pos_x, player_transform.translation.y, 1.0),
-                        transform: Transform {
-                            translation: Vec3::new(pos_x, player_transform.translation.y, 1.0),
-                            scale: Vec3::splat(player_stats.area),
-                            ..default()
-                        },
-                        sprite: Sprite {
-                            flip_x: is_flip,
-                            ..default()
-                        },
+        commands
+            .spawn((
+                SpriteBundle {
+                    texture,
+                    // transform: Transform::from_xyz(pos_x, player_transform.translation.y, 1.0),
+                    transform: Transform {
+                        translation: Vec3::new(pos_x, player_transform.translation.y, 1.0),
+                        scale: Vec3::splat(player_stats.area),
                         ..default()
                     },
-                    TextureAtlas {
-                        layout: texture_atlas_layout,
-                        index: 0,
+                    sprite: Sprite {
+                        flip_x: is_flip,
+                        ..default()
                     },
-                    AnimationIndices {
-                        first: 0,
-                        last: 1,
-                        is_repeating: false,
-                    },
-                    AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-                    Sensor,
-                ))
-                .insert((
-                    Collider::cuboid(48.0 / 2.0, 48.0 / 2.0),
-                    ProjectileBundleCollider::default(),
-                    ProjectileLifetime {
-                        timer: Timer::from_seconds(
-                            0.3 * player_stats.attack_duration,
-                            TimerMode::Once,
-                        ),
-                    },
-                    AlreadyHitEnemies { seen: Vec::new() },
-                    ProjectileDamage(5.0),
-                    ProjectileImpulse(2000.0),
-                    Claw,
-                    ProjectileFromWeapon(WeaponsTypes::Claw),
-                    Projectile,
-                    Name::new("Claw Attack"),
-                ));
-        }
+                    ..default()
+                },
+                TextureAtlas {
+                    layout: texture_atlas_layout,
+                    index: 0,
+                },
+                AnimationIndices {
+                    first: 0,
+                    last: 1,
+                    is_repeating: false,
+                },
+                AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+                Sensor,
+            ))
+            .insert((
+                Collider::cuboid(48.0 / 2.0, 48.0 / 2.0),
+                ProjectileBundleCollider::default(),
+                ProjectileLifetime {
+                    timer: Timer::from_seconds(0.3 * player_stats.attack_duration, TimerMode::Once),
+                },
+                AlreadyHitEnemies { seen: Vec::new() },
+                ProjectileDamage(5.0),
+                ProjectileImpulse(2000.0),
+                Claw,
+                ProjectileFromWeapon(WeaponsTypes::Claw),
+                Projectile,
+                Name::new("Claw Attack"),
+            ));
     }
 }
 

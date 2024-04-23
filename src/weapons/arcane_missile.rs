@@ -67,7 +67,10 @@ fn spawn_arcane_missile_attack(
             &mut AttackAmmo,
             &mut ProjectileBendLeftOrRight,
         ),
-        (With<ArcaneMissileSpawner>, Without<AttackReloadDuration>),
+        (
+            With<ArcaneMissileSpawner>,
+            Without<AttackSpawnerIsReloading>,
+        ),
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     time: Res<Time>,
@@ -81,9 +84,9 @@ fn spawn_arcane_missile_attack(
         attack_timer.timer.tick(time.delta());
 
         if attack_timer.timer.just_finished() {
-            if attack_ammo.amount == 0 {
-                return;
-            }
+            // if attack_ammo.amount == 0 {
+            //     return;
+            // }
 
             // get closed enemy
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();

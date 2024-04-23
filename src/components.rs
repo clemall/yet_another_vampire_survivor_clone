@@ -473,13 +473,14 @@ pub struct AlreadyHitEnemies {
 }
 
 // Delay between 2 attacks
-// could be use as reload when the weapon has no real reload time
-// like claw
-// rename cast delay
 #[derive(Component)]
 pub struct DelayBetweenAttacks {
     pub timer: Timer,
 }
+
+// works with DelayBetweenAttacks
+#[derive(Component)]
+pub struct CanAttack;
 
 #[derive(Component)]
 pub struct AttackAmmo {
@@ -493,7 +494,7 @@ pub struct AttackAmmo {
 // works with AttackAmmo.reload_time that is used to set
 // the timer on AttackReloadDuration
 #[derive(Component)]
-pub struct AttackReloadDuration {
+pub struct AttackSpawnerIsReloading {
     pub timer: Timer,
 }
 
