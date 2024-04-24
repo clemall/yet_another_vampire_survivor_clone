@@ -42,7 +42,7 @@ fn setup_arcane_missile_spawner(mut commands: Commands, player_stats: Res<Player
     commands.spawn((
         ArcaneMissileSpawner,
         DelayBetweenAttacks {
-            timer: Timer::from_seconds(0.3, TimerMode::Repeating),
+            timer: Timer::from_seconds(0.4, TimerMode::Repeating),
         },
         AttackAmmo {
             size: 3 + player_stats.attack_amount,
@@ -51,6 +51,7 @@ fn setup_arcane_missile_spawner(mut commands: Commands, player_stats: Res<Player
             reload_time: 2.0 * player_stats.attack_reload,
             default_reload_time: 2.0,
         },
+        CanAttack,
         ProjectileBendLeftOrRight(true),
         Name::new("Arcane missile Spawner"),
     ));
@@ -62,32 +63,23 @@ fn spawn_arcane_missile_attack(
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<
-        (
-            &mut DelayBetweenAttacks,
+        (   Entity,
             &mut AttackAmmo,
             &mut ProjectileBendLeftOrRight,
         ),
         (
             With<ArcaneMissileSpawner>,
+            With<CanAttack>,
             Without<AttackSpawnerIsReloading>,
         ),
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
-    time: Res<Time>,
-    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
-    if let Ok((mut attack_timer, mut attack_ammo, mut projectile_orientation)) =
+    if let Ok((spawner_entity, mut attack_ammo, mut projectile_orientation)) =
         spawner.get_single_mut()
     {
-        attack_timer.timer.tick(time.delta());
-
-        if attack_timer.timer.just_finished() {
-            // if attack_ammo.amount == 0 {
-            //     return;
-            // }
-
             // get closed enemy
             let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
             let closed_enemy: Option<Entity> = find_closest(
@@ -124,6 +116,7 @@ fn spawn_arcane_missile_attack(
                     **projectile_orientation = !projectile_orientation.0;
 
                     attack_ammo.amount -= 1;
+                    commands.entity(spawner_entity).remove::<CanAttack>();
 
                     commands
                         .spawn((
@@ -174,7 +167,6 @@ fn spawn_arcane_missile_attack(
                         ));
                 }
             }
-        }
     }
 }
 

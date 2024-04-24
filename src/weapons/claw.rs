@@ -45,6 +45,7 @@ fn setup_claw_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStat
             reload_time: 2.0 * player_stats.attack_reload,
             default_reload_time: 2.0,
         },
+        CanAttack,
         ProjectileBendLeftOrRight(true),
         Name::new("Claw Spawner"),
     ));
@@ -67,7 +68,7 @@ fn spawn_claw_attack(
 ) {
     let player_transform = player.single_mut();
 
-    if let Ok((entity, mut attack_ammo, mut projectile_orientation)) = spawner.get_single_mut() {
+    if let Ok((spawner_entity, mut attack_ammo, mut projectile_orientation)) = spawner.get_single_mut() {
         let texture = asset_server.load("claw.png");
         let layout = TextureAtlasLayout::from_grid(
             Vec2::new(48.0, 48.0),
@@ -94,7 +95,7 @@ fn spawn_claw_attack(
         **projectile_orientation = !projectile_orientation.0;
 
         attack_ammo.amount -= 1;
-        commands.entity(entity).remove::<CanAttack>();
+        commands.entity(spawner_entity).remove::<CanAttack>();
 
         commands
             .spawn((
