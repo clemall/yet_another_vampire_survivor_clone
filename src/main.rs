@@ -162,7 +162,6 @@ fn debug(
     mut player_weapons: ResMut<PlayerWeapons>,
     mut enemy_died: EventWriter<EnemyDied>,
     mut spawn_enemy: EventWriter<SpawnEnemy>,
-    mut item_pickup: EventWriter<ItemPickup>,
     mut next_state: ResMut<NextState<GameState>>,
     // mut gizmos: Gizmos,
 ) {
@@ -199,31 +198,6 @@ fn debug(
             enemy_types: EnemyTypes::Bat,
         });
     }
-    if keyboard_input.just_pressed(KeyCode::KeyO) {
-        spawn_enemy.send(SpawnEnemy {
-            enemy_types: EnemyTypes::Bee,
-        });
-    }
-    if keyboard_input.just_pressed(KeyCode::KeyI) {
-        spawn_enemy.send(SpawnEnemy {
-            enemy_types: EnemyTypes::Golem,
-        });
-    }
-    if keyboard_input.just_pressed(KeyCode::KeyU) {
-        spawn_enemy.send(SpawnEnemy {
-            enemy_types: EnemyTypes::Rabbit,
-        });
-    }
-    if keyboard_input.just_pressed(KeyCode::KeyY) {
-        spawn_enemy.send(SpawnEnemy {
-            enemy_types: EnemyTypes::Skull,
-        });
-    }
-    if keyboard_input.just_pressed(KeyCode::KeyT) {
-        spawn_enemy.send(SpawnEnemy {
-            enemy_types: EnemyTypes::BossWolf,
-        });
-    }
 
     let mut window = windows.single_mut();
 
@@ -238,13 +212,6 @@ fn debug(
         enemy_died.send(EnemyDied {
             position: get_random_position_in_screen().extend(0.0),
             experience: 1,
-        });
-    }
-
-    if keyboard_input.just_pressed(KeyCode::KeyX) {
-        item_pickup.send(ItemPickup {
-            item_key: "HEALTHY_GEM_STONE".to_string(),
-            rarity: Rarity::Legendary,
         });
     }
 

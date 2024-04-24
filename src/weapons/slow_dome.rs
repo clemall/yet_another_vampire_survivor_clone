@@ -48,6 +48,7 @@ fn setup_slow_dome_spawner(mut commands: Commands, player_stats: Res<PlayerInGam
             reload_time: 10.0 * player_stats.attack_reload,
             default_reload_time: 10.0,
         },
+        CanAttack,
         Name::new("Slow Dome Spawner"),
     ));
 }
@@ -57,68 +58,64 @@ fn spawn_slow_dome_attack(
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<
-        (&mut DelayBetweenAttacks, &mut AttackAmmo),
-        (With<SlowDomeSpawner>, Without<AttackSpawnerIsReloading>),
+        (Entity, &mut AttackAmmo),
+        (
+            With<SlowDomeSpawner>,
+            With<CanAttack>,
+            Without<AttackSpawnerIsReloading>,
+        ),
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
-    time: Res<Time>,
     player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
-    if let Ok((mut attack_timer, mut attack_ammo)) = spawner.get_single_mut() {
-        attack_timer.timer.tick(time.delta());
+    if let Ok((spawner_entity, mut attack_ammo)) = spawner.get_single_mut() {
+        let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
+        let closed_enemy: Option<Entity> = find_closest(
+            player_transform.translation,
+            enemies_lens.query(),
+            300.0,
+            None,
+        );
 
-        if attack_timer.timer.just_finished() {
-            // if attack_ammo.amount == 0 {
-            //     return;
-            // }
+        if let Some(closed_enemy) = closed_enemy {
+            if let Ok((_enemy, enemy_transform)) = enemies.get(closed_enemy) {
+                attack_ammo.amount -= 1;
+                commands.entity(spawner_entity).remove::<CanAttack>();
 
-            let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
-            let closed_enemy: Option<Entity> = find_closest(
-                player_transform.translation,
-                enemies_lens.query(),
-                300.0,
-                None,
-            );
-
-            if let Some(closed_enemy) = closed_enemy {
-                if let Ok((_enemy, enemy_transform)) = enemies.get(closed_enemy) {
-                    attack_ammo.amount -= 1;
-
-                    let texture = asset_server.load("slow-dome.png");
-                    commands.spawn((
-                        SpriteBundle {
-                            texture,
-                            transform: Transform {
-                                translation: enemy_transform.translation,
-                                scale: Vec3::splat(player_stats.area),
-                                ..default()
-                            },
+                let texture = asset_server.load("slow-dome.png");
+                commands.spawn((
+                    SpriteBundle {
+                        texture,
+                        transform: Transform {
+                            translation: enemy_transform.translation,
+                            scale: Vec3::splat(player_stats.area),
                             ..default()
                         },
-                        Sensor,
-                        Collider::ball(95.0 / 2.0),
-                        ProjectileBundleCollider::default(),
-                        ProjectileLifetime {
-                            timer: Timer::from_seconds(
-                                8.0 * player_stats.attack_duration,
-                                TimerMode::Once,
-                            ),
-                        },
-                        ProjectileDamage(1.0),
-                        ProjectileTimeBetweenDamage {
-                            timer: Timer::from_seconds(0.33, TimerMode::Repeating),
-                        },
-                        SlowDome,
-                        Projectile,
-                        ProjectileFromWeapon(WeaponsTypes::SlowDome),
-                        // TriggersOnHit{
-                        //     auras_systems: vec![systems.slow_enemy]
-                        // },
-                        Name::new("Slow dome Attack"),
-                    ));
-                }
+                        ..default()
+                    },
+                    Sensor,
+                    Collider::ball(95.0 / 2.0),
+                    ProjectileBundleCollider::default(),
+                    ProjectileLifetime {
+                        timer: Timer::from_seconds(
+                            8.0 * player_stats.attack_duration,
+                            TimerMode::Once,
+                        ),
+                    },
+                    ProjectileDamage(1.0),
+                    ProjectileTimeBetweenDamage {
+                        timer: Timer::from_seconds(0.33, TimerMode::Repeating),
+                    },
+                    SlowDome,
+                    Projectile,
+                    ProjectileFromWeapon(WeaponsTypes::SlowDome),
+                    // TriggersOnHit{
+                    //     auras_systems: vec![systems.slow_enemy]
+                    // },
+                    Name::new("Slow dome Attack"),
+                ));
             }
         }
     }

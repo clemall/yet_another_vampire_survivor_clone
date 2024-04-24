@@ -117,7 +117,7 @@ fn trigger_item(
             }
         }
 
-        // handle unique, remove them from the poll after getting picked
+        // handle unique, remove them from the pool after getting picked
         if event.rarity == Rarity::Unique {
             loot_table
                 .item_by_rarity
@@ -146,7 +146,7 @@ fn apply_luck_to_loot_table(
                     .max(1.0) as u32;
             }
             Rarity::Rare => {
-                // Luck as no effect for rare
+                // Luck as no effect on rare
             }
             Rarity::Epic | Rarity::Legendary => {
                 loot_table.weighted_rarity[index].1 = (value_as_f32 * player_stats.luck) as u32;

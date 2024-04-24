@@ -2,7 +2,7 @@ use crate::components::*;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-const CLAWS_POSITION_X: f32 = 28.0;
+const CLAWS_OFFSET: f32 = 28.0;
 
 #[derive(Component)]
 pub struct ClawSpawner;
@@ -20,7 +20,7 @@ impl Plugin for WeaponClawPlugin {
         );
         app.add_systems(
             Update,
-            (spawn_claw_attack,).run_if(in_state(GameState::Gameplay)),
+            (spawn_claw_attack).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -68,7 +68,9 @@ fn spawn_claw_attack(
 ) {
     let player_transform = player.single_mut();
 
-    if let Ok((spawner_entity, mut attack_ammo, mut projectile_orientation)) = spawner.get_single_mut() {
+    if let Ok((spawner_entity, mut attack_ammo, mut projectile_orientation)) =
+        spawner.get_single_mut()
+    {
         let texture = asset_server.load("claw.png");
         let layout = TextureAtlasLayout::from_grid(
             Vec2::new(48.0, 48.0),
@@ -83,11 +85,11 @@ fn spawn_claw_attack(
 
         let is_flip = match projectile_orientation.0 {
             true => {
-                pos_x -= CLAWS_POSITION_X;
+                pos_x -= CLAWS_OFFSET;
                 true
             }
             false => {
-                pos_x += CLAWS_POSITION_X;
+                pos_x += CLAWS_OFFSET;
                 false
             }
         };
@@ -101,7 +103,6 @@ fn spawn_claw_attack(
             .spawn((
                 SpriteBundle {
                     texture,
-                    // transform: Transform::from_xyz(pos_x, player_transform.translation.y, 1.0),
                     transform: Transform {
                         translation: Vec3::new(pos_x, player_transform.translation.y, 1.0),
                         scale: Vec3::splat(player_stats.area),
@@ -141,13 +142,3 @@ fn spawn_claw_attack(
             ));
     }
 }
-
-// fn claw_attack_animation_and_collider(
-//     mut claws: Query<(&mut Transform, &ProjectileLifetime), With<Claw>>,
-// ) {
-//     for (mut tranform, attack_duration) in &mut claws {
-//         // transform claw attack
-//         tranform.scale.x = (attack_duration.timer.fraction() * 0.2) + 0.8;
-//         tranform.scale.y = (attack_duration.timer.fraction() * 0.2) + 0.8;
-//     }
-// }

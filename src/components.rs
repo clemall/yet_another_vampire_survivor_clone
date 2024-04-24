@@ -256,6 +256,7 @@ pub enum WeaponsTypes {
     FireBoots,
     LightSwords,
 }
+
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
     // entity ID
