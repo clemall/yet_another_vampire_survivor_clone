@@ -246,6 +246,7 @@ pub enum Facing {
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum WeaponsTypes {
     Claw,
+    ClawUpgrade1,
     FireArea,
     ArcaneMissile,
     Shuriken,

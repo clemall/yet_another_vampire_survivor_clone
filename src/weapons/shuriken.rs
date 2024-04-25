@@ -16,7 +16,7 @@ impl Plugin for ShurikenPlugin {
         app.add_systems(
             Update,
             setup_shuriken_spawner.run_if(
-                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_shuriken_present),
+                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_shuriken_not_present),
             ),
         );
         app.add_systems(
@@ -26,7 +26,7 @@ impl Plugin for ShurikenPlugin {
     }
 }
 
-fn run_if_shuriken_present(
+fn run_if_shuriken_not_present(
     player_weapons: Res<PlayerWeapons>,
     weapon: Query<(), With<ShurikenSpawner>>,
 ) -> bool {

@@ -1,14 +1,15 @@
 use crate::components::*;
 use crate::enemies::enemy::enemy_death_check;
+use crate::math_utils::simple_bezier;
 use bevy::app::{App, Plugin, Update};
 use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use std::f32::consts::TAU;
+use std::f32::consts::{PI, TAU};
 
-pub struct GenericWeaponPlugin;
+pub struct ProjectilePlugin;
 
-impl Plugin for GenericWeaponPlugin {
+impl Plugin for ProjectilePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
@@ -24,6 +25,7 @@ impl Plugin for GenericWeaponPlugin {
                 projectile_move_around_player,
                 projectile_move_spiral,
                 // projectile_move_boomerang,
+                projectile_move_toward_target_in_arc,
                 projectile_rotate_on_self,
                 projectile_update_area,
                 weapons_update_stats,
@@ -34,13 +36,6 @@ impl Plugin for GenericWeaponPlugin {
         app.add_systems(PostUpdate, projectile_delete);
     }
 }
-
-// fn run_if_weapon_not_already_equipped(
-//     player_weapons: Res<PlayerWeapons>,
-//     weapon: Query<&Spawner>,
-// ) -> bool {
-//     player_weapons.weapons.contains(&WeaponsTypes::Y) && weapon.is_empty()
-// }
 
 fn projectile_delete(
     mut commands: Commands,
@@ -244,30 +239,50 @@ fn projectile_move_toward_direction(
     }
 }
 
-// update area of weapons that doesn't spawn projectile.
-fn projectile_update_area(
-    mut projectiles: Query<&mut Transform, (With<Projectile>, Without<ProjectileFixedScale>)>,
-    player_stats: Res<PlayerInGameStats>,
+fn projectile_move_toward_target_in_arc(
+    mut commands: Commands,
+    mut arcane_missiles: Query<
+        (
+            Entity,
+            &mut Transform,
+            &ProjectileTarget,
+            &mut ProjectileSpeedAsDuration,
+            &ProjectileOrigin,
+            &ProjectileControlPoint,
+        ),
+        (With<Projectile>, Without<Enemy>),
+    >,
+    enemies: Query<&Transform, (With<Enemy>, Without<Projectile>)>,
+    time: Res<Time>,
 ) {
-    if !player_stats.is_changed() {
-        return;
-    }
+    for (
+        arcane_missile_entity,
+        mut transform,
+        projectile_target,
+        mut projectile_speed_as_duration,
+        projectile_origin,
+        projectile_control_point,
+    ) in &mut arcane_missiles
+    {
+        if let Ok(enemy_transform) = enemies.get(projectile_target.0) {
+            projectile_speed_as_duration.timer.tick(time.delta());
 
-    for mut transform in &mut projectiles {
-        transform.scale = Vec3::splat(player_stats.area);
-    }
-}
+            let direction = (transform.translation.truncate()
+                - enemy_transform.translation.truncate())
+            .normalize();
 
-fn weapons_update_stats(
-    mut attack_ammos: Query<&mut AttackAmmo>,
-    player_stats: Res<PlayerInGameStats>,
-) {
-    if !player_stats.is_changed() {
-        return;
-    }
-    for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = attack_ammo.default_reload_time * player_stats.attack_reload;
-        attack_ammo.size = attack_ammo.default_size + player_stats.attack_amount;
+            transform.translation = simple_bezier(
+                projectile_origin.0,
+                projectile_control_point.0,
+                enemy_transform.translation,
+                projectile_speed_as_duration.timer.fraction(),
+            );
+            // rotate the projectile toward the enemy
+            transform.rotation = Quat::from_rotation_z(direction.to_angle() - PI)
+        } else {
+            // delete projectile
+            commands.entity(arcane_missile_entity).despawn_recursive();
+        }
     }
 }
 
@@ -366,5 +381,32 @@ fn projectile_rotate_on_self(
 ) {
     for mut transform in &mut projectiles {
         transform.rotate_z(1.5 * TAU * time.delta_seconds());
+    }
+}
+
+// update area of weapons that doesn't spawn projectile.
+fn projectile_update_area(
+    mut projectiles: Query<&mut Transform, (With<Projectile>, Without<ProjectileFixedScale>)>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+
+    for mut transform in &mut projectiles {
+        transform.scale = Vec3::splat(player_stats.area);
+    }
+}
+
+fn weapons_update_stats(
+    mut attack_ammos: Query<&mut AttackAmmo>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    if !player_stats.is_changed() {
+        return;
+    }
+    for mut attack_ammo in &mut attack_ammos {
+        attack_ammo.reload_time = attack_ammo.default_reload_time * player_stats.attack_reload;
+        attack_ammo.size = attack_ammo.default_size + player_stats.attack_amount;
     }
 }

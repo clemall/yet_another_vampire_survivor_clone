@@ -15,19 +15,18 @@ impl Plugin for ChainLightningPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            setup_chain_lightning_spawner.run_if(
-                resource_exists_and_changed::<PlayerWeapons>
-                    .and_then(run_if_chain_lightning_present),
+            spawn_weapon.run_if(
+                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_weapon_not_present),
             ),
         );
         app.add_systems(
             Update,
-            (spawn_chain_lightning_attack,).run_if(in_state(GameState::Gameplay)),
+            (spawn_attack,).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
 
-fn run_if_chain_lightning_present(
+fn run_if_weapon_not_present(
     player_weapons: Res<PlayerWeapons>,
     weapon: Query<(), With<ChainLightningSpawner>>,
 ) -> bool {
@@ -37,7 +36,7 @@ fn run_if_chain_lightning_present(
         && weapon.is_empty()
 }
 
-fn setup_chain_lightning_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
+fn spawn_weapon(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         ChainLightningSpawner,
         ChainLightning,
@@ -52,7 +51,7 @@ fn setup_chain_lightning_spawner(mut commands: Commands, player_stats: Res<Playe
     ));
 }
 
-fn spawn_chain_lightning_attack(
+fn spawn_attack(
     mut commands: Commands,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>,

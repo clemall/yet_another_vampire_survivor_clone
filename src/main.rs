@@ -24,17 +24,8 @@ use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_update_weapon_up::UiUpdateWeaponPlugin;
 use yet_another_vampire_survivor_clone::waves::waves::WavesPlugin;
-use yet_another_vampire_survivor_clone::waves::waves_map_1::WavesMap1Plugin;
-use yet_another_vampire_survivor_clone::weapons::arcane_missile::ArcaneMissilePlugin;
-use yet_another_vampire_survivor_clone::weapons::bouncing_ball::BouncingBallPlugin;
-use yet_another_vampire_survivor_clone::weapons::chain_lightning::ChainLightningPlugin;
-use yet_another_vampire_survivor_clone::weapons::claw::WeaponClawPlugin;
-use yet_another_vampire_survivor_clone::weapons::fire_area::WeaponFireAreaPlugin;
-use yet_another_vampire_survivor_clone::weapons::fire_boots::FireBootsPlugin;
-use yet_another_vampire_survivor_clone::weapons::generic_systems::GenericWeaponPlugin;
-use yet_another_vampire_survivor_clone::weapons::light_sword::LightSwordsPlugin;
-use yet_another_vampire_survivor_clone::weapons::shuriken::ShurikenPlugin;
-use yet_another_vampire_survivor_clone::weapons::slow_dome::SlowDomePlugin;
+use yet_another_vampire_survivor_clone::weapons::projectiles::ProjectilePlugin;
+use yet_another_vampire_survivor_clone::weapons::weapons::WeaponsPlugin;
 
 fn main() {
     App::new()
@@ -100,16 +91,7 @@ fn main() {
         .add_plugins(GemsPlugin)
         .add_plugins(GemsBossPlugin)
         // Weapons
-        .add_plugins(GenericWeaponPlugin)
-        .add_plugins(WeaponClawPlugin)
-        .add_plugins(WeaponFireAreaPlugin)
-        .add_plugins(ArcaneMissilePlugin)
-        .add_plugins(ShurikenPlugin)
-        .add_plugins(ChainLightningPlugin)
-        .add_plugins(SlowDomePlugin)
-        .add_plugins(BouncingBallPlugin)
-        .add_plugins(FireBootsPlugin)
-        .add_plugins(LightSwordsPlugin)
+        .add_plugins(WeaponsPlugin)
         // Setup
         // .add_systems(Startup, setup)
         // test
@@ -166,7 +148,7 @@ fn debug(
     // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
-        player_weapons.weapons.push(WeaponsTypes::Claw);
+        player_weapons.weapons.push(WeaponsTypes::ClawUpgrade1);
     }
     if keyboard_input.just_pressed(KeyCode::Digit2) {
         player_weapons.weapons.push(WeaponsTypes::FireArea);

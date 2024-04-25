@@ -15,26 +15,25 @@ impl Plugin for BouncingBallPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            setup_bouncing_ball_spawner.run_if(
-                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_bouncing_ball_present),
+            spawn_weapon.run_if(
+                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_weapon_not_present),
             ),
         );
         app.add_systems(
             Update,
-            (spawn_bouncing_ball_attack, duplicate_ball_on_hit)
-                .run_if(in_state(GameState::Gameplay)),
+            (spawn_attack, duplicate_ball_on_hit).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
 
-fn run_if_bouncing_ball_present(
+fn run_if_weapon_not_present(
     player_weapons: Res<PlayerWeapons>,
     weapon: Query<(), With<BouncingBallSpawner>>,
 ) -> bool {
     player_weapons.weapons.contains(&WeaponsTypes::BouncingBall) && weapon.is_empty()
 }
 
-fn setup_bouncing_ball_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
+fn spawn_weapon(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         BouncingBallSpawner,
         DelayBetweenAttacks {
@@ -52,7 +51,7 @@ fn setup_bouncing_ball_spawner(mut commands: Commands, player_stats: Res<PlayerI
     ));
 }
 
-fn spawn_bouncing_ball_attack(
+fn spawn_attack(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,

@@ -13,29 +13,29 @@ impl Plugin for WeaponFireAreaPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            setup_fire_area.run_if(
-                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_fire_area_present),
+            spawn_weapon.run_if(
+                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_weapon_not_present),
             ),
         );
         app.add_systems(
             Update,
-            (spawn_fire_area_attack,).run_if(in_state(GameState::Gameplay)),
+            (spawn_attack,).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
 
-fn run_if_fire_area_present(
+fn run_if_weapon_not_present(
     player_weapons: Res<PlayerWeapons>,
     weapon: Query<(), With<FireArea>>,
 ) -> bool {
     player_weapons.weapons.contains(&WeaponsTypes::FireArea) && weapon.is_empty()
 }
 
-fn setup_fire_area(mut commands: Commands, _player_stats: Res<PlayerInGameStats>) {
+fn spawn_weapon(mut commands: Commands, _player_stats: Res<PlayerInGameStats>) {
     commands.spawn((FireAreaSpawner, CanAttack, Name::new("Fire area Spawner")));
 }
 
-pub fn spawn_fire_area_attack(
+pub fn spawn_attack(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,

@@ -17,25 +17,25 @@ impl Plugin for SlowDomePlugin {
         // );
         app.add_systems(
             Update,
-            setup_slow_dome_spawner.run_if(
-                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_slow_dome_present),
+            spawn_weapon.run_if(
+                resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_weapon_not_present),
             ),
         );
         app.add_systems(
             Update,
-            (spawn_slow_dome_attack, apply_slow_aura_on_hit).run_if(in_state(GameState::Gameplay)),
+            (spawn_attack, apply_slow_aura_on_hit).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
 
-fn run_if_slow_dome_present(
+fn run_if_weapon_not_present(
     player_weapons: Res<PlayerWeapons>,
     weapon: Query<(), With<SlowDomeSpawner>>,
 ) -> bool {
     player_weapons.weapons.contains(&WeaponsTypes::SlowDome) && weapon.is_empty()
 }
 
-fn setup_slow_dome_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
+fn spawn_weapon(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         SlowDomeSpawner,
         DelayBetweenAttacks {
@@ -53,7 +53,7 @@ fn setup_slow_dome_spawner(mut commands: Commands, player_stats: Res<PlayerInGam
     ));
 }
 
-fn spawn_slow_dome_attack(
+fn spawn_attack(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut player: Query<&Transform, With<Player>>,
