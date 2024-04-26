@@ -135,7 +135,7 @@ fn duplicate_ball_on_hit(
             continue;
         }
         if let Ok((_enemy_entity, enemy_transform)) = enemies.get(event.enemy_entity) {
-            for _index in 0..2 {
+            for _index in 0..2 + player_stats.attack_amount {
                 let texture = asset_server.load("bouncing_ball.png");
                 let direction =
                     (enemy_transform.translation.xy() - event.projectile_position.xy()).normalize();

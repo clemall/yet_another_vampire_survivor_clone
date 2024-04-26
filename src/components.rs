@@ -249,6 +249,7 @@ pub enum WeaponsTypes {
     ClawUpgrade1,
     FireArea,
     ArcaneMissile,
+    ArcaneMissileSplit,
     Shuriken,
     ChainLightning,
     SlowDome,

@@ -37,9 +37,9 @@ fn spawn_weapon(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
             timer: Timer::from_seconds(0.6, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 4 + player_stats.attack_amount,
-            default_size: 4,
-            amount: 4,
+            size: 10 + player_stats.attack_amount,
+            default_size: 10,
+            amount: 10,
             reload_time: 2.0 * player_stats.attack_reload,
             default_reload_time: 2.0,
         },
@@ -77,8 +77,16 @@ fn spawn_attack(
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
         commands.entity(spawner_entity).remove::<CanAttack>();
-
+        
+        let mut counter = 4;
+        
         while attack_ammo.amount > 0 {
+            // this weapon should shoot 4 "bullet" at a time
+            if counter == 0{
+                return;
+            }
+            counter -= 1;
+            
             let mut pos_x = player_transform.translation.x;
             let mut pos_y = player_transform.translation.y;
 
