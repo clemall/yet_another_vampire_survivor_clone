@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use rand::Rng;
@@ -90,7 +91,7 @@ fn spawn_attack(
                             player_transform.translation.x,
                             player_transform.translation.y
                                 + rand::thread_rng().gen_range(-10.0..10.0),
-                            1.0,
+                            PROJECTILE_Z_INDEX,
                         ),
                         scale: Vec3::splat(player_stats.area),
                         ..default()

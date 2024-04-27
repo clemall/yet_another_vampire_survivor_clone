@@ -180,7 +180,8 @@ pub struct EnemiesResource {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct EnemyData {
-    pub texture_patch: String,
+    pub texture_path: String,
+    pub texture_shadow_path: String,
     pub texture_layout_size: Vec2,
     pub texture_layout_columns: usize,
     pub texture_layout_rows: usize,
@@ -472,7 +473,7 @@ pub struct ProjectileSpeedAsDuration {
 #[derive(Component, Deref, DerefMut)]
 pub struct AlreadyHitEnemies {
     // entity ID
-    pub seen: Vec<u32>,
+    pub seen: Vec<Entity>,
 }
 
 // Delay between 2 attacks

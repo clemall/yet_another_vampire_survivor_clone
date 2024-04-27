@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -66,7 +67,7 @@ pub fn spawn_attack(
                         translation: Vec3::new(
                             player_transform.translation.x,
                             player_transform.translation.y,
-                            1.0,
+                            PROJECTILE_Z_INDEX,
                         ),
                         scale: Vec3::splat(player_stats.area),
                         ..default()
@@ -92,7 +93,7 @@ pub fn spawn_attack(
                 Projectile,
                 ProjectileFromWeapon(WeaponsTypes::FireArea),
                 ProjectileImpulse(150.0),
-                ProjectileDamage(10.0),
+                ProjectileDamage(20.0),
                 ProjectilePositionOnPlayer,
                 ProjectileTimeBetweenDamage {
                     timer: Timer::from_seconds(0.33, TimerMode::Repeating),

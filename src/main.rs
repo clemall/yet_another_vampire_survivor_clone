@@ -24,6 +24,7 @@ use yet_another_vampire_survivor_clone::ui::ui_level_up::UiLevelUpPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_update_weapon_up::UiUpdateWeaponPlugin;
 use yet_another_vampire_survivor_clone::waves::waves::WavesPlugin;
+use yet_another_vampire_survivor_clone::waves::waves_map_1::WavesMap1Plugin;
 use yet_another_vampire_survivor_clone::weapons::projectiles::ProjectilePlugin;
 use yet_another_vampire_survivor_clone::weapons::weapons::WeaponsPlugin;
 
@@ -58,7 +59,7 @@ fn main() {
         .add_plugins(UiFPSPlugin)
         // Rapier2D plugin
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.0))
-        .add_plugins(RapierDebugRenderPlugin::default())
+        // .add_plugins(RapierDebugRenderPlugin::default())
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
             ..default()
@@ -76,7 +77,7 @@ fn main() {
         .add_plugins(ItemsPlugin)
         // Waves
         .add_plugins(WavesPlugin)
-        // .add_plugins(WavesMap1Plugin) // Temp
+        .add_plugins(WavesMap1Plugin) // Temp
         // Enemies plugin
         .add_plugins(EnemyPlugin)
         // UI

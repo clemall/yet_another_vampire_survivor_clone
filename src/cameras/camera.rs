@@ -21,7 +21,15 @@ impl Plugin for PlayerCameraPlugin {
 
 pub fn setup_camera(mut commands: Commands) {
     commands.spawn((
-        Camera2dBundle::default(),
+        Camera2dBundle {
+            projection: OrthographicProjection {
+                scale: 0.5,
+                far: 1000.,
+                near: -1000.,
+                ..default()
+            },
+            ..default()
+        },
         // PixelZoom::FitSize {
         //     width: SCREEN_WIDTH,
         //     height: SCREEN_HEIGHT,

@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use crate::math_utils::find_closest;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
@@ -122,7 +123,7 @@ fn spawn_attack(
                                 translation: Vec3::new(
                                     position_lightning.x,
                                     position_lightning.y,
-                                    1.0,
+                                    PROJECTILE_Z_INDEX,
                                 ),
                                 rotation: Quat::from_rotation_z(
                                     lightning_direction.to_angle() - PI / 2.0,

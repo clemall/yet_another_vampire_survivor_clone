@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::{ENEMY_Z_INDEX, GEM_Z_INDEX};
 use crate::enemies::enemy_bundle::EnemyBundle;
 use crate::math_utils::get_random_position_outside_screen;
 use bevy::prelude::*;
@@ -70,7 +71,7 @@ fn spawn_enemy(
             }
         }
 
-        let texture = asset_server.load(&enemy_data.texture_patch);
+        let texture = asset_server.load(&enemy_data.texture_path);
         let layout = TextureAtlasLayout::from_grid(
             enemy_data.texture_layout_size,
             enemy_data.texture_layout_columns,
@@ -86,7 +87,7 @@ fn spawn_enemy(
                     texture: texture.clone(),
                     transform: Transform {
                         translation: get_random_position_outside_screen(player.translation.xy())
-                            .extend(0.0),
+                            .extend(ENEMY_Z_INDEX), // always in front
                         rotation: Default::default(),
                         scale: Vec3::new(1.0, 1.0, 0.0),
                     },
@@ -118,6 +119,15 @@ fn spawn_enemy(
         if enemy_data.is_boss {
             commands.entity(new_enemy).insert(EnemyBossDrop);
         }
+
+        // handle shadow
+        let enemy_shadow = commands
+            .spawn(SpriteBundle {
+                texture: asset_server.load(&enemy_data.texture_shadow_path),
+                ..default()
+            })
+            .id();
+        commands.entity(new_enemy).add_child(enemy_shadow);
     }
 }
 

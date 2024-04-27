@@ -105,7 +105,7 @@ fn setup_player_plugin(
 
     let player = (
         SpriteBundle {
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            transform: Transform::from_xyz(0.0, 0.0, PLAYER_Z_INDEX),
             texture,
             ..default()
         },

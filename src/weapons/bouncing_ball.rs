@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use crate::math_utils::find_closest;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -91,7 +92,11 @@ fn spawn_attack(
                         SpriteBundle {
                             texture,
                             transform: Transform {
-                                translation: player_transform.translation,
+                                translation: Vec3::new(
+                                    player_transform.translation.x,
+                                    player_transform.translation.y,
+                                    PROJECTILE_Z_INDEX,
+                                ),
                                 scale: Vec3::splat(player_stats.area),
                                 ..default()
                             },
@@ -106,7 +111,7 @@ fn spawn_attack(
                                 TimerMode::Once,
                             ),
                         },
-                        ProjectileDamage(1.0),
+                        ProjectileDamage(50.0),
                         ProjectileDeleteOnHit,
                         BouncingBall,
                     ))
@@ -158,7 +163,7 @@ fn duplicate_ball_on_hit(
                                 TimerMode::Once,
                             ),
                         },
-                        ProjectileDamage(1.0),
+                        ProjectileDamage(25.0),
                         ProjectileDeleteOnHit,
                         BouncingBall,
                     ))

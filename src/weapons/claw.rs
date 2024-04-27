@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -102,7 +103,11 @@ fn spawn_attack(
                 SpriteBundle {
                     texture,
                     transform: Transform {
-                        translation: Vec3::new(pos_x, player_transform.translation.y, 1.0),
+                        translation: Vec3::new(
+                            pos_x,
+                            player_transform.translation.y,
+                            PROJECTILE_Z_INDEX,
+                        ),
                         scale: Vec3::splat(player_stats.area),
                         ..default()
                     },
@@ -131,7 +136,7 @@ fn spawn_attack(
                     timer: Timer::from_seconds(0.3 * player_stats.attack_duration, TimerMode::Once),
                 },
                 AlreadyHitEnemies { seen: Vec::new() },
-                ProjectileDamage(5.0),
+                ProjectileDamage(100.0),
                 ProjectileImpulse(2000.0),
                 Claw,
                 ProjectileFromWeapon(WeaponsTypes::Claw),

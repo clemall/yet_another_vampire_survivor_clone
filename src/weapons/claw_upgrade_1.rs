@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -77,16 +78,16 @@ fn spawn_attack(
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
         commands.entity(spawner_entity).remove::<CanAttack>();
-        
+
         let mut counter = 4;
-        
+
         while attack_ammo.amount > 0 {
             // this weapon should shoot 4 "bullet" at a time
-            if counter == 0{
+            if counter == 0 {
                 return;
             }
             counter -= 1;
-            
+
             let mut pos_x = player_transform.translation.x;
             let mut pos_y = player_transform.translation.y;
 
@@ -116,7 +117,7 @@ fn spawn_attack(
                     SpriteBundle {
                         texture: texture.clone(),
                         transform: Transform {
-                            translation: Vec3::new(pos_x, pos_y, 1.0),
+                            translation: Vec3::new(pos_x, pos_y, PROJECTILE_Z_INDEX),
                             scale: Vec3::splat(player_stats.area),
                             ..default()
                         },
@@ -148,7 +149,7 @@ fn spawn_attack(
                         ),
                     },
                     AlreadyHitEnemies { seen: Vec::new() },
-                    ProjectileDamage(50.0),
+                    ProjectileDamage(200.0),
                     ProjectileImpulse(2000.0),
                     Claw,
                     ProjectileFromWeapon(WeaponsTypes::Claw),

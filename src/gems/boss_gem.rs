@@ -24,7 +24,11 @@ fn spawn_boss_gem_on_enemy_death(
         commands.spawn((
             SpriteBundle {
                 texture: asset_server.load("gem_boss.png"),
-                transform: Transform::from_xyz(event.position.x, event.position.y, 0.0),
+                transform: Transform::from_xyz(
+                    event.position.x,
+                    event.position.y,
+                    GEM_BOSS_Z_INDEX,
+                ),
                 ..default()
             },
             RigidBody::Fixed,

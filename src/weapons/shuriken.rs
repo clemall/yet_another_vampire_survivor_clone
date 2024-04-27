@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::f32::consts::TAU;
@@ -80,7 +81,7 @@ fn spawn_shuriken_attack(
                             translation: Vec3::new(
                                 player_transform.translation.x,
                                 player_transform.translation.y,
-                                1.0,
+                                PROJECTILE_Z_INDEX,
                             ),
                             scale: Vec3::splat(player_stats.area),
                             ..default()
@@ -106,7 +107,7 @@ fn spawn_shuriken_attack(
                         distance: 0.0,
                         spiral_speed: 60.0,
                     },
-                    ProjectileDamage(10.0),
+                    ProjectileDamage(45.0),
                     ProjectileImpulse(200.0),
                     ProjectileLifetime {
                         timer: Timer::from_seconds(

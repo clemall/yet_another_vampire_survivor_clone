@@ -14,7 +14,7 @@ impl Plugin for ProjectilePlugin {
         app.add_systems(
             Update,
             (
-                projectile_apply_damage.after(enemy_death_check),
+                handle_projectile_colliding_with_enemy.after(enemy_death_check),
                 start_reload_attack_spawner,
                 reloading_attack_spawner,
                 projectile_lifetime_tick,
@@ -59,7 +59,7 @@ fn delay_between_attack_timer_tick(
     }
 }
 
-fn projectile_apply_damage(
+fn handle_projectile_colliding_with_enemy(
     mut commands: Commands,
     mut attacks: Query<
         (
@@ -106,10 +106,10 @@ fn projectile_apply_damage(
             // if let Ok(transform) = enemies.get_mut(enemy_entity) {}
 
             if let Some(hit_enemies) = hit_enemies.as_deref_mut() {
-                if hit_enemies.seen.contains(&enemy_entity.index()) {
+                if hit_enemies.seen.contains(&enemy_entity) {
                     continue;
                 }
-                hit_enemies.seen.push(enemy_entity.index());
+                hit_enemies.seen.push(enemy_entity);
             }
             enemy_received_damage.send(EnemyReceivedDamage {
                 enemy_entity,

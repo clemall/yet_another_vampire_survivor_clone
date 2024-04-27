@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::constants::PROJECTILE_Z_INDEX;
 use crate::math_utils::find_closest;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -89,7 +90,11 @@ fn spawn_attack(
                     SpriteBundle {
                         texture,
                         transform: Transform {
-                            translation: enemy_transform.translation,
+                            translation: Vec3::new(
+                                enemy_transform.translation.x,
+                                enemy_transform.translation.y,
+                                PROJECTILE_Z_INDEX,
+                            ),
                             scale: Vec3::splat(player_stats.area),
                             ..default()
                         },
@@ -104,7 +109,7 @@ fn spawn_attack(
                             TimerMode::Once,
                         ),
                     },
-                    ProjectileDamage(1.0),
+                    ProjectileDamage(15.0),
                     ProjectileTimeBetweenDamage {
                         timer: Timer::from_seconds(0.33, TimerMode::Repeating),
                     },

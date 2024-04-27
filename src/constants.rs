@@ -34,3 +34,10 @@ pub const DAMAGE_FONT_COLOR: Color = Color::WHITE; // white
 
 pub const FONT: &str = "fonts/FiraMono-Medium.ttf";
 pub const FONT_BOLD: &str = "fonts/FiraSans-Bold.ttf";
+
+// Z index.....
+pub const ENEMY_Z_INDEX: f32 = 99.0;
+pub const PLAYER_Z_INDEX: f32 = 98.0;
+pub const PROJECTILE_Z_INDEX: f32 = 199.0;
+pub const GEM_Z_INDEX: f32 = 50.0; // under enemies makes it better
+pub const GEM_BOSS_Z_INDEX: f32 = 999.0; // Above anything

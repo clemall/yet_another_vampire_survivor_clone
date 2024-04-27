@@ -29,7 +29,7 @@ fn spawn_gem_on_enemy_death(
         commands.spawn((
             SpriteBundle {
                 texture: asset_server.load("gem.png"),
-                transform: Transform::from_xyz(event.position.x, event.position.y, 0.0),
+                transform: Transform::from_xyz(event.position.x, event.position.y, GEM_Z_INDEX),
                 ..default()
             },
             RigidBody::Fixed,
