@@ -76,7 +76,7 @@ fn handle_projectile_colliding_with_enemy(
         ),
         (With<Projectile>, Without<ColliderDisabled>),
     >,
-    mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventWriter<OnEnemyHit>,
     player_stats: Res<PlayerInGameStats>,
     time: Res<Time>,
 ) {
@@ -111,7 +111,7 @@ fn handle_projectile_colliding_with_enemy(
                 }
                 hit_enemies.seen.push(enemy_entity);
             }
-            enemy_received_damage.send(EnemyReceivedDamage {
+            eneny_hit_event.send(OnEnemyHit {
                 enemy_entity,
                 damage: projectile_damage.0 * player_stats.power,
                 projectile_position: projectile_transform.translation,

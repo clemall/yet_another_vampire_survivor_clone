@@ -306,7 +306,7 @@ fn player_game_over(
 }
 
 fn compute_experience(
-    mut collect_experience: EventReader<CollectExperience>,
+    mut collect_experience: EventReader<OnCollectExperience>,
     mut player_experience: ResMut<PlayerExperience>,
     mut next_state: ResMut<NextState<GameState>>,
     player_stats: Res<PlayerInGameStats>,
@@ -332,7 +332,7 @@ fn compute_experience(
 }
 
 fn player_received_damage(
-    mut received_damage: EventReader<PlayerReceivedDamage>,
+    mut received_damage: EventReader<OnPlayerReceivedDamage>,
     mut player: Query<&mut Health, With<Player>>,
     player_stats: Res<PlayerInGameStats>,
 ) {

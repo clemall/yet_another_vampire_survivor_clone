@@ -132,7 +132,7 @@ fn duplicate_ball_on_hit(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     enemies: Query<(Entity, &Transform), With<Enemy>>,
-    mut eneny_hit_event: EventReader<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventReader<OnEnemyHit>,
     player_stats: Res<PlayerInGameStats>,
 ) {
     for event in eneny_hit_event.read() {

@@ -18,7 +18,7 @@ impl Plugin for GemsBossPlugin {
 fn spawn_boss_gem_on_enemy_death(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut boss_died: EventReader<EnemyBossDied>,
+    mut boss_died: EventReader<OnEnemyBossDied>,
 ) {
     for event in boss_died.read() {
         commands.spawn((

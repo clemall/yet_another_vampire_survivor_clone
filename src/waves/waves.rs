@@ -39,7 +39,7 @@ fn waves_manager_tick(mut commands: Commands, mut waves: Query<&mut WaveManager>
 fn waves_spawn(
     mut waves: Query<&mut Wave>,
     time: Res<Time>,
-    mut spawn_enemy: EventWriter<SpawnEnemy>,
+    mut spawn_enemy: EventWriter<OnSpawnEnemy>,
 ) {
     for mut wave in &mut waves {
         wave.delay_between_spawn.tick(time.delta());
@@ -48,7 +48,7 @@ fn waves_spawn(
         }
 
         for _ in 0..wave.amount_per_timer_trigger {
-            spawn_enemy.send(SpawnEnemy {
+            spawn_enemy.send(OnSpawnEnemy {
                 enemy_types: wave.enemy_type,
             });
         }

@@ -139,7 +139,7 @@ fn spawn_attack(
 fn apply_slow_aura_on_hit(
     mut commands: Commands,
     enemies: Query<Entity, With<Enemy>>,
-    mut eneny_hit_event: EventReader<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventReader<OnEnemyHit>,
 ) {
     for event in eneny_hit_event.read() {
         if event.weapon_projectile_type != WeaponsTypes::SlowDome {

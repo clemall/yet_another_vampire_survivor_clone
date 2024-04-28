@@ -16,10 +16,10 @@ impl Plugin for UiEnemyPlugin {
 pub fn enemy_received_damage_ui(
     mut commands: Commands,
     mut enemies: Query<&Transform, With<Enemy>>,
-    mut eneny_received_damaged_event: EventReader<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventReader<OnEnemyHit>,
     asset_server: Res<AssetServer>,
 ) {
-    for event in eneny_received_damaged_event.read() {
+    for event in eneny_hit_event.read() {
         if let Ok(enemy_transform) = enemies.get_mut(event.enemy_entity) {
             let parent = commands
                 .spawn((

@@ -23,7 +23,7 @@ impl Plugin for GemsPlugin {
 fn spawn_gem_on_enemy_death(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut enemy_died: EventReader<EnemyDied>,
+    mut enemy_died: EventReader<OnEnemyDied>,
 ) {
     for event in enemy_died.read() {
         commands.spawn((
@@ -75,12 +75,12 @@ fn gem_retrieve_by_user(
         (Without<ColliderDisabled>, With<GemIsAttracted>),
     >,
     player: Query<Entity, With<Player>>,
-    mut collect_experience: EventWriter<CollectExperience>,
+    mut collect_experience: EventWriter<OnCollectExperience>,
 ) {
     let player = player.single();
     for (gem_entity, gem, colliding_entities) in &mut gems {
         if colliding_entities.contains(player) {
-            collect_experience.send(CollectExperience {
+            collect_experience.send(OnCollectExperience {
                 experience: gem.experience,
             });
 

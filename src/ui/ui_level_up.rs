@@ -150,12 +150,12 @@ fn level_up_button_interaction(
         (&Interaction, &mut BackgroundColor, &ButtonUpgrade), // UiImage
         (Changed<Interaction>, With<Button>),
     >,
-    mut item_pickup: EventWriter<ItemPickup>,
+    mut item_pickup: EventWriter<OnItemPickup>,
 ) {
     for (interaction, mut image, upgrade) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                item_pickup.send(ItemPickup {
+                item_pickup.send(OnItemPickup {
                     item_key: upgrade.item_key.clone(),
                     rarity: upgrade.rarity,
                 });

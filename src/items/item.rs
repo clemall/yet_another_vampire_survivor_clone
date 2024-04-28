@@ -52,7 +52,7 @@ fn setup_loot_table(mut commands: Commands) {
 }
 
 fn trigger_item(
-    mut item_event: EventReader<ItemPickup>,
+    mut item_event: EventReader<OnItemPickup>,
     mut player_stats: ResMut<PlayerInGameStats>,
     item_resource: Res<ItemsResource>,
     mut loot_table: ResMut<LootTable>,

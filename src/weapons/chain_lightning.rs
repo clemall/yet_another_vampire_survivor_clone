@@ -65,7 +65,7 @@ fn spawn_attack(
         ),
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
-    mut enemy_received_damage: EventWriter<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventWriter<OnEnemyHit>,
 ) {
     let player_transform = player.single_mut();
 
@@ -162,7 +162,7 @@ fn spawn_attack(
                     // move position to the one from the enemy
                     position_lightning = enemy_transform.translation.clone();
 
-                    enemy_received_damage.send(EnemyReceivedDamage {
+                    eneny_hit_event.send(OnEnemyHit {
                         damage: 50.0,
                         enemy_entity: enemy,
                         projectile_position: enemy_transform.translation,

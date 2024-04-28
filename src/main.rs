@@ -47,13 +47,13 @@ fn main() {
         // States
         .init_state::<GameState>()
         // Events
-        .add_event::<EnemyDied>()
-        .add_event::<EnemyBossDied>()
-        .add_event::<CollectExperience>()
-        .add_event::<EnemyReceivedDamage>()
-        .add_event::<PlayerReceivedDamage>()
-        .add_event::<SpawnEnemy>()
-        .add_event::<ItemPickup>()
+        .add_event::<OnEnemyDied>()
+        .add_event::<OnEnemyBossDied>()
+        .add_event::<OnCollectExperience>()
+        .add_event::<OnEnemyHit>()
+        .add_event::<OnPlayerReceivedDamage>()
+        .add_event::<OnSpawnEnemy>()
+        .add_event::<OnItemPickup>()
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(UiFPSPlugin)
@@ -143,8 +143,8 @@ fn debug(
     mut windows: Query<&mut Window>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
-    mut enemy_died: EventWriter<EnemyDied>,
-    mut spawn_enemy: EventWriter<SpawnEnemy>,
+    mut enemy_died: EventWriter<OnEnemyDied>,
+    mut spawn_enemy: EventWriter<OnSpawnEnemy>,
     mut next_state: ResMut<NextState<GameState>>,
     // mut gizmos: Gizmos,
 ) {
@@ -177,8 +177,8 @@ fn debug(
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyP) {
-        spawn_enemy.send(SpawnEnemy {
-            enemy_types: EnemyTypes::Bat,
+        spawn_enemy.send(OnSpawnEnemy {
+            enemy_types: EnemyTypes::BossWolf,
         });
     }
 
@@ -192,7 +192,7 @@ fn debug(
     }
 
     if keyboard_input.pressed(KeyCode::KeyG) {
-        enemy_died.send(EnemyDied {
+        enemy_died.send(OnEnemyDied {
             position: get_random_position_in_screen().extend(0.0),
             experience: 1,
         });

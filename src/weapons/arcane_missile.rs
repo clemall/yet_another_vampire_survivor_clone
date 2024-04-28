@@ -171,7 +171,7 @@ fn duplicate_arcane_missile_on_hit(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
-    mut eneny_hit_event: EventReader<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventReader<OnEnemyHit>,
     mut player: Query<&Transform, With<Player>>,
     player_stats: Res<PlayerInGameStats>,
 ) {

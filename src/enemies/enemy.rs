@@ -45,7 +45,7 @@ fn spawn_enemy(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    mut spawn_enemy: EventReader<SpawnEnemy>,
+    mut spawn_enemy: EventReader<OnSpawnEnemy>,
     player: Query<&Transform, With<Player>>,
     enemies_resource: Res<EnemiesResource>,
     enemies: Query<Entity, With<Enemy>>,
@@ -200,12 +200,12 @@ fn enemy_damage_player(
     enemies: Query<(&CollidingEntities, &EnemyDamageOverTime), With<Enemy>>,
     player: Query<Entity, With<Player>>,
     time: Res<Time>,
-    mut player_received_damage_event: EventWriter<PlayerReceivedDamage>,
+    mut player_received_damage_event: EventWriter<OnPlayerReceivedDamage>,
 ) {
     let player = player.single();
     for (colliding_entities, damage) in enemies.iter() {
         if colliding_entities.contains(player) {
-            player_received_damage_event.send(PlayerReceivedDamage {
+            player_received_damage_event.send(OnPlayerReceivedDamage {
                 damage: damage.0 * time.delta_seconds(),
             });
         }
@@ -216,7 +216,7 @@ pub fn enemy_applied_impulse(
     mut commands: Commands,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     mut player: Query<&Transform, With<Player>>,
-    mut eneny_hit_event: EventReader<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventReader<OnEnemyHit>,
 ) {
     let player_transform = player.single_mut();
     for event in eneny_hit_event.read() {
@@ -235,9 +235,9 @@ pub fn enemy_applied_impulse(
 
 pub fn enemy_applied_received_damage(
     mut enemies: Query<&mut Health, With<Enemy>>,
-    mut eneny_received_damaged_event: EventReader<EnemyReceivedDamage>,
+    mut eneny_hit_event: EventReader<OnEnemyHit>,
 ) {
-    for event in eneny_received_damaged_event.read() {
+    for event in eneny_hit_event.read() {
         if let Ok(mut health) = enemies.get_mut(event.enemy_entity) {
             **health -= event.damage;
         }
@@ -256,19 +256,19 @@ pub fn enemy_death_check(
         ),
         With<Enemy>,
     >,
-    mut enemy_died: EventWriter<EnemyDied>,
-    mut enemy_boss_died: EventWriter<EnemyBossDied>,
+    mut enemy_died: EventWriter<OnEnemyDied>,
+    mut enemy_boss_died: EventWriter<OnEnemyBossDied>,
 ) {
     for (entity, transform, health, experience, boss_drop) in &mut enemies {
         if health.0 <= 0.0 {
             if let Some(experience) = experience {
-                enemy_died.send(EnemyDied {
+                enemy_died.send(OnEnemyDied {
                     position: transform.translation.clone(),
                     experience: experience.0,
                 });
             }
             if let Some(_boss_drop) = boss_drop {
-                enemy_boss_died.send(EnemyBossDied {
+                enemy_boss_died.send(OnEnemyBossDied {
                     position: transform.translation.clone(),
                 });
             }

@@ -287,24 +287,24 @@ pub struct GemIsAttracted;
 // EVENTS
 
 #[derive(Event)]
-pub struct ItemPickup {
+pub struct OnItemPickup {
     pub item_key: String,
     pub rarity: Rarity,
 }
 
 #[derive(Event)]
-pub struct EnemyDied {
+pub struct OnEnemyDied {
     pub position: Vec3,
     pub experience: u32,
 }
 
 #[derive(Event)]
-pub struct EnemyBossDied {
+pub struct OnEnemyBossDied {
     pub position: Vec3,
 }
 
 #[derive(Event)]
-pub struct EnemyReceivedDamage {
+pub struct OnEnemyHit {
     pub damage: f32,
     pub enemy_entity: Entity,
     pub projectile_position: Vec3,
@@ -314,17 +314,17 @@ pub struct EnemyReceivedDamage {
 }
 
 #[derive(Event)]
-pub struct PlayerReceivedDamage {
+pub struct OnPlayerReceivedDamage {
     pub damage: f32,
 }
 
 #[derive(Event)]
-pub struct CollectExperience {
+pub struct OnCollectExperience {
     pub experience: u32,
 }
 
 #[derive(Event)]
-pub struct SpawnEnemy {
+pub struct OnSpawnEnemy {
     pub enemy_types: EnemyTypes,
 }
 
