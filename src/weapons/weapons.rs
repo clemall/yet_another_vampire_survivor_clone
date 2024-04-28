@@ -2,7 +2,6 @@ use crate::weapons::arcane_missile::ArcaneMissilePlugin;
 use crate::weapons::bouncing_ball::BouncingBallPlugin;
 use crate::weapons::chain_lightning::ChainLightningPlugin;
 use crate::weapons::claw::WeaponClawPlugin;
-use crate::weapons::claw_upgrade_1::WeaponClawUpgrade1Plugin;
 use crate::weapons::fire_area::WeaponFireAreaPlugin;
 use crate::weapons::fire_boots::FireBootsPlugin;
 use crate::weapons::light_sword::LightSwordsPlugin;
@@ -18,7 +17,6 @@ impl Plugin for WeaponsPlugin {
         app.add_plugins(ProjectilePlugin);
 
         app.add_plugins(WeaponClawPlugin);
-        app.add_plugins(WeaponClawUpgrade1Plugin);
 
         app.add_plugins(WeaponFireAreaPlugin);
 

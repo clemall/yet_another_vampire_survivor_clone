@@ -1,5 +1,5 @@
 use crate::components::*;
-use crate::constants::{ENEMY_Z_INDEX, GEM_Z_INDEX};
+use crate::constants::ENEMY_Z_INDEX;
 use crate::enemies::enemy_bundle::EnemyBundle;
 use crate::math_utils::get_random_position_outside_screen;
 use bevy::prelude::*;
