@@ -251,6 +251,7 @@ pub enum WeaponsTypes {
     FireArea,
     ArcaneMissile,
     ArcaneMissileSplit,
+    ArcaneMissileExplosion,
     Shuriken,
     ChainLightning,
     SlowDome,

@@ -23,7 +23,12 @@ impl Plugin for ArcaneMissilePlugin {
         );
         app.add_systems(
             Update,
-            (spawn_attack, duplicate_arcane_missile_on_hit).run_if(in_state(GameState::Gameplay)),
+            (
+                spawn_attack,
+                handle_arcane_missile_split_on_hit,
+                handle_arcane_missile_explosion_hit,
+            )
+                .run_if(in_state(GameState::Gameplay)),
         );
     }
 }
@@ -71,6 +76,7 @@ fn spawn_attack(
         ),
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
+    player_stats: Res<PlayerInGameStats>,
 ) {
     let player_transform = player.single_mut();
 
@@ -124,6 +130,7 @@ fn spawn_attack(
                                     player_transform.translation.y,
                                     PROJECTILE_Z_INDEX,
                                 ),
+                                scale: Vec3::splat(player_stats.area),
                                 ..default()
                             },
                             ..default()
@@ -166,17 +173,14 @@ fn spawn_attack(
     }
 }
 
-fn duplicate_arcane_missile_on_hit(
+fn handle_arcane_missile_split_on_hit(
     mut commands: Commands,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     mut eneny_hit_event: EventReader<OnEnemyHit>,
-    mut player: Query<&Transform, With<Player>>,
     player_stats: Res<PlayerInGameStats>,
 ) {
-    let player_transform = player.single_mut();
-
     for event in eneny_hit_event.read() {
         if event.weapon_projectile_type != WeaponsTypes::ArcaneMissile {
             continue;
@@ -225,10 +229,11 @@ fn duplicate_arcane_missile_on_hit(
                             texture,
                             transform: Transform {
                                 translation: Vec3::new(
-                                    player_transform.translation.x,
-                                    player_transform.translation.y,
+                                    event.projectile_position.x,
+                                    event.projectile_position.y,
                                     PROJECTILE_Z_INDEX,
                                 ),
+                                scale: Vec3::splat(player_stats.area),
                                 ..default()
                             },
                             ..default()
@@ -250,7 +255,6 @@ fn duplicate_arcane_missile_on_hit(
                     .insert((
                         Projectile,
                         ProjectileFromWeapon(WeaponsTypes::ArcaneMissileSplit),
-                        // ProjectileDeleteOnHit,
                         ProjectileDamage(25.0),
                         ProjectileTarget(entity),
                         ProjectileOrigin(event.projectile_position),
@@ -268,6 +272,69 @@ fn duplicate_arcane_missile_on_hit(
                     ));
             }
         }
+    }
+}
+
+fn handle_arcane_missile_explosion_hit(
+    mut commands: Commands,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    asset_server: Res<AssetServer>,
+    mut eneny_hit_event: EventReader<OnEnemyHit>,
+    player_stats: Res<PlayerInGameStats>,
+) {
+    for event in eneny_hit_event.read() {
+        if event.weapon_projectile_type != WeaponsTypes::ArcaneMissile
+            && event.weapon_projectile_type != WeaponsTypes::ArcaneMissileSplit
+        {
+            continue;
+        }
+
+        let texture = asset_server.load("arcane-missile-explosion.png");
+        let layout = TextureAtlasLayout::from_grid(Vec2::new(64.0, 64.0), 11, 1, None, None);
+        let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
+        commands
+            .spawn((
+                SpriteBundle {
+                    texture,
+                    transform: Transform {
+                        translation: Vec3::new(
+                            event.projectile_position.x,
+                            event.projectile_position.y,
+                            PROJECTILE_Z_INDEX,
+                        ),
+                        scale: Vec3::splat(player_stats.area),
+                        ..default()
+                    },
+                    ..default()
+                },
+                TextureAtlas {
+                    layout: texture_atlas_layout,
+                    index: 0,
+                },
+                AnimationIndices {
+                    first: 0,
+                    last: 10,
+                    is_repeating: false,
+                },
+                AnimationTimer(Timer::from_seconds(0.05, TimerMode::Repeating)),
+                Sensor,
+                Collider::ball(55.0 / 2.0),
+                ArcaneMissile,
+            ))
+            .insert((
+                Projectile,
+                ProjectileFromWeapon(WeaponsTypes::ArcaneMissileExplosion),
+                ProjectileDamage(80.0),
+                ProjectileOrigin(event.projectile_position),
+                ProjectileImpulse(120.0),
+                AlreadyHitEnemies { seen: Vec::new() },
+                ProjectileLifetime {
+                    timer: Timer::from_seconds(0.4, TimerMode::Once),
+                },
+                ProjectileBundleCollider::default(),
+                Name::new("Arcane missile explosion"),
+            ));
         // }
     }
 }

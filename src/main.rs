@@ -59,7 +59,7 @@ fn main() {
         .add_plugins(UiFPSPlugin)
         // Rapier2D plugin
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.0))
-        // .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(RapierDebugRenderPlugin::default())
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
             ..default()
