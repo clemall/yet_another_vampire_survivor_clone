@@ -150,8 +150,14 @@ fn spawn_attack(
                 Sensor,
             ))
             .insert((
-                Collider::cuboid(48.0 / 2.0, 48.0 / 2.0),
                 ProjectileBundleCollider::default(),
+                Collider::cuboid(48.0 / 2.0, 48.0 / 2.0),
+                // Collider::convex_hull(&vec![
+                //     Vect::new(-20.0, 0.0),
+                //     Vect::new(20.0, -30.0),
+                //     Vect::new(20.0, 30.0),
+                // ])
+                // .unwrap(),
                 ProjectileLifetime {
                     timer: Timer::from_seconds(0.3 * player_stats.attack_duration, TimerMode::Once),
                 },
@@ -179,6 +185,7 @@ fn spawn_weapon_upgrade(mut commands: Commands, player_stats: Res<PlayerInGameSt
             default_reload_time: 2.0,
         },
         CanAttack,
+        ClawUpgrade1Spawner,
         Name::new("Claw Spawner"),
     ));
 }

@@ -149,7 +149,7 @@ fn debug(
     // mut gizmos: Gizmos,
 ) {
     if keyboard_input.just_pressed(KeyCode::Digit1) {
-        player_weapons.weapons.push(WeaponsTypes::ClawUpgrade1);
+        player_weapons.weapons.push(WeaponsTypes::Claw);
     }
     if keyboard_input.just_pressed(KeyCode::Digit2) {
         player_weapons.weapons.push(WeaponsTypes::FireArea);
