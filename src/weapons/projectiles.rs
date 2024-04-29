@@ -67,7 +67,7 @@ fn handle_projectile_colliding_with_enemy(
             &Transform,
             &CollidingEntities,
             &ProjectileDamage,
-            &ProjectileFromWeapon,
+            &ProjectileType,
             Option<&mut ProjectileTimeBetweenDamage>,
             Option<&mut AlreadyHitEnemies>,
             Option<&ProjectilePierce>,
@@ -115,7 +115,7 @@ fn handle_projectile_colliding_with_enemy(
                 enemy_entity,
                 damage: projectile_damage.0 * player_stats.power,
                 projectile_position: projectile_transform.translation,
-                weapon_projectile_type: projectile_type.0,
+                projectile_type: projectile_type.0,
                 impulse: projectile_impulse.map(|projectile_impulse| projectile_impulse.0),
             });
 

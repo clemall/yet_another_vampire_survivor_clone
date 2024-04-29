@@ -120,7 +120,7 @@ fn spawn_attack(
                         ProjectileSpeed(100.0),
                         ProjectileDirection(direction),
                         ProjectileImpulse(700.0),
-                        ProjectileFromWeapon(WeaponsTypes::BouncingBall),
+                        ProjectileType(ProjectileTypes::BouncingBall),
                         Name::new("Bouncing ball Attack"),
                     ));
             }
@@ -136,7 +136,7 @@ fn duplicate_ball_on_hit(
     player_stats: Res<PlayerInGameStats>,
 ) {
     for event in eneny_hit_event.read() {
-        if event.weapon_projectile_type != WeaponsTypes::BouncingBall {
+        if event.projectile_type != ProjectileTypes::BouncingBall {
             continue;
         }
         if let Ok((_enemy_entity, enemy_transform)) = enemies.get(event.enemy_entity) {
@@ -172,7 +172,7 @@ fn duplicate_ball_on_hit(
                         ProjectileSpeed(100.0),
                         ProjectileDirection(direction),
                         ProjectileImpulse(700.0),
-                        ProjectileFromWeapon(WeaponsTypes::BouncingBallSplit),
+                        ProjectileType(ProjectileTypes::BouncingBallSplit),
                         Name::new("Bouncing ball duplicate Attack"),
                     ));
             }

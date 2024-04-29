@@ -107,7 +107,7 @@ fn spawn_attack(
             ))
             .insert((
                 Projectile,
-                ProjectileFromWeapon(WeaponsTypes::FireBoots),
+                ProjectileType(ProjectileTypes::FireBoots),
                 FireBoot,
                 ProjectileDamage(30.0),
                 ProjectileImpulse(20.0),

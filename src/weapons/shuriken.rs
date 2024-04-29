@@ -24,6 +24,15 @@ impl Plugin for ShurikenPlugin {
             Update,
             (spawn_shuriken_attack,).run_if(in_state(GameState::Gameplay)),
         );
+
+        app.add_systems(
+            Update,
+            handle_shuriken_extra_ammo_update.run_if(
+                in_state(GameState::Gameplay)
+                    .and_then(run_if_upgrade_extra_ammo)
+                    .and_then(run_once()),
+            ),
+        );
     }
 }
 
@@ -34,18 +43,31 @@ fn run_if_shuriken_not_present(
     player_weapons.weapons.contains(&WeaponsTypes::Shuriken) && weapon.is_empty()
 }
 
+fn run_if_upgrade_extra_ammo(weapon_upgrades: Res<PlayerUpgradeWeapons>) -> bool {
+    weapon_upgrades
+        .upgrades
+        .contains(&WeaponsUpgradesTypes::ShurikenExtraAmmo)
+}
+
 fn setup_shuriken_spawner(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
         ShurikenSpawner,
         AttackAmmo {
-            size: 8 + player_stats.attack_amount,
-            amount: 8,
-            default_size: 8,
+            size: 4 + player_stats.attack_amount,
+            amount: 4,
+            default_size: 4,
             reload_time: 7.0 * player_stats.attack_reload,
             default_reload_time: 7.0,
         },
         Name::new("Shuriken Spawner"),
     ));
+}
+
+fn handle_shuriken_extra_ammo_update(mut spawner: Query<&mut AttackAmmo, With<ShurikenSpawner>>) {
+    if let Ok(mut attack_ammo) = spawner.get_single_mut() {
+        attack_ammo.default_size += 4;
+        attack_ammo.size += 4;
+    }
 }
 
 fn spawn_shuriken_attack(
@@ -54,6 +76,7 @@ fn spawn_shuriken_attack(
     mut player: Query<&Transform, With<Player>>,
     mut spawner: Query<&mut AttackAmmo, (With<ShurikenSpawner>, Without<AttackSpawnerIsReloading>)>,
     player_stats: Res<PlayerInGameStats>,
+    weapon_upgrades: Res<PlayerUpgradeWeapons>,
 ) {
     let player_transform = player.single_mut();
 
@@ -71,9 +94,9 @@ fn spawn_shuriken_attack(
             attack_ammo.amount -= 1;
             let incremental_angle = TAU / attack_ammo.size as f32;
             let angle = incremental_angle * attack_ammo.amount as f32;
-            // let direction = Vec2::from_angle(angle);
+            let direction = Vec2::from_angle(angle);
 
-            commands
+            let projectile_id = commands
                 .spawn((
                     SpriteBundle {
                         texture: texture.clone(),
@@ -94,21 +117,16 @@ fn spawn_shuriken_attack(
                 ))
                 .insert((
                     Projectile,
-                    ProjectileFromWeapon(WeaponsTypes::Shuriken),
+                    ProjectileType(ProjectileTypes::Shuriken),
                     Shuriken,
-                    ProjectileSpeed(2.0),
-                    // ProjectileDirection(direction),
-                    // ProjectileRotateAroundPlayer{
+                    ProjectileSpeed(150.0),
+                    ProjectileDirection(direction),
+                    // ProjectileRotateAroundPlayer {
                     //     angle,
                     //     distance: 40.0,
                     // },
-                    ProjectileSpiralAroundPlayer {
-                        angle,
-                        distance: 0.0,
-                        spiral_speed: 60.0,
-                    },
-                    ProjectileDamage(45.0),
-                    ProjectileImpulse(200.0),
+                    ProjectileDamage(80.0),
+                    ProjectileImpulse(3000.0),
                     ProjectilePierce,
                     ProjectileLifetime {
                         timer: Timer::from_seconds(
@@ -120,7 +138,22 @@ fn spawn_shuriken_attack(
                     ProjectileRotateOnSelf,
                     ProjectileOrigin(player_transform.translation),
                     Name::new("Shuriken Attack"),
+                ))
+                .id();
+
+            if weapon_upgrades
+                .upgrades
+                .contains(&WeaponsUpgradesTypes::ShurikenSpiralAroundPlayer)
+            {
+                commands.entity(projectile_id).insert((
+                    ProjectileSpiralAroundPlayer {
+                        angle,
+                        distance: 0.0,
+                        spiral_speed: 70.0,
+                    },
+                    ProjectileSpeed(1.5),
                 ));
+            }
         }
     }
 }

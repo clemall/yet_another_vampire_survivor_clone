@@ -247,7 +247,70 @@ pub enum Facing {
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum WeaponsTypes {
     Claw,
-    ClawUpgrade1,
+    FireArea,
+    ArcaneMissile,
+    Shuriken,
+    ChainLightning,
+    SlowDome,
+    BouncingBall,
+    FireBoots,
+    LightSwords,
+}
+
+impl WeaponsTypes {
+    pub fn upgrades(&self) -> Vec<WeaponsUpgradesTypes> {
+        match self {
+            WeaponsTypes::Claw => {
+                vec![]
+            }
+            WeaponsTypes::FireArea => {
+                vec![]
+            }
+            WeaponsTypes::ArcaneMissile => {
+                vec![
+                    WeaponsUpgradesTypes::ArcaneMissilePierce,
+                    WeaponsUpgradesTypes::ArcaneMissileSplit,
+                    WeaponsUpgradesTypes::ArcaneMissileExplosion,
+                    WeaponsUpgradesTypes::ArcaneMissileDamage,
+                ]
+            }
+            WeaponsTypes::Shuriken => {
+                vec![
+                    WeaponsUpgradesTypes::ShurikenSpiralAroundPlayer,
+                    WeaponsUpgradesTypes::ShurikenExtraAmmo,
+                ]
+            }
+            WeaponsTypes::ChainLightning => {
+                vec![]
+            }
+            WeaponsTypes::SlowDome => {
+                vec![]
+            }
+            WeaponsTypes::BouncingBall => {
+                vec![]
+            }
+            WeaponsTypes::FireBoots => {
+                vec![]
+            }
+            WeaponsTypes::LightSwords => {
+                vec![]
+            }
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum WeaponsUpgradesTypes {
+    ArcaneMissilePierce,
+    ArcaneMissileSplit,
+    ArcaneMissileExplosion,
+    ArcaneMissileDamage,
+    ShurikenSpiralAroundPlayer,
+    ShurikenExtraAmmo,
+}
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum ProjectileTypes {
+    Claw,
     FireArea,
     ArcaneMissile,
     ArcaneMissileSplit,
@@ -259,13 +322,6 @@ pub enum WeaponsTypes {
     BouncingBallSplit,
     FireBoots,
     LightSwords,
-}
-
-#[derive(Debug, Eq, PartialEq, Clone, Copy)]
-pub enum WeaponsUpgradesTypes {
-    ArcaneMissilePierce,
-    ArcaneMissileSplit,
-    ArcaneMissileExplosion,
 }
 
 #[derive(Resource, Debug)]
@@ -321,7 +377,7 @@ pub struct OnEnemyHit {
     pub projectile_position: Vec3,
     pub impulse: Option<f32>,
     // pub position: Vec3,
-    pub weapon_projectile_type: WeaponsTypes,
+    pub projectile_type: ProjectileTypes,
 }
 
 #[derive(Event)]
@@ -402,7 +458,7 @@ pub struct Projectile;
 pub struct ProjectileFixedScale;
 
 #[derive(Component)]
-pub struct ProjectileFromWeapon(pub WeaponsTypes);
+pub struct ProjectileType(pub ProjectileTypes);
 
 #[derive(Component)]
 pub struct ProjectileDamage(pub f32);

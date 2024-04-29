@@ -164,7 +164,7 @@ fn spawn_attack(
                     ))
                     .insert((
                         Projectile,
-                        ProjectileFromWeapon(WeaponsTypes::ArcaneMissile),
+                        ProjectileType(ProjectileTypes::ArcaneMissile),
                         ProjectileDamage(50.0),
                         ProjectileTarget(entity),
                         ProjectileOrigin(player_transform.translation),
@@ -188,6 +188,15 @@ fn spawn_attack(
                 {
                     commands.entity(projectile_id).insert(ProjectilePierce);
                 }
+
+                if weapon_upgrades
+                    .upgrades
+                    .contains(&WeaponsUpgradesTypes::ArcaneMissileDamage)
+                {
+                    commands
+                        .entity(projectile_id)
+                        .insert(ProjectileDamage(100.0));
+                }
             }
         }
     }
@@ -203,7 +212,7 @@ fn handle_arcane_missile_split_on_hit(
     weapon_upgrades: Res<PlayerUpgradeWeapons>,
 ) {
     for event in eneny_hit_event.read() {
-        if event.weapon_projectile_type != WeaponsTypes::ArcaneMissile {
+        if event.projectile_type != ProjectileTypes::ArcaneMissile {
             continue;
         }
 
@@ -275,7 +284,7 @@ fn handle_arcane_missile_split_on_hit(
                     ))
                     .insert((
                         Projectile,
-                        ProjectileFromWeapon(WeaponsTypes::ArcaneMissileSplit),
+                        ProjectileType(ProjectileTypes::ArcaneMissileSplit),
                         ProjectileDamage(25.0),
                         ProjectileTarget(entity),
                         ProjectileOrigin(event.projectile_position),
@@ -299,6 +308,15 @@ fn handle_arcane_missile_split_on_hit(
                 {
                     commands.entity(projectile_id).insert(ProjectilePierce);
                 }
+
+                if weapon_upgrades
+                    .upgrades
+                    .contains(&WeaponsUpgradesTypes::ArcaneMissileDamage)
+                {
+                    commands
+                        .entity(projectile_id)
+                        .insert(ProjectileDamage(100.0));
+                }
             }
         }
     }
@@ -310,10 +328,11 @@ fn handle_arcane_missile_explosion_hit(
     asset_server: Res<AssetServer>,
     mut eneny_hit_event: EventReader<OnEnemyHit>,
     player_stats: Res<PlayerInGameStats>,
+    weapon_upgrades: Res<PlayerUpgradeWeapons>,
 ) {
     for event in eneny_hit_event.read() {
-        if event.weapon_projectile_type != WeaponsTypes::ArcaneMissile
-            && event.weapon_projectile_type != WeaponsTypes::ArcaneMissileSplit
+        if event.projectile_type != ProjectileTypes::ArcaneMissile
+            && event.projectile_type != ProjectileTypes::ArcaneMissileSplit
         {
             continue;
         }
@@ -322,7 +341,7 @@ fn handle_arcane_missile_explosion_hit(
         let layout = TextureAtlasLayout::from_grid(Vec2::new(64.0, 64.0), 11, 1, None, None);
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-        commands
+        let projectile_id = commands
             .spawn((
                 SpriteBundle {
                     texture,
@@ -353,7 +372,7 @@ fn handle_arcane_missile_explosion_hit(
             ))
             .insert((
                 Projectile,
-                ProjectileFromWeapon(WeaponsTypes::ArcaneMissileExplosion),
+                ProjectileType(ProjectileTypes::ArcaneMissileExplosion),
                 ProjectileDamage(80.0),
                 ProjectileOrigin(event.projectile_position),
                 ProjectileImpulse(120.0),
@@ -364,7 +383,17 @@ fn handle_arcane_missile_explosion_hit(
                 },
                 ProjectileBundleCollider::default(),
                 Name::new("Arcane missile explosion"),
-            ));
+            ))
+            .id();
+
+        if weapon_upgrades
+            .upgrades
+            .contains(&WeaponsUpgradesTypes::ArcaneMissileDamage)
+        {
+            commands
+                .entity(projectile_id)
+                .insert(ProjectileDamage(100.0));
+        }
         // }
     }
 }

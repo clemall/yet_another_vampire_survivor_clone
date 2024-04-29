@@ -116,7 +116,7 @@ fn spawn_attack(
                     SlowDome,
                     Projectile,
                     ProjectilePierce,
-                    ProjectileFromWeapon(WeaponsTypes::SlowDome),
+                    ProjectileType(ProjectileTypes::SlowDome),
                     // TriggersOnHit{
                     //     auras_systems: vec![systems.slow_enemy]
                     // },
@@ -143,7 +143,7 @@ fn apply_slow_aura_on_hit(
     mut eneny_hit_event: EventReader<OnEnemyHit>,
 ) {
     for event in eneny_hit_event.read() {
-        if event.weapon_projectile_type != WeaponsTypes::SlowDome {
+        if event.projectile_type != ProjectileTypes::SlowDome {
             continue;
         }
         if let Ok(enemy_entity) = enemies.get(event.enemy_entity) {

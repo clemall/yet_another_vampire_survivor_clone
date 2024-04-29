@@ -167,7 +167,7 @@ fn spawn_attack(
                         enemy_entity: enemy,
                         projectile_position: enemy_transform.translation,
                         impulse: None,
-                        weapon_projectile_type: WeaponsTypes::ChainLightning,
+                        projectile_type: ProjectileTypes::ChainLightning,
                     });
                 }
             }

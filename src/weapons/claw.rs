@@ -23,13 +23,13 @@ impl Plugin for WeaponClawPlugin {
                 resource_exists_and_changed::<PlayerWeapons>.and_then(run_if_weapon_not_present),
             ),
         );
-        app.add_systems(
-            Update,
-            spawn_weapon_upgrade.run_if(
-                resource_exists_and_changed::<PlayerWeapons>
-                    .and_then(run_if_weapon_upgraded_not_present),
-            ),
-        );
+        // app.add_systems(
+        //     Update,
+        //     spawn_weapon_upgrade.run_if(
+        //         resource_exists_and_changed::<PlayerWeapons>
+        //             .and_then(run_if_weapon_upgraded_not_present),
+        //     ),
+        // );
         app.add_systems(
             Update,
             (spawn_attack, spawn_attack_upgrade).run_if(in_state(GameState::Gameplay)),
@@ -44,12 +44,12 @@ fn run_if_weapon_not_present(
     player_weapons.weapons.contains(&WeaponsTypes::Claw) && weapon.is_empty()
 }
 
-fn run_if_weapon_upgraded_not_present(
-    player_weapons: Res<PlayerWeapons>,
-    weapon: Query<(), With<ClawUpgrade1Spawner>>,
-) -> bool {
-    player_weapons.weapons.contains(&WeaponsTypes::ClawUpgrade1) && weapon.is_empty()
-}
+// fn run_if_weapon_upgraded_not_present(
+//     player_weapons: Res<PlayerWeapons>,
+//     weapon: Query<(), With<ClawUpgrade1Spawner>>,
+// ) -> bool {
+//     player_weapons.weapons.contains(&WeaponsTypes::ClawUpgrade1) && weapon.is_empty()
+// }
 
 fn spawn_weapon(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
     commands.spawn((
@@ -166,7 +166,7 @@ fn spawn_attack(
                 ProjectileImpulse(2000.0),
                 Claw,
                 ProjectilePierce,
-                ProjectileFromWeapon(WeaponsTypes::Claw),
+                ProjectileType(ProjectileTypes::Claw),
                 Projectile,
                 Name::new("Claw Attack"),
             ));
@@ -295,7 +295,7 @@ fn spawn_attack_upgrade(
                     ProjectileImpulse(2000.0),
                     Claw,
                     ProjectilePierce,
-                    ProjectileFromWeapon(WeaponsTypes::Claw),
+                    ProjectileType(ProjectileTypes::Claw),
                     Projectile,
                     Name::new("Claw Attack"),
                 ));

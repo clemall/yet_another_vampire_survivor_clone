@@ -108,7 +108,7 @@ fn spawn_attack(
             ))
             .insert((
                 Projectile,
-                ProjectileFromWeapon(WeaponsTypes::LightSwords),
+                ProjectileType(ProjectileTypes::LightSwords),
                 LightSwords,
                 ProjectileDamage(40.0),
                 ProjectileImpulse(120.0),

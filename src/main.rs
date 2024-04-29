@@ -158,20 +158,20 @@ fn debug(
     if keyboard_input.just_pressed(KeyCode::Digit3) {
         player_weapons.weapons.push(WeaponsTypes::ArcaneMissile);
     }
-    if keyboard_input.just_pressed(KeyCode::Digit3) && keyboard_input.pressed(KeyCode::ShiftLeft) {
-        weapon_upgrades
-            .upgrades
-            .push(WeaponsUpgradesTypes::ArcaneMissileSplit);
-        println!("{:?}", weapon_upgrades.upgrades);
-    }
-    if keyboard_input.just_pressed(KeyCode::Digit3) && keyboard_input.pressed(KeyCode::AltLeft) {
-        weapon_upgrades
-            .upgrades
-            .push(WeaponsUpgradesTypes::ArcaneMissileExplosion);
-    }
     if keyboard_input.just_pressed(KeyCode::Digit4) {
         player_weapons.weapons.push(WeaponsTypes::Shuriken);
     }
+    if keyboard_input.just_pressed(KeyCode::Digit4) && keyboard_input.pressed(KeyCode::ShiftLeft) {
+        weapon_upgrades
+            .upgrades
+            .push(WeaponsUpgradesTypes::ShurikenSpiralAroundPlayer);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit4) && keyboard_input.pressed(KeyCode::AltLeft) {
+        weapon_upgrades
+            .upgrades
+            .push(WeaponsUpgradesTypes::ShurikenExtraAmmo);
+    }
+    println!("{:?}", weapon_upgrades.upgrades);
     if keyboard_input.just_pressed(KeyCode::Digit5) {
         player_weapons.weapons.push(WeaponsTypes::ChainLightning);
     }
