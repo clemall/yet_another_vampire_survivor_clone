@@ -70,7 +70,7 @@ fn handle_projectile_colliding_with_enemy(
             &ProjectileFromWeapon,
             Option<&mut ProjectileTimeBetweenDamage>,
             Option<&mut AlreadyHitEnemies>,
-            Option<&ProjectileDeleteOnHit>,
+            Option<&ProjectilePierce>,
             Option<&ProjectileImpulse>,
             // Option<&TriggersOnHit>,
         ),
@@ -88,7 +88,7 @@ fn handle_projectile_colliding_with_enemy(
         projectile_type,
         projectile_delay_between_damage,
         mut hit_enemies,
-        should_delete_projectile,
+        should_projectile_pierce,
         projectile_impulse,
         // triggers_on_hit,
     ) in &mut attacks
@@ -128,11 +128,13 @@ fn handle_projectile_colliding_with_enemy(
             //     }
             // }
 
-            if let Some(_should_delete) = should_delete_projectile {
-                commands
-                    .entity(projectile_entity)
-                    .insert(ProjectileDeleteMe);
-                // commands.entity(projectile_entity).despawn_recursive();
+            match should_projectile_pierce {
+                None => {
+                    commands
+                        .entity(projectile_entity)
+                        .insert(ProjectileDeleteMe);
+                }
+                Some(_) => {}
             }
         }
     }

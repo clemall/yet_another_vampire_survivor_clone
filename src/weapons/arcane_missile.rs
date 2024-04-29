@@ -25,8 +25,8 @@ impl Plugin for ArcaneMissilePlugin {
             Update,
             (
                 spawn_attack,
-                handle_arcane_missile_split_on_hit,
-                handle_arcane_missile_explosion_hit,
+                handle_arcane_missile_split_on_hit.run_if(run_if_upgrade_split_is_present),
+                handle_arcane_missile_explosion_hit.run_if(run_if_upgrade_explosion_is_present),
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -41,6 +41,18 @@ fn run_if_weapon_not_present(
         .weapons
         .contains(&WeaponsTypes::ArcaneMissile)
         && weapon.is_empty()
+}
+
+fn run_if_upgrade_split_is_present(weapon_upgrades: Res<PlayerUpgradeWeapons>) -> bool {
+    weapon_upgrades
+        .upgrades
+        .contains(&WeaponsUpgradesTypes::ArcaneMissileSplit)
+}
+
+fn run_if_upgrade_explosion_is_present(weapon_upgrades: Res<PlayerUpgradeWeapons>) -> bool {
+    weapon_upgrades
+        .upgrades
+        .contains(&WeaponsUpgradesTypes::ArcaneMissileExplosion)
 }
 
 fn spawn_weapon(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
@@ -77,6 +89,7 @@ fn spawn_attack(
     >,
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     player_stats: Res<PlayerInGameStats>,
+    weapon_upgrades: Res<PlayerUpgradeWeapons>,
 ) {
     let player_transform = player.single_mut();
 
@@ -120,7 +133,7 @@ fn spawn_attack(
                 attack_ammo.amount -= 1;
                 commands.entity(spawner_entity).remove::<CanAttack>();
 
-                commands
+                let projectile_id = commands
                     .spawn((
                         SpriteBundle {
                             texture,
@@ -152,7 +165,6 @@ fn spawn_attack(
                     .insert((
                         Projectile,
                         ProjectileFromWeapon(WeaponsTypes::ArcaneMissile),
-                        // ProjectileDeleteOnHit,
                         ProjectileDamage(50.0),
                         ProjectileTarget(entity),
                         ProjectileOrigin(player_transform.translation),
@@ -167,7 +179,15 @@ fn spawn_attack(
                         },
                         ProjectileBundleCollider::default(),
                         Name::new("Arcane missile Attack"),
-                    ));
+                    ))
+                    .id();
+
+                if weapon_upgrades
+                    .upgrades
+                    .contains(&WeaponsUpgradesTypes::ArcaneMissilePierce)
+                {
+                    commands.entity(projectile_id).insert(ProjectilePierce);
+                }
             }
         }
     }
@@ -180,6 +200,7 @@ fn handle_arcane_missile_split_on_hit(
     mut enemies: Query<(Entity, &Transform), With<Enemy>>,
     mut eneny_hit_event: EventReader<OnEnemyHit>,
     player_stats: Res<PlayerInGameStats>,
+    weapon_upgrades: Res<PlayerUpgradeWeapons>,
 ) {
     for event in eneny_hit_event.read() {
         if event.weapon_projectile_type != WeaponsTypes::ArcaneMissile {
@@ -223,7 +244,7 @@ fn handle_arcane_missile_split_on_hit(
                     control_point_2
                 };
 
-                commands
+                let projectile_id = commands
                     .spawn((
                         SpriteBundle {
                             texture,
@@ -269,7 +290,15 @@ fn handle_arcane_missile_split_on_hit(
                         },
                         ProjectileBundleCollider::default(),
                         Name::new("Arcane missile Attack"),
-                    ));
+                    ))
+                    .id();
+
+                if weapon_upgrades
+                    .upgrades
+                    .contains(&WeaponsUpgradesTypes::ArcaneMissilePierce)
+                {
+                    commands.entity(projectile_id).insert(ProjectilePierce);
+                }
             }
         }
     }
@@ -329,6 +358,7 @@ fn handle_arcane_missile_explosion_hit(
                 ProjectileOrigin(event.projectile_position),
                 ProjectileImpulse(120.0),
                 AlreadyHitEnemies { seen: Vec::new() },
+                ProjectilePierce,
                 ProjectileLifetime {
                     timer: Timer::from_seconds(0.4, TimerMode::Once),
                 },

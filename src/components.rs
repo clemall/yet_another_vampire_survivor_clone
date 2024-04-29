@@ -261,10 +261,20 @@ pub enum WeaponsTypes {
     LightSwords,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum WeaponsUpgradesTypes {
+    ArcaneMissilePierce,
+    ArcaneMissileSplit,
+    ArcaneMissileExplosion,
+}
+
 #[derive(Resource, Debug)]
 pub struct PlayerWeapons {
-    // entity ID
     pub weapons: Vec<WeaponsTypes>,
+}
+#[derive(Resource, Debug)]
+pub struct PlayerUpgradeWeapons {
+    pub upgrades: Vec<WeaponsUpgradesTypes>,
 }
 
 #[derive(Component)]
@@ -398,7 +408,7 @@ pub struct ProjectileFromWeapon(pub WeaponsTypes);
 pub struct ProjectileDamage(pub f32);
 
 #[derive(Component)]
-pub struct ProjectileDeleteOnHit;
+pub struct ProjectilePierce;
 
 #[derive(Component)]
 pub struct ProjectilePositionOnPlayer;

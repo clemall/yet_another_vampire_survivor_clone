@@ -112,7 +112,7 @@ fn spawn_attack(
                             ),
                         },
                         ProjectileDamage(50.0),
-                        ProjectileDeleteOnHit,
+                        ProjectilePierce,
                         BouncingBall,
                     ))
                     .insert((
@@ -164,7 +164,7 @@ fn duplicate_ball_on_hit(
                             ),
                         },
                         ProjectileDamage(25.0),
-                        ProjectileDeleteOnHit,
+                        ProjectilePierce,
                         BouncingBall,
                     ))
                     .insert((

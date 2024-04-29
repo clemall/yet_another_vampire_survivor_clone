@@ -95,6 +95,7 @@ pub fn spawn_attack(
                 ProjectileImpulse(150.0),
                 ProjectileDamage(20.0),
                 ProjectilePositionOnPlayer,
+                ProjectilePierce,
                 ProjectileTimeBetweenDamage {
                     timer: Timer::from_seconds(0.33, TimerMode::Repeating),
                 },

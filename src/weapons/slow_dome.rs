@@ -115,6 +115,7 @@ fn spawn_attack(
                     },
                     SlowDome,
                     Projectile,
+                    ProjectilePierce,
                     ProjectileFromWeapon(WeaponsTypes::SlowDome),
                     // TriggersOnHit{
                     //     auras_systems: vec![systems.slow_enemy]

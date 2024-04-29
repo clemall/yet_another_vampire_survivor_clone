@@ -63,6 +63,10 @@ impl Plugin for PlayerPlugin {
             weapons: Vec::new(),
         });
 
+        app.insert_resource(PlayerUpgradeWeapons {
+            upgrades: Vec::new(),
+        });
+
         app.add_systems(
             Startup,
             (setup_player_in_game_stats, setup_player_plugin).chain(),

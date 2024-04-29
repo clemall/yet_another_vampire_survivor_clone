@@ -143,6 +143,7 @@ fn debug(
     mut windows: Query<&mut Window>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut player_weapons: ResMut<PlayerWeapons>,
+    mut weapon_upgrades: ResMut<PlayerUpgradeWeapons>,
     mut enemy_died: EventWriter<OnEnemyDied>,
     mut spawn_enemy: EventWriter<OnSpawnEnemy>,
     mut next_state: ResMut<NextState<GameState>>,
@@ -156,6 +157,17 @@ fn debug(
     }
     if keyboard_input.just_pressed(KeyCode::Digit3) {
         player_weapons.weapons.push(WeaponsTypes::ArcaneMissile);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit3) && keyboard_input.pressed(KeyCode::ShiftLeft) {
+        weapon_upgrades
+            .upgrades
+            .push(WeaponsUpgradesTypes::ArcaneMissileSplit);
+        println!("{:?}", weapon_upgrades.upgrades);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit3) && keyboard_input.pressed(KeyCode::AltLeft) {
+        weapon_upgrades
+            .upgrades
+            .push(WeaponsUpgradesTypes::ArcaneMissileExplosion);
     }
     if keyboard_input.just_pressed(KeyCode::Digit4) {
         player_weapons.weapons.push(WeaponsTypes::Shuriken);

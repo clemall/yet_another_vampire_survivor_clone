@@ -109,6 +109,7 @@ fn spawn_shuriken_attack(
                     },
                     ProjectileDamage(45.0),
                     ProjectileImpulse(200.0),
+                    ProjectilePierce,
                     ProjectileLifetime {
                         timer: Timer::from_seconds(
                             10.0 * player_stats.attack_duration,

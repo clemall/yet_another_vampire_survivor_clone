@@ -111,6 +111,7 @@ fn spawn_attack(
                 FireBoot,
                 ProjectileDamage(30.0),
                 ProjectileImpulse(20.0),
+                ProjectilePierce,
                 ProjectileLifetime {
                     timer: Timer::from_seconds(5.0 * player_stats.attack_duration, TimerMode::Once),
                 },
