@@ -85,7 +85,7 @@ fn trigger_item(
                     player_stats.luck += BASE_LUCK * effect.value;
                 }
                 PlayerBaseStatsType::Resistance => {
-                    player_stats.resistance += BASE_LUCK * effect.value;
+                    player_stats.resistance += BASE_RESISTANCE * effect.value;
                 }
                 PlayerBaseStatsType::AttackSpeed => {
                     player_stats.attack_speed += BASE_ATTACK_SPEED * effect.value;
@@ -94,7 +94,7 @@ fn trigger_item(
                     // effect.value is negative
                     player_stats.attack_reload += BASE_ATTACK_RELOAD * effect.value;
                     // weapon reload time should NOT be lower than 0s
-                    player_stats.attack_reload = player_stats.attack_reload.max(0.0);
+                    player_stats.attack_reload = player_stats.attack_reload.max(0.0333);
                 }
                 PlayerBaseStatsType::AttackDuration => {
                     player_stats.attack_duration += BASE_ATTACK_DURATION * effect.value;

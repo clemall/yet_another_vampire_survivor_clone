@@ -5,6 +5,7 @@ use crate::math_utils::get_random_position_outside_screen;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::fs;
+use bevy::input::common_conditions::{ input_pressed};
 
 pub struct EnemyPlugin;
 
@@ -22,7 +23,7 @@ impl Plugin for EnemyPlugin {
                 enemy_applied_impulse,
                 compute_enemy_velocity,
                 apply_aura_on_enemy_velocity,
-                apply_enemy_velocity,
+                apply_enemy_velocity.run_if(not(input_pressed(KeyCode::Space))),
             )
                 .chain()
                 .run_if(in_state(GameState::Gameplay)),

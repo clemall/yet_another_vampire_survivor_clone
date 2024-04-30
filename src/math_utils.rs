@@ -1,3 +1,4 @@
+use std::f32::consts::E;
 use crate::constants::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use bevy::prelude::*;
 use rand::Rng;
@@ -127,4 +128,34 @@ pub fn find_closest(
     }
 
     closed_enemy
+}
+
+/// 
+/// 
+/// # Arguments 
+/// 
+/// * `x`: Value that varies
+/// * `cap`: Max value that will be return, but never reaching it
+/// * `ascending_speed`: The slope speed. Value close or above to cap gives a nice slope, value close to 0
+/// give steep slope
+/// 
+/// returns: f32 
+pub fn diminishing_return(x:f32, cap:f32,ascending_speed:f32) -> f32{
+    cap*x/(x + ascending_speed)
+}
+
+
+/// 
+/// 
+/// # Arguments 
+/// 
+/// * `x`: Value that varies
+/// * `cap`: Max value that will be return, but never reaching it
+/// * `ascending_speed`: The slope speed. Value close to 0 gives a nice slope, value close to 1
+/// give steep slope
+/// 
+/// returns: f32 
+
+pub fn diminishing_return_expo(x:f32, cap:f32,ascending_speed:f32) -> f32{
+    cap * (1.0 - E.powf(-ascending_speed * x))
 }

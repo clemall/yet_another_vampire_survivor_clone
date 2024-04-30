@@ -171,7 +171,7 @@ fn debug(
             .upgrades
             .push(WeaponsUpgradesTypes::ShurikenExtraAmmo);
     }
-    println!("{:?}", weapon_upgrades.upgrades);
+    // println!("{:?}", weapon_upgrades.upgrades);
     if keyboard_input.just_pressed(KeyCode::Digit5) {
         player_weapons.weapons.push(WeaponsTypes::ChainLightning);
     }
