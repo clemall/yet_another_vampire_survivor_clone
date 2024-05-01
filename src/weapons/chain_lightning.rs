@@ -119,7 +119,7 @@ fn spawn_attack(
 
         let amount_of_new_chain = if weapon_upgrades
             .upgrades
-            .contains(&WeaponsUpgradesTypes::ChainLightningExtraAmmo)
+            .contains(&WeaponsUpgradesTypes::ChainLightningTriple)
         {
             3
         } else {

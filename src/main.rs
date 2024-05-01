@@ -171,7 +171,7 @@ fn debug(
 
         weapon_upgrades
             .upgrades
-            .push(WeaponsUpgradesTypes::ChainLightningDouble);
+            .push(WeaponsUpgradesTypes::ChainLightningTriple);
     }
     if keyboard_input.just_pressed(KeyCode::Digit6) {
         player_weapons.weapons.push(WeaponsTypes::SlowDome);

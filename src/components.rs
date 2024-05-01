@@ -286,7 +286,7 @@ impl WeaponsTypes {
                 vec![
                     WeaponsUpgradesTypes::ChainLightningStun,
                     WeaponsUpgradesTypes::ChainLightningExtraAmmo,
-                    WeaponsUpgradesTypes::ChainLightningDouble,
+                    WeaponsUpgradesTypes::ChainLightningTriple,
                 ]
             }
             WeaponsTypes::SlowDome => {
@@ -317,7 +317,7 @@ pub enum WeaponsUpgradesTypes {
     ShurikenExtraLarge,
     ChainLightningStun,
     ChainLightningExtraAmmo,
-    ChainLightningDouble,
+    ChainLightningTriple,
 }
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum ProjectileTypes {
