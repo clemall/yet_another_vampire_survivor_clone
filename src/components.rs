@@ -278,10 +278,16 @@ impl WeaponsTypes {
                 vec![
                     WeaponsUpgradesTypes::ShurikenSpiralAroundPlayer,
                     WeaponsUpgradesTypes::ShurikenExtraAmmo,
+                    WeaponsUpgradesTypes::ShurikenSpawnMiniShuriken,
+                    WeaponsUpgradesTypes::ShurikenExtraLarge,
                 ]
             }
             WeaponsTypes::ChainLightning => {
-                vec![]
+                vec![
+                    WeaponsUpgradesTypes::ChainLightningStun,
+                    WeaponsUpgradesTypes::ChainLightningExtraAmmo,
+                    WeaponsUpgradesTypes::ChainLightningDouble,
+                ]
             }
             WeaponsTypes::SlowDome => {
                 vec![]
@@ -307,6 +313,11 @@ pub enum WeaponsUpgradesTypes {
     ArcaneMissileDamage,
     ShurikenSpiralAroundPlayer,
     ShurikenExtraAmmo,
+    ShurikenSpawnMiniShuriken,
+    ShurikenExtraLarge,
+    ChainLightningStun,
+    ChainLightningExtraAmmo,
+    ChainLightningDouble,
 }
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum ProjectileTypes {
@@ -316,6 +327,7 @@ pub enum ProjectileTypes {
     ArcaneMissileSplit,
     ArcaneMissileExplosion,
     Shuriken,
+    ShurikenMini,
     ChainLightning,
     SlowDome,
     BouncingBall,
@@ -336,6 +348,11 @@ pub struct PlayerUpgradeWeapons {
 #[derive(Component)]
 pub struct VelocityAura {
     pub value: f32,
+    pub lifetime: Timer,
+}
+
+#[derive(Component)]
+pub struct StunAura {
     pub lifetime: Timer,
 }
 
@@ -458,6 +475,9 @@ pub struct Projectile;
 pub struct ProjectileFixedScale;
 
 #[derive(Component)]
+pub struct ProjectileliveForever;
+
+#[derive(Component)]
 pub struct ProjectileType(pub ProjectileTypes);
 
 #[derive(Component)]
@@ -478,7 +498,7 @@ pub struct ProjectileTimeBetweenDamage {
 }
 
 #[derive(Component)]
-pub struct ProjectileRotateOnSelf;
+pub struct ProjectileRotateOnSelf(pub f32);
 
 // #[derive(Component, Deref, DerefMut)]
 // pub struct ProjectileVelocity(pub Vec2);
@@ -572,8 +592,8 @@ pub struct AttackSpawnerIsReloading {
 // Waves
 #[derive(Component)]
 pub struct WaveManager {
-    pub start_delay: Timer,
-    pub end_delay: Timer,
+    pub start_timer: Timer,
+    pub end_timer: Timer,
     pub waves_prefab: Vec<Wave>,
     pub waves: Vec<Entity>,
 }

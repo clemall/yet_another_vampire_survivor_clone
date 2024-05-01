@@ -378,17 +378,17 @@ fn projectile_move_spiral(
 // }
 
 fn projectile_rotate_on_self(
-    mut projectiles: Query<&mut Transform, (With<Projectile>, With<ProjectileRotateOnSelf>)>,
+    mut projectiles: Query<(&mut Transform, &ProjectileRotateOnSelf)>,
     time: Res<Time>,
 ) {
-    for mut transform in &mut projectiles {
-        transform.rotate_z(1.5 * TAU * time.delta_seconds());
+    for (mut transform, speed) in &mut projectiles {
+        transform.rotate_z(speed.0 * TAU * time.delta_seconds());
     }
 }
 
 // update area of weapons that doesn't spawn projectile.
 fn projectile_update_area(
-    mut projectiles: Query<&mut Transform, (With<Projectile>, Without<ProjectileFixedScale>)>,
+    mut projectiles: Query<&mut Transform, With<ProjectileliveForever>>,
     player_stats: Res<PlayerInGameStats>,
 ) {
     if !player_stats.is_changed() {

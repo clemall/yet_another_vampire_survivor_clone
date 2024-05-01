@@ -19,16 +19,16 @@ impl Plugin for WavesPlugin {
 
 fn waves_manager_tick(mut commands: Commands, mut waves: Query<&mut WaveManager>, time: Res<Time>) {
     for mut wave_manager in &mut waves {
-        wave_manager.start_delay.tick(time.delta());
-        wave_manager.end_delay.tick(time.delta());
+        wave_manager.start_timer.tick(time.delta());
+        wave_manager.end_timer.tick(time.delta());
 
-        if wave_manager.start_delay.just_finished() {
+        if wave_manager.start_timer.just_finished() {
             for wave_prefab in wave_manager.waves_prefab.clone() {
                 let wave_id = commands.spawn(wave_prefab.clone()).id();
                 wave_manager.waves.push(wave_id);
             }
         }
-        if wave_manager.end_delay.just_finished() {
+        if wave_manager.end_timer.just_finished() {
             for wave in wave_manager.waves.clone() {
                 commands.entity(wave).despawn_recursive();
             }

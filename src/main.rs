@@ -25,7 +25,6 @@ use yet_another_vampire_survivor_clone::ui::ui_player::UiPlayerPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_update_weapon_up::UiUpdateWeaponPlugin;
 use yet_another_vampire_survivor_clone::waves::waves::WavesPlugin;
 use yet_another_vampire_survivor_clone::waves::waves_map_1::WavesMap1Plugin;
-use yet_another_vampire_survivor_clone::weapons::projectiles::ProjectilePlugin;
 use yet_another_vampire_survivor_clone::weapons::weapons::WeaponsPlugin;
 
 fn main() {
@@ -161,19 +160,18 @@ fn debug(
     if keyboard_input.just_pressed(KeyCode::Digit4) {
         player_weapons.weapons.push(WeaponsTypes::Shuriken);
     }
-    if keyboard_input.just_pressed(KeyCode::Digit4) && keyboard_input.pressed(KeyCode::ShiftLeft) {
-        weapon_upgrades
-            .upgrades
-            .push(WeaponsUpgradesTypes::ShurikenSpiralAroundPlayer);
-    }
-    if keyboard_input.just_pressed(KeyCode::Digit4) && keyboard_input.pressed(KeyCode::AltLeft) {
-        weapon_upgrades
-            .upgrades
-            .push(WeaponsUpgradesTypes::ShurikenExtraAmmo);
-    }
-    // println!("{:?}", weapon_upgrades.upgrades);
+
     if keyboard_input.just_pressed(KeyCode::Digit5) {
         player_weapons.weapons.push(WeaponsTypes::ChainLightning);
+    }
+    if keyboard_input.just_pressed(KeyCode::Digit5) && keyboard_input.pressed(KeyCode::ShiftLeft) {
+        weapon_upgrades
+            .upgrades
+            .push(WeaponsUpgradesTypes::ChainLightningExtraAmmo);
+
+        weapon_upgrades
+            .upgrades
+            .push(WeaponsUpgradesTypes::ChainLightningDouble);
     }
     if keyboard_input.just_pressed(KeyCode::Digit6) {
         player_weapons.weapons.push(WeaponsTypes::SlowDome);

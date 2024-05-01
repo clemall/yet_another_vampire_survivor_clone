@@ -93,7 +93,7 @@ fn trigger_item(
                 PlayerBaseStatsType::AttackReloadDuration => {
                     // effect.value is negative
                     player_stats.attack_reload += BASE_ATTACK_RELOAD * effect.value;
-                    // weapon reload time should NOT be lower than 0s
+                    // weapon reload time should NOT be lower than 0.0333s (1/30)
                     player_stats.attack_reload = player_stats.attack_reload.max(0.0333);
                 }
                 PlayerBaseStatsType::AttackDuration => {

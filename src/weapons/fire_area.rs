@@ -91,6 +91,7 @@ pub fn spawn_attack(
             .insert((
                 FireArea,
                 Projectile,
+                ProjectileliveForever,
                 ProjectileType(ProjectileTypes::FireArea),
                 ProjectileImpulse(150.0),
                 ProjectileDamage(20.0),

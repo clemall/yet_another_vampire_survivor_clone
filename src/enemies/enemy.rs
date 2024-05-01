@@ -2,10 +2,10 @@ use crate::components::*;
 use crate::constants::ENEMY_Z_INDEX;
 use crate::enemies::enemy_bundle::EnemyBundle;
 use crate::math_utils::get_random_position_outside_screen;
+use bevy::input::common_conditions::input_pressed;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::fs;
-use bevy::input::common_conditions::{ input_pressed};
 
 pub struct EnemyPlugin;
 
@@ -22,7 +22,8 @@ impl Plugin for EnemyPlugin {
                 enemy_death_check,
                 enemy_applied_impulse,
                 compute_enemy_velocity,
-                apply_aura_on_enemy_velocity,
+                apply_slow_aura_on_enemy,
+                apply_stun_aura_on_enemy,
                 apply_enemy_velocity.run_if(not(input_pressed(KeyCode::Space))),
             )
                 .chain()
@@ -83,32 +84,42 @@ fn spawn_enemy(
         let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
         let new_enemy = commands
-            .spawn((EnemyBundle {
-                sprite_bundle: SpriteBundle {
-                    texture: texture.clone(),
-                    transform: Transform {
-                        translation: get_random_position_outside_screen(player.translation.xy())
+            .spawn((
+                EnemyBundle {
+                    sprite_bundle: SpriteBundle {
+                        texture: texture.clone(),
+                        transform: Transform {
+                            translation: get_random_position_outside_screen(
+                                player.translation.xy(),
+                            )
                             .extend(ENEMY_Z_INDEX), // always in front
-                        rotation: Default::default(),
-                        scale: Vec3::new(1.0, 1.0, 0.0),
+                            rotation: Default::default(),
+                            scale: Vec3::new(1.0, 1.0, 0.0),
+                        },
+                        ..default()
                     },
+                    texture_atlas: TextureAtlas {
+                        layout: texture_atlas_layout.clone(),
+                        index: 0,
+                    },
+                    animation_indices: AnimationIndices {
+                        first: 0,
+                        last: enemy_data.animation_last_indice,
+                        is_repeating: true,
+                    },
+                    health: Health(enemy_data.health * player_stats.curse),
+                    enemy_speed: EnemySpeed(enemy_data.speed * player_stats.curse),
+                    enemy_damage_overtime: EnemyDamageOverTime(
+                        enemy_data.damage * player_stats.curse,
+                    ),
+                    collider: Collider::capsule_x(3.0, 12.0 / 2.0),
                     ..default()
                 },
-                texture_atlas: TextureAtlas {
-                    layout: texture_atlas_layout.clone(),
-                    index: 0,
-                },
-                animation_indices: AnimationIndices {
-                    first: 0,
-                    last: enemy_data.animation_last_indice,
-                    is_repeating: true,
-                },
-                health: Health(enemy_data.health * player_stats.curse),
-                enemy_speed: EnemySpeed(enemy_data.speed * player_stats.curse),
-                enemy_damage_overtime: EnemyDamageOverTime(enemy_data.damage * player_stats.curse),
-                collider: Collider::capsule_x(3.0, 12.0 / 2.0),
-                ..default()
-            },))
+                // Velocity {
+                //     linvel: Vec2::new(0.0, 0.0),
+                //     angvel: 0.0,
+                // },
+            ))
             .id();
 
         if !enemy_data.is_boss && !enemy_data.is_semi_boss {
@@ -124,6 +135,10 @@ fn spawn_enemy(
         // handle shadow
         let enemy_shadow = commands
             .spawn(SpriteBundle {
+                transform: Transform {
+                    translation: Vec2::ZERO.extend(0.0), // slightly under enemies
+                    ..default()
+                },
                 texture: asset_server.load(&enemy_data.texture_shadow_path),
                 ..default()
             })
@@ -149,7 +164,7 @@ fn compute_enemy_velocity(
     }
 }
 
-fn apply_aura_on_enemy_velocity(
+fn apply_slow_aura_on_enemy(
     mut commands: Commands,
     mut enemies: Query<(Entity, &mut EnemyVelocity, &mut VelocityAura, &mut Sprite)>,
     time: Res<Time>,
@@ -174,11 +189,46 @@ fn apply_aura_on_enemy_velocity(
     }
 }
 
+fn apply_stun_aura_on_enemy(
+    mut commands: Commands,
+    mut enemies: Query<(Entity, &mut EnemyVelocity, &mut StunAura, &mut Sprite)>,
+    time: Res<Time>,
+) {
+    for (entity, mut velocity, mut aura, mut sprite) in &mut enemies {
+        velocity.x = 0.0;
+        velocity.y = 0.0;
+
+        commands.entity(entity).try_insert(RigidBody::Fixed);
+
+        aura.lifetime.tick(time.delta());
+
+        sprite.color = Color::Rgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        };
+
+        if aura.lifetime.just_finished() {
+            sprite.color = Color::WHITE;
+            commands.entity(entity).remove::<StunAura>();
+            commands.entity(entity).try_insert(RigidBody::Dynamic);
+        }
+    }
+}
+
 fn apply_enemy_velocity(mut enemies: Query<(&mut Transform, &EnemyVelocity)>) {
     for (mut transform, velocity) in &mut enemies {
         transform.translation -= velocity.extend(0.0);
     }
 }
+
+// fn apply_enemy_velocity(mut velocities: Query<(&mut Velocity, &EnemyVelocity)>) {
+//     for (mut vel, velocity) in velocities.iter_mut() {
+//         vel.linvel = Vec2::new(-velocity.x * 1000.0, -velocity.y * 1000.0);
+//         // vel.angvel = 0.4;
+//     }
+// }
 
 fn check_enemy_too_far(
     mut commands: Commands,
