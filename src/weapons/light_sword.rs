@@ -41,11 +41,11 @@ fn spawn_weapon(mut commands: Commands, player_stats: Res<PlayerInGameStats>) {
             timer: Timer::from_seconds(0.3, TimerMode::Repeating),
         },
         AttackAmmo {
-            size: 3 + player_stats.attack_amount,
+            capacity: 3 + player_stats.attack_amount,
             amount: 3,
-            default_size: 3,
+            initial_capacity: 3,
             reload_time: 5.0 * player_stats.attack_reload,
-            default_reload_time: 5.0,
+            initial_reload_time: 5.0,
         },
         Name::new("Light Sword Spawner"),
     ));

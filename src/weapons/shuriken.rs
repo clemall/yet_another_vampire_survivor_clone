@@ -63,11 +63,11 @@ fn setup_shuriken_spawner(mut commands: Commands, player_stats: Res<PlayerInGame
     commands.spawn((
         ShurikenSpawner,
         AttackAmmo {
-            size: 4 + player_stats.attack_amount,
+            capacity: 4 + player_stats.attack_amount,
             amount: 4,
-            default_size: 4,
+            initial_capacity: 4,
             reload_time: 7.0 * player_stats.attack_reload,
-            default_reload_time: 7.0,
+            initial_reload_time: 7.0,
         },
         Name::new("Shuriken Spawner"),
     ));
@@ -75,8 +75,8 @@ fn setup_shuriken_spawner(mut commands: Commands, player_stats: Res<PlayerInGame
 
 fn handle_shuriken_extra_ammo_update(mut spawner: Query<&mut AttackAmmo, With<ShurikenSpawner>>) {
     if let Ok(mut attack_ammo) = spawner.get_single_mut() {
-        attack_ammo.default_size += 4;
-        attack_ammo.size += 4;
+        attack_ammo.initial_capacity += 4;
+        attack_ammo.capacity += 4;
     }
 }
 
@@ -102,7 +102,7 @@ fn spawn_shuriken_attack(
 
         while attack_ammo.amount > 0 {
             attack_ammo.amount -= 1;
-            let incremental_angle = TAU / attack_ammo.size as f32;
+            let incremental_angle = TAU / attack_ammo.capacity as f32;
             let angle = incremental_angle * attack_ammo.amount as f32;
             let direction = Vec2::from_angle(angle);
 

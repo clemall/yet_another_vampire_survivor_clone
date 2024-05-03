@@ -165,7 +165,7 @@ fn reloading_attack_spawner(
         attack_reload.timer.tick(time.delta());
 
         if attack_reload.timer.just_finished() {
-            attack_ammo.amount = attack_ammo.size;
+            attack_ammo.amount = attack_ammo.capacity;
 
             commands.entity(entity).remove::<AttackSpawnerIsReloading>();
         }
@@ -391,6 +391,7 @@ fn projectile_update_area(
     mut projectiles: Query<&mut Transform, With<ProjectileliveForever>>,
     player_stats: Res<PlayerInGameStats>,
 ) {
+    // equivalent to .run_if(resource_exists_and_changed::<PlayerInGameStats>) of the system
     if !player_stats.is_changed() {
         return;
     }
@@ -408,7 +409,7 @@ fn weapons_update_stats(
         return;
     }
     for mut attack_ammo in &mut attack_ammos {
-        attack_ammo.reload_time = attack_ammo.default_reload_time * player_stats.attack_reload;
-        attack_ammo.size = attack_ammo.default_size + player_stats.attack_amount;
+        attack_ammo.reload_time = attack_ammo.initial_reload_time * player_stats.attack_reload;
+        attack_ammo.capacity = attack_ammo.initial_capacity + player_stats.attack_amount;
     }
 }
