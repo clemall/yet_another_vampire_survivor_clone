@@ -1,7 +1,6 @@
 use crate::components::*;
 use crate::constants::PROJECTILE_Z_INDEX;
 use crate::math_utils::find_closest;
-use crate::weapons::shuriken::ShurikenSpawner;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use std::f32::consts::PI;

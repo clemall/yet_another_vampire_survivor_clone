@@ -1,6 +1,5 @@
 use crate::components::*;
 use crate::constants::PROJECTILE_Z_INDEX;
-use crate::weapons::arcane_missile::ArcaneMissile;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::f32::consts::TAU;
