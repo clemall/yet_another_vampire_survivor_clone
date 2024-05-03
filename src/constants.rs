@@ -40,4 +40,7 @@ pub const ENEMY_Z_INDEX: f32 = 99.0;
 pub const PLAYER_Z_INDEX: f32 = 98.0;
 pub const PROJECTILE_Z_INDEX: f32 = 199.0;
 pub const GEM_Z_INDEX: f32 = 50.0; // under enemies makes it better
+
 pub const GEM_BOSS_Z_INDEX: f32 = 999.0; // Above anything
+
+pub const SHADOW_Z_INDEX: f32 = 1.0;

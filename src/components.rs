@@ -666,3 +666,10 @@ pub struct ItemEffect {
     pub base_stat: PlayerBaseStatsType,
     pub value: f32,
 }
+
+// Shadow
+
+#[derive(Component)]
+pub struct ShadowTrackedEntity {
+    pub target: Entity,
+}

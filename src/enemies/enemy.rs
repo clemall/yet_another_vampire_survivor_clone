@@ -1,5 +1,5 @@
 use crate::components::*;
-use crate::constants::ENEMY_Z_INDEX;
+use crate::constants::{ENEMY_Z_INDEX, SHADOW_Z_INDEX};
 use crate::enemies::enemy_bundle::EnemyBundle;
 use crate::math_utils::get_random_position_outside_screen;
 use bevy::input::common_conditions::input_pressed;
@@ -37,6 +37,7 @@ impl Plugin for EnemyPlugin {
                 enemy_damage_player,
                 spawn_enemy,
                 check_enemy_too_far,
+                handler_shadow_position,
             )
                 .run_if(in_state(GameState::Gameplay)),
         );
@@ -133,17 +134,17 @@ fn spawn_enemy(
         }
 
         // handle shadow
-        let enemy_shadow = commands
-            .spawn(SpriteBundle {
+        commands.spawn((
+            SpriteBundle {
                 transform: Transform {
-                    translation: Vec2::ZERO.extend(0.0), // slightly under enemies
+                    translation: Vec2::ZERO.extend(SHADOW_Z_INDEX),
                     ..default()
                 },
                 texture: asset_server.load(&enemy_data.texture_shadow_path),
                 ..default()
-            })
-            .id();
-        commands.entity(new_enemy).add_child(enemy_shadow);
+            },
+            ShadowTrackedEntity { target: new_enemy },
+        ));
     }
 }
 
@@ -324,6 +325,18 @@ pub fn enemy_death_check(
                 });
             }
             commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+fn handler_shadow_position(
+    enemies: Query<&Transform, (With<Enemy>, Without<ShadowTrackedEntity>)>,
+    mut shadows: Query<(&mut Transform, &ShadowTrackedEntity)>,
+) {
+    for (mut shadow_transform, enemy_entity) in &mut shadows {
+        if let Ok(enemy_transform) = enemies.get(enemy_entity.target) {
+            shadow_transform.translation.x = enemy_transform.translation.x;
+            shadow_transform.translation.y = enemy_transform.translation.y;
         }
     }
 }
