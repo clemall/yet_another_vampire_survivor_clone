@@ -96,6 +96,12 @@ fn spawn_attack(
     if let Ok((spawner_entity, mut attack_ammo, mut projectile_orientation)) =
         spawner.get_single_mut()
     {
+        // Protection from going below 0.
+        // AttackReloadDuration can take 1 frame too much before being added to
+        // the current spawner
+        if attack_ammo.amount == 0 {
+            return;
+        }
         // get closed enemy
         let mut enemies_lens = enemies.transmute_lens::<(Entity, &Transform)>();
         let closed_enemy: Option<Entity> = find_closest(
