@@ -330,13 +330,16 @@ pub fn enemy_death_check(
 }
 
 fn handler_shadow_position(
+    mut commands: Commands,
     enemies: Query<&Transform, (With<Enemy>, Without<ShadowTrackedEntity>)>,
-    mut shadows: Query<(&mut Transform, &ShadowTrackedEntity)>,
+    mut shadows: Query<(Entity, &mut Transform, &ShadowTrackedEntity)>,
 ) {
-    for (mut shadow_transform, enemy_entity) in &mut shadows {
+    for (shadow_entity, mut shadow_transform, enemy_entity) in &mut shadows {
         if let Ok(enemy_transform) = enemies.get(enemy_entity.target) {
             shadow_transform.translation.x = enemy_transform.translation.x;
             shadow_transform.translation.y = enemy_transform.translation.y;
+        } else {
+            commands.entity(shadow_entity).despawn_recursive();
         }
     }
 }
