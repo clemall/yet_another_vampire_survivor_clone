@@ -330,8 +330,15 @@ fn compute_experience(
 
         player_experience.level += 1;
 
-        // GG player leveled up
-        next_state.set(GameState::PlayerLevelUp);
+        match player_experience.level {
+            5 | 10 | 15 => {
+                next_state.set(GameState::PlayerChooseWeapon);
+            }
+            _ => {
+                // GG player leveled up
+                next_state.set(GameState::PlayerLevelUp);
+            }
+        }
     }
 }
 
