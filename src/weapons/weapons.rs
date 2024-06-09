@@ -1,4 +1,6 @@
-use crate::components::{GameState, OnUpgradePickup, PlayerUpgradeWeapons};
+use crate::components::{
+    GameState, OnUpgradePickup, OnWeaponPickup, PlayerUpgradeWeapons, PlayerWeapons,
+};
 use crate::weapons::arcane_missile::ArcaneMissilePlugin;
 use crate::weapons::bouncing_ball::BouncingBallPlugin;
 use crate::weapons::chain_lightning::ChainLightningPlugin;
@@ -37,16 +39,26 @@ impl Plugin for WeaponsPlugin {
 
         app.add_systems(
             Update,
-            trigger_upgrade.run_if(in_state(GameState::Gameplay)),
+            (trigger_weapon, trigger_upgrade).run_if(in_state(GameState::Gameplay)),
         );
     }
 }
 
+fn trigger_weapon(
+    mut events: EventReader<OnWeaponPickup>,
+    mut player_weapons: ResMut<PlayerWeapons>,
+) {
+    for event in events.read() {
+        player_weapons.weapons.push(event.upgrade);
+        println!("-> Player weapons: {:?}", player_weapons.weapons);
+    }
+}
+
 fn trigger_upgrade(
-    mut upgrade_events: EventReader<OnUpgradePickup>,
+    mut events: EventReader<OnUpgradePickup>,
     mut player_upgrade_weapons: ResMut<PlayerUpgradeWeapons>,
 ) {
-    for event in upgrade_events.read() {
+    for event in events.read() {
         player_upgrade_weapons.upgrades.push(event.upgrade);
         println!("-> Player upgrades: {:?}", player_upgrade_weapons.upgrades);
     }

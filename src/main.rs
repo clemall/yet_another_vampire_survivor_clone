@@ -17,6 +17,7 @@ use yet_another_vampire_survivor_clone::gems::gem::GemsPlugin;
 use yet_another_vampire_survivor_clone::items::item::ItemsPlugin;
 use yet_another_vampire_survivor_clone::math_utils::get_random_position_in_screen;
 use yet_another_vampire_survivor_clone::players::player::PlayerPlugin;
+use yet_another_vampire_survivor_clone::ui::ui_choose_weapon::UiChooseWeaponPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_enemy::UiEnemyPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_fps::UiFPSPlugin;
 use yet_another_vampire_survivor_clone::ui::ui_global_timer::UiGlobalTimerPlugin;
@@ -54,6 +55,7 @@ fn main() {
         .add_event::<OnSpawnEnemy>()
         .add_event::<OnItemPickup>()
         .add_event::<OnUpgradePickup>()
+        .add_event::<OnWeaponPickup>()
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(UiFPSPlugin)
@@ -86,6 +88,7 @@ fn main() {
         .add_plugins(UiLevelUpPlugin)
         .add_plugins(UiGlobalTimerPlugin)
         .add_plugins(UiUpdateWeaponPlugin)
+        .add_plugins(UiChooseWeaponPlugin)
         // animation
         .add_plugins(AnimationSimplePlugin)
         // gems
@@ -215,5 +218,9 @@ fn debug(
 
     if keyboard_input.just_pressed(KeyCode::KeyW) {
         next_state.set(GameState::PlayerUpdateWeapon);
+    }
+
+    if keyboard_input.just_pressed(KeyCode::KeyE) {
+        next_state.set(GameState::PlayerChooseWeapon);
     }
 }

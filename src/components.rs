@@ -14,6 +14,7 @@ pub enum GameState {
     GameOver,
     PlayerLevelUp,
     PlayerUpdateWeapon,
+    PlayerChooseWeapon,
 }
 
 // PLAYER
@@ -323,6 +324,33 @@ impl WeaponsTypes {
             }
         }
     }
+
+    pub fn list() -> Vec<WeaponsTypes> {
+        vec![
+            WeaponsTypes::Claw,
+            WeaponsTypes::FireArea,
+            WeaponsTypes::ArcaneMissile,
+            WeaponsTypes::Shuriken,
+            WeaponsTypes::ChainLightning,
+            WeaponsTypes::SlowDome,
+            WeaponsTypes::BouncingBall,
+            WeaponsTypes::FireBoots,
+            WeaponsTypes::LightSwords,
+        ]
+    }
+    pub fn name(&self) -> String {
+        match self {
+            WeaponsTypes::Claw => "Claw".to_string(),
+            WeaponsTypes::FireArea => "Fire Area".to_string(),
+            WeaponsTypes::ArcaneMissile => "Arcane Missile".to_string(),
+            WeaponsTypes::Shuriken => "Shuriken".to_string(),
+            WeaponsTypes::ChainLightning => "ChainLightning".to_string(),
+            WeaponsTypes::SlowDome => "Slow Dome".to_string(),
+            WeaponsTypes::BouncingBall => "Bouncing Ball".to_string(),
+            WeaponsTypes::FireBoots => "Fire Boots".to_string(),
+            WeaponsTypes::LightSwords => "Light Swords".to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
@@ -437,6 +465,11 @@ pub struct OnUpgradePickup {
 }
 
 #[derive(Event)]
+pub struct OnWeaponPickup {
+    pub upgrade: WeaponsTypes,
+}
+
+#[derive(Event)]
 pub struct OnEnemyDied {
     pub position: Vec3,
     pub experience: u32,
@@ -508,6 +541,10 @@ pub struct ButtonWeaponUpgrade {
     pub item: WeaponsUpgradesTypes,
 }
 
+#[derive(Component)]
+pub struct ButtonWeaponChoose {
+    pub item: WeaponsTypes,
+}
 #[derive(Component)]
 pub struct WorldTextUI {
     pub lifetime: Timer,
