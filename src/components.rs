@@ -339,6 +339,30 @@ pub enum WeaponsUpgradesTypes {
     ChainLightningExtraAmmo,
     ChainLightningTriple,
 }
+
+impl WeaponsUpgradesTypes {
+    pub fn name(&self) -> String {
+        match self {
+            WeaponsUpgradesTypes::ArcaneMissilePierce => "Arcane Missile Pierce".to_string(),
+            WeaponsUpgradesTypes::ArcaneMissileSplit => "Arcane Missile Split".to_string(),
+            WeaponsUpgradesTypes::ArcaneMissileExplosion => "Arcane Missile Explosion".to_string(),
+            WeaponsUpgradesTypes::ArcaneMissileDamage => "Arcane Missile Damage".to_string(),
+            WeaponsUpgradesTypes::ShurikenSpiralAroundPlayer => {
+                "Shuriken Spiral Around Player".to_string()
+            }
+            WeaponsUpgradesTypes::ShurikenExtraAmmo => "Shuriken Extra Ammo".to_string(),
+            WeaponsUpgradesTypes::ShurikenSpawnMiniShuriken => {
+                "Shuriken Spawn Mini Shuriken".to_string()
+            }
+            WeaponsUpgradesTypes::ShurikenExtraLarge => "Shuriken Extra Large".to_string(),
+            WeaponsUpgradesTypes::ChainLightningStun => "ChainLightning Stun".to_string(),
+            WeaponsUpgradesTypes::ChainLightningExtraAmmo => {
+                "ChainLightning Extra Ammo".to_string()
+            }
+            WeaponsUpgradesTypes::ChainLightningTriple => "Chain Lightning Triple".to_string(),
+        }
+    }
+}
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum ProjectileTypes {
     Claw,
@@ -408,6 +432,11 @@ pub struct OnItemPickup {
 }
 
 #[derive(Event)]
+pub struct OnUpgradePickup {
+    pub upgrade: WeaponsUpgradesTypes,
+}
+
+#[derive(Event)]
 pub struct OnEnemyDied {
     pub position: Vec3,
     pub experience: u32,
@@ -469,9 +498,14 @@ pub struct GlobalTimerUI;
 pub struct PlayerLevelUI;
 
 #[derive(Component)]
-pub struct ButtonUpgrade {
+pub struct ButtonItemUpgrade {
     pub item_key: String,
     pub rarity: Rarity,
+}
+
+#[derive(Component)]
+pub struct ButtonWeaponUpgrade {
+    pub item: WeaponsUpgradesTypes,
 }
 
 #[derive(Component)]

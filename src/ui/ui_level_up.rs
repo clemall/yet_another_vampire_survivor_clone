@@ -147,7 +147,7 @@ fn spawn_level_up_ui(
 fn level_up_button_interaction(
     mut next_state: ResMut<NextState<GameState>>,
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &ButtonUpgrade), // UiImage
+        (&Interaction, &mut BackgroundColor, &ButtonItemUpgrade), // UiImage
         (Changed<Interaction>, With<Button>),
     >,
     mut item_pickup: EventWriter<OnItemPickup>,
@@ -224,7 +224,7 @@ fn card_ui_factory(
                 z_index: ZIndex::Global(10),
                 ..default()
             },
-            ButtonUpgrade {
+            ButtonItemUpgrade {
                 item_key: item_key.into(),
                 rarity: *rarity,
             },

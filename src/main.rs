@@ -53,6 +53,7 @@ fn main() {
         .add_event::<OnPlayerReceivedDamage>()
         .add_event::<OnSpawnEnemy>()
         .add_event::<OnItemPickup>()
+        .add_event::<OnUpgradePickup>()
         // FPS plugin
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(UiFPSPlugin)
@@ -210,5 +211,9 @@ fn debug(
 
     if keyboard_input.just_pressed(KeyCode::KeyQ) {
         next_state.set(GameState::PlayerLevelUp);
+    }
+
+    if keyboard_input.just_pressed(KeyCode::KeyW) {
+        next_state.set(GameState::PlayerUpdateWeapon);
     }
 }

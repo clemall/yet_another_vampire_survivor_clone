@@ -1,9 +1,7 @@
 use crate::components::*;
 use crate::constants::{FONT, FONT_BOLD, SCREEN_WIDTH};
 use bevy::prelude::*;
-use rand::distributions::{Distribution, WeightedIndex};
 use rand::seq::SliceRandom;
-use rand::Rng;
 
 pub struct UiUpdateWeaponPlugin;
 
@@ -39,10 +37,10 @@ fn spawn_update_weapon_ui(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     camera: Query<&Camera>,
-    loot_table: Res<LootTable>,
-    items_resource: Res<ItemsResource>,
+    player_weapon: Res<PlayerWeapons>,
+    player_upgrade_weapons: Res<PlayerUpgradeWeapons>,
 ) {
-    let level_up_parent = commands
+    let weapon_update_parent = commands
         .spawn((
             NodeBundle {
                 style: Style {
@@ -60,7 +58,7 @@ fn spawn_update_weapon_ui(
         ))
         .id();
 
-    let level_up_popup = commands
+    let weapon_update_popup = commands
         .spawn(NodeBundle {
             style: Style {
                 width: Val::Percent(80.0),
@@ -77,93 +75,80 @@ fn spawn_update_weapon_ui(
         .id();
 
     commands
-        .entity(level_up_parent)
-        .push_children(&[level_up_popup]);
+        .entity(weapon_update_parent)
+        .push_children(&[weapon_update_popup]);
 
     let camera = camera.single();
     let view_dimensions = camera.logical_viewport_size().unwrap();
     let ratio = view_dimensions.x / SCREEN_WIDTH as f32;
 
-    let dist = WeightedIndex::new(loot_table.weighted_rarity.iter().map(|item| item.1)).unwrap();
+    let player_upgrades = player_upgrade_weapons.upgrades.clone();
 
-    let mut item_to_offer = 5;
+    // max amount of time we try to find an upgrade before giving up
+    let mut try_amount = 15;
+    let mut item_to_offer = 3;
     while item_to_offer > 0 {
-        let mut rarity = loot_table.weighted_rarity[dist.sample(&mut rand::thread_rng())].0;
+        // pick a weapon to update with potential upgrade
 
-        // has a small chance to be a cursed item
-        if rand::thread_rng().gen_range(0.0..100.0) < 1.0 {
-            rarity = loot_table.weighted_rarity[5].0;
+        let weapon = player_weapon
+            .weapons
+            .choose(&mut rand::thread_rng())
+            .unwrap();
+
+        let mut potential_upgrade = weapon.upgrades().clone();
+        for player_upgrade in &player_upgrades {
+            potential_upgrade.retain(|&x| x != *player_upgrade);
         }
 
-        let Some(item_key) = loot_table
-            .item_by_rarity
-            .get(&rarity)
-            .unwrap()
-            .choose(&mut rand::thread_rng())
-        else {
-            // unique rarity has a list of items that can be removed over time
-            // To avoid the function to panic, we simply continue the loop and try again to pick
-            // another rarity/item.
+        let Some(upgrade) = potential_upgrade.choose(&mut rand::thread_rng()) else {
+            // not smart but will do for now
+            try_amount -= 1;
+            if try_amount <= 0 {
+                item_to_offer -= 1;
+                try_amount = 0;
+            }
             continue;
         };
 
         // item is found, we can decrease the counter
         item_to_offer -= 1;
 
-        let item_name = items_resource
-            .items
-            .get(&item_key.clone())
-            .unwrap()
-            .name
-            .clone();
+        let item_name = upgrade.name();
 
-        let texture_atlas_index = items_resource
-            .items
-            .get(&item_key.clone())
-            .unwrap()
-            .texture_atlas_index
-            .clone();
+        let texture_atlas_index = 1;
 
-        let item_description = items_resource
-            .items
-            .get(&item_key.clone())
-            .unwrap()
-            .rarity_to_effects
-            .get(&rarity)
-            .unwrap()
-            .description
-            .clone();
+        let item_description = upgrade.name();
 
         let card_item = card_ui_factory(
             &mut commands,
             &asset_server,
             &mut texture_atlas_layouts,
             ratio,
-            &rarity,
-            &*item_key,
+            upgrade,
             &*item_name,
             &*item_description,
             texture_atlas_index,
         );
 
-        commands.entity(level_up_popup).push_children(&[card_item]);
+        commands
+            .entity(weapon_update_popup)
+            .push_children(&[card_item]);
     }
 }
 
 fn update_weapon_button_interaction(
     mut next_state: ResMut<NextState<GameState>>,
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &ButtonUpgrade), // UiImage
+        (&Interaction, &mut BackgroundColor, &ButtonWeaponUpgrade), // UiImage
         (Changed<Interaction>, With<Button>),
     >,
-    mut item_pickup: EventWriter<OnItemPickup>,
+    mut item_pickup: EventWriter<OnUpgradePickup>,
 ) {
     for (interaction, mut image, upgrade) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                item_pickup.send(OnItemPickup {
-                    item_key: upgrade.item_key.clone(),
-                    rarity: upgrade.rarity,
+                item_pickup.send(OnUpgradePickup {
+                    upgrade: upgrade.item,
                 });
 
                 next_state.set(GameState::Gameplay);
@@ -183,35 +168,15 @@ fn card_ui_factory(
     asset_server: &AssetServer,
     texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
     ratio: f32,
-    rarity: &Rarity,
-    item_key: &str,
+    upgrade: &WeaponsUpgradesTypes,
     item_name: &str,
     item_description: &str,
     texture_atlas_index: u32,
 ) -> Entity {
-    let texture_icons = asset_server.load("design_items_ui.png");
     let layout = TextureAtlasLayout::from_grid(Vec2::new(74.0, 61.0), 23, 1, None, None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
-    let texture = match rarity {
-        Rarity::Common => asset_server.load("item_ui_background_common.png"),
-        Rarity::Uncommon => asset_server.load("item_ui_background_uncommon.png"),
-        Rarity::Rare => asset_server.load("item_ui_background_rare.png"),
-        Rarity::Epic => asset_server.load("item_ui_background_epic.png"),
-        Rarity::Legendary => asset_server.load("item_ui_background_legendary.png"),
-        Rarity::Cursed => asset_server.load("item_ui_background_curse.png"),
-        Rarity::Unique => asset_server.load("item_ui_background_unique.png"),
-    };
-
-    let rarity_text_color = match rarity {
-        Rarity::Common => Color::MAROON,
-        Rarity::Uncommon => Color::YELLOW_GREEN,
-        Rarity::Rare => Color::MIDNIGHT_BLUE,
-        Rarity::Epic => Color::FUCHSIA,
-        Rarity::Legendary => Color::GOLD,
-        Rarity::Cursed => Color::CRIMSON,
-        Rarity::Unique => Color::BLACK,
-    };
+    let texture = asset_server.load("item_ui_background_upgrade.png");
 
     let card_item = commands
         .spawn((
@@ -230,32 +195,7 @@ fn card_ui_factory(
                 z_index: ZIndex::Global(10),
                 ..default()
             },
-            ButtonUpgrade {
-                item_key: item_key.into(),
-                rarity: *rarity,
-            },
-        ))
-        .id();
-
-    let card_icon = commands
-        .spawn((
-            ButtonBundle {
-                style: Style {
-                    position_type: PositionType::Relative,
-                    width: Val::Px(74. * ratio),
-                    height: Val::Px(61. * ratio),
-                    align_self: AlignSelf::Start,
-                    margin: UiRect::top(Val::Px(11.0)),
-                    ..default()
-                },
-                image: UiImage::new(texture_icons),
-                z_index: ZIndex::Global(1),
-                ..default()
-            },
-            TextureAtlas {
-                layout: texture_atlas_layout,
-                index: texture_atlas_index as usize,
-            },
+            ButtonWeaponUpgrade { item: *upgrade },
         ))
         .id();
 
@@ -292,7 +232,7 @@ fn card_ui_factory(
             )
             .with_style(Style {
                 position_type: PositionType::Absolute,
-                top: Val::Percent(70.0),
+                top: Val::Percent(90.0),
                 left: Val::Percent(7.0),
                 width: Val::Percent(90.0),
                 ..default()
@@ -300,32 +240,10 @@ fn card_ui_factory(
         )
         .id();
 
-    let item_rarity = commands
-        .spawn(
-            TextBundle::from_section(
-                rarity.name(),
-                TextStyle {
-                    font: asset_server.load(FONT_BOLD),
-                    font_size: 16.0,
-                    color: rarity_text_color,
-                    ..default()
-                },
-            )
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                top: Val::Percent(90.0),
-                left: Val::Percent(7.0),
-                ..default()
-            }),
-        )
-        .id();
-
-    commands.entity(card_item).push_children(&[card_icon]);
     commands.entity(card_item).push_children(&[item_name]);
     commands
         .entity(card_item)
         .push_children(&[item_description]);
-    commands.entity(card_item).push_children(&[item_rarity]);
 
     card_item
 }

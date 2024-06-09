@@ -14,11 +14,18 @@ fn setup_waves_map_1(mut commands: Commands) {
         WaveManager {
             start_timer: Timer::from_seconds(0.0, TimerMode::Once),
             end_timer: Timer::from_seconds(30.0, TimerMode::Once),
-            waves_prefab: vec![Wave {
-                enemy_type: EnemyTypes::Bat,
-                delay_between_spawn: Timer::from_seconds(2.0, TimerMode::Repeating),
-                amount_per_timer_trigger: 2,
-            }],
+            waves_prefab: vec![
+                Wave {
+                    enemy_type: EnemyTypes::Bat,
+                    delay_between_spawn: Timer::from_seconds(2.0, TimerMode::Repeating),
+                    amount_per_timer_trigger: 2,
+                },
+                Wave {
+                    enemy_type: EnemyTypes::BossWolf,
+                    delay_between_spawn: Timer::from_seconds(10.0, TimerMode::Once),
+                    amount_per_timer_trigger: 1,
+                },
+            ],
             waves: Vec::new(),
         },
         Name::new("Wave manager 0"),
