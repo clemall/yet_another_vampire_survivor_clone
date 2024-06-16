@@ -8,8 +8,8 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
-    #[default]
     Gameplay,
+    #[default]
     MainMenu,
     GameOver,
     PlayerLevelUp,
@@ -510,6 +510,9 @@ pub struct OnSpawnEnemy {
 // ###################################################################
 // ###################################################################
 // UI
+
+#[derive(Component)]
+pub struct MainMenuUI;
 #[derive(Component)]
 pub struct PlayerHealthUIParent;
 
@@ -529,6 +532,9 @@ pub struct GlobalTimerUI;
 
 #[derive(Component)]
 pub struct PlayerLevelUI;
+
+#[derive(Component)]
+pub struct MainMenuPlayButton;
 
 #[derive(Component)]
 pub struct ButtonItemUpgrade {
